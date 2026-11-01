@@ -1,8 +1,8 @@
 {
   "repository": "https://github.com/rreon633-design/NARADA",
   "intended_initial_tag": "v0.0.1",
-  "files": 539,
-  "bytes": 9471038,
+  "files": 540,
+  "bytes": 9475902,
   "history": "Historical source/evidence remains preserved separately; these are new CI revisions.",
   "export_push_performed": false,
   "inputs": {
@@ -17,8 +17,8 @@
       "source": ".gitattributes"
     },
     ".github/workflows/build-test-release.yml": {
-      "sha256": "acb9f9bbadb6a5fa2349b1d76a1e835dfca323df71b1b4769bb455eb75e4b6ed",
-      "bytes": 18357,
+      "sha256": "0dde06eae80c9b89a7a22aba653da0629cacc11af2ec5b924fa593ffeae03cd0",
+      "bytes": 18336,
       "source": ".github/workflows/build-test-release.yml"
     },
     ".github/workflows/ci-diagnostics.yml": {
@@ -1407,8 +1407,8 @@
       "source": "crates/narada-core/src/lib.rs"
     },
     "crates/narada-files/Cargo.toml": {
-      "sha256": "7abbe68881c38b59235e433d8daf5f7e7e8dac437b33c26758661f7ff127ef40",
-      "bytes": 960,
+      "sha256": "2d00c0506e4fe7a833687505d16c5c6ce1e43e7536f5d507bc353bc22d9cd397",
+      "bytes": 986,
       "source": "crates/narada-files/Cargo.toml"
     },
     "crates/narada-files/src/catalog.rs": {
@@ -1452,8 +1452,8 @@
       "source": "crates/narada-files/src/safe_fs/platform_linux.rs"
     },
     "crates/narada-files/src/safe_fs/platform_windows.rs": {
-      "sha256": "2973c6bcf198ba4ca50df41ab2c7684f2e642c610e982929051582bf1f7502d5",
-      "bytes": 13977,
+      "sha256": "174ec7907492a9831e3f672b4ed448f4c849d90b80964513264b7b186c932d79",
+      "bytes": 16848,
       "source": "crates/narada-files/src/safe_fs/platform_windows.rs"
     },
     "crates/narada-files/src/sync.rs": {
@@ -2117,8 +2117,8 @@
       "source": "docs/files-and-recovery.md"
     },
     "docs/github/ci.md": {
-      "sha256": "86d0140fe33045d4c9c5b4bb8bbdb98a8988c650e7a95147fafdc1cd4d904d1a",
-      "bytes": 7910,
+      "sha256": "5cdc0bb5abbb4fc7dda400bdd916af35ee2b7b62a1289d176531644400762e1f",
+      "bytes": 8250,
       "source": "docs/github/ci.md"
     },
     "docs/github/history.md": {
@@ -2135,6 +2135,11 @@
       "sha256": "1bf013ba470a7661a173139a5a9f71c1da33dd1d415a720536456f1a90fe5d12",
       "bytes": 6212,
       "source": "docs/github/manual-testing.md"
+    },
+    "docs/github/windows-filesystem.md": {
+      "sha256": "55cd5fb7cf4cb1b0a03a1347b2a0afe25e1ca682c77970213cb4eb4df06caf28",
+      "bytes": 1648,
+      "source": "docs/github/windows-filesystem.md"
     },
     "docs/pairing-and-recovery.md": {
       "sha256": "97ec3f487f7bff2efb040e10c5c1fbd2b4ffdc2d5c29b7689f26fcd182604dc0",

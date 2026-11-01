@@ -66,3 +66,5 @@ See [manual testing](manual-testing.md), [lightweight policy](lightweight.md), a
 The separate `ci-diagnostics.yml` workflow uses GitHub's short-lived token with `actions: read` and `contents: read` to retrieve failed job logs in this repository. It publishes bounded, escaped diagnostic excerpts as check annotations so failures can be investigated using the SSH-only delivery setup. It never prints its token, never forwards it to signed log-storage URLs, and cannot write tags, commits or releases. Diagnostics of an older failed run are labeled as such; they do not change that run's outcome. Command failures also emit bounded annotations directly.
 
 Android command-line tools are explicitly pinned to `16111833`; the obsolete SDK `tools` package is not requested.
+
+In-flight source revisions now retain their own commit-scoped concurrency groups instead of cancelling the earlier platform campaign on every repair push. This preserves complete diagnostics/caches. Publication still requires the current `main` SHA and all same-attempt evidence; an older or failed campaign cannot release a newer commit.

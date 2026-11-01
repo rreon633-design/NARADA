@@ -1,11 +1,16 @@
 use super::*;
 use std::os::windows::{ffi::OsStrExt, fs::OpenOptionsExt, io::AsRawHandle};
+use windows_sys::Wdk::Storage::FileSystem::{
+    FileRenameInformation, NtSetInformationFile, FILE_RENAME_INFORMATION,
+};
+use windows_sys::Win32::Foundation::RtlNtStatusToDosError;
+use windows_sys::Win32::System::IO::IO_STATUS_BLOCK;
 use windows_sys::Win32::System::WindowsProgramming::DRIVE_FIXED;
 use windows_sys::Win32::{Foundation::HANDLE, Storage::FileSystem::*};
 fn open(path: &Path, mutation: bool, directory: bool) -> Result<File, RpcError> {
     let access = FILE_READ_ATTRIBUTES
         | if directory {
-            FILE_LIST_DIRECTORY
+            FILE_LIST_DIRECTORY | FILE_TRAVERSE
         } else {
             FILE_READ_DATA
         }
@@ -202,12 +207,12 @@ pub fn rename(
     name: &str,
 ) -> Result<(), RpcError> {
     let utf: Vec<u16> = name.encode_utf16().collect();
-    let offset = std::mem::offset_of!(FILE_RENAME_INFO, FileName);
+    let offset = std::mem::offset_of!(FILE_RENAME_INFORMATION, FileName);
     let length = offset + (utf.len() + 1) * 2;
-    // usize storage provides the alignment required by FILE_RENAME_INFO and its flexible tail.
+    // usize storage provides the alignment required by FILE_RENAME_INFORMATION and its flexible tail.
     let mut buffer = vec![0usize; length.div_ceil(std::mem::size_of::<usize>())];
     unsafe {
-        let p = buffer.as_mut_ptr().cast::<FILE_RENAME_INFO>();
+        let p = buffer.as_mut_ptr().cast::<FILE_RENAME_INFORMATION>();
         (*p).Anonymous.ReplaceIfExists = 0;
         (*p).RootDirectory = dest.file.as_raw_handle() as HANDLE;
         (*p).FileNameLength = (utf.len() * 2) as u32;
@@ -216,14 +221,25 @@ pub fn rename(
             buffer.as_mut_ptr().cast::<u8>().add(offset).cast::<u16>(),
             utf.len(),
         );
-        if SetFileInformationByHandle(
+        let mut status_block: IO_STATUS_BLOCK = std::mem::zeroed();
+        // The Win32 wrapper rejected this handle-relative operation with error
+        // 87 on the Windows 2022 CI runner. Use the documented native relative
+        // rename, NOT an absolute-path/reopen or replace-existing fallback.
+        // SAFETY: source is a live, synchronous (non-OVERLAPPED) owned handle
+        // with DELETE access. Destination and all ancestors remain pinned.
+        // The aligned buffer and status block stay live through completion;
+        // FileNameLength describes only the validated leaf's UTF-16 bytes.
+        let status = NtSetInformationFile(
             source.file.as_raw_handle() as HANDLE,
-            FileRenameInfo,
+            &mut status_block,
             p.cast(),
             length as u32,
-        ) == 0
-        {
-            return Err(io_error(std::io::Error::last_os_error()));
+            FileRenameInformation,
+        );
+        if status != 0 {
+            return Err(io_error(std::io::Error::from_raw_os_error(
+                RtlNtStatusToDosError(status) as i32,
+            )));
         }
     }
     Ok(())
@@ -367,4 +383,38 @@ pub fn mkdir_private(root: &SafeRoot, name: &str) -> Result<(), RpcError> {
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn native_relative_rename_is_cross_directory_and_never_replaces_a_collision() {
+        let base = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .parent().unwrap().parent().unwrap().join("test-fixtures");
+        std::fs::create_dir_all(&base).unwrap();
+        let temp = tempfile::Builder::new().prefix("win-relative-rename-")
+            .tempdir_in(base).unwrap();
+        std::fs::create_dir(temp.path().join("from")).unwrap();
+        std::fs::create_dir(temp.path().join("to")).unwrap();
+        std::fs::write(temp.path().join("from/source.bin"), b"SYNTHETIC_SOURCE").unwrap();
+        std::fs::write(temp.path().join("to/keep.bin"), b"PRESERVE_EXISTING").unwrap();
+        let root = SafeRoot::open(temp.path(), None).unwrap();
+        let source = root.open_relative("from/source.bin", true).unwrap();
+        let identity = info(&source.file).unwrap().identity;
+        let destination = root.open_relative("to", false).unwrap();
+        // Call the native primitive itself, bypassing the user-facing collision
+        // precheck: the kernel must enforce no-replace even at the rename race.
+        let collision = rename(&root, &source, "from/source.bin", &destination, "keep.bin")
+            .unwrap_err();
+        assert_eq!(collision.code, "NAME_COLLISION");
+        assert_eq!(std::fs::read(temp.path().join("to/keep.bin")).unwrap(), b"PRESERVE_EXISTING");
+        rename(&root, &source, "from/source.bin", &destination, "moved.bin").unwrap();
+        assert_eq!(info(&source.file).unwrap().identity, identity);
+        drop(source);
+        assert!(!temp.path().join("from/source.bin").exists());
+        assert_eq!(root.info("to/moved.bin").unwrap().identity, identity);
+        assert_eq!(std::fs::read(temp.path().join("to/moved.bin")).unwrap(), b"SYNTHETIC_SOURCE");
+    }
 }

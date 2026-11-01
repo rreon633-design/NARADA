@@ -11,8 +11,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: narada-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+  group: narada-${{ github.workflow }}-${{ github.ref }}-${{ github.sha }}
+  cancel-in-progress: false
 
 env:
   CI: 'true'
