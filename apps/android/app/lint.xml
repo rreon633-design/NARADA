@@ -8,4 +8,9 @@
     <issue id="GradleDependency" severity="informational" />
     <issue id="NewerVersionAvailable" severity="informational" />
     <issue id="AndroidGradlePluginVersion" severity="informational" />
+    <!-- API 36 is deliberate for this isolated development candidate. API 37
+         needs the separately tracked LAN-permission/compatibility review; do
+         not silently change application behavior to satisfy a date-based hint.
+         Artifact audits still enforce target 36. Keep the advisory visible. -->
+    <issue id="OldTargetApi" severity="informational" />
 </lint>

@@ -30,6 +30,19 @@ class DiagnosticsTests(unittest.TestCase):
         self.assertEqual(len(keys), 1)
         self.assertEqual(len(bytes.fromhex(keys[0])), 32)
 
+    def test_java_stack_does_not_hide_lint_cause(self):
+        raw = ('build.gradle.kts:31: Error: synthetic [OldTargetApi]\n' + '\tat gradle.synthetic.Frame.method(File.kt:12)\n' * 200).encode()
+        self.assertIn('[OldTargetApi]', diagnostics.excerpt(raw))
+
+    def test_node_selection_is_explicit_and_has_live_and_junit_reporters(self):
+        import node_tests
+        cmd = node_tests.command(Path('synthetic-report.xml'))
+        files = [v for v in cmd if v.endswith('.test.js')]
+        self.assertEqual(5, len(files))
+        self.assertNotIn('desktop-ui/tests', cmd)
+        self.assertIn('--test-reporter=tap', cmd)
+        self.assertIn('--test-reporter=junit', cmd)
+
     def test_excerpt_keeps_error_context(self):
         raw = b'2026-11-01T00:00:00Z compiling\n2026-11-01T00:00:01Z error[E001]: synthetic failure\n  source.rs:7\n'
         text = diagnostics.excerpt(raw)

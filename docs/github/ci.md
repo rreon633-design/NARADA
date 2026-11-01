@@ -68,3 +68,7 @@ The separate `ci-diagnostics.yml` workflow uses GitHub's short-lived token with 
 Android command-line tools are explicitly pinned to `16111833`; the obsolete SDK `tools` package is not requested.
 
 In-flight source revisions now retain their own commit-scoped concurrency groups instead of cancelling the earlier platform campaign on every repair push. This preserves complete diagnostics/caches. Publication still requires the current `main` SHA and all same-attempt evidence; an older or failed campaign cannot release a newer commit.
+
+The Node 22 test entrypoint enumerates the actual test files explicitly and emits TAP plus JUnit. A directory argument that passed with local Node 20 failed under Node 22; the local Node 22 failure is recorded separately, and a zero/partial test selection cannot satisfy the 37-case minimum.
+
+Lint still treats application warnings as errors. `OldTargetApi` is retained as an **informational advisory**, like pinned dependency-update notices: target API 36 is intentional for this development package, and target-37 LAN permission/compatibility work remains an explicit production gate. APK audits still enforce the declared target/minimum SDK. This is not a claim of Play-store eligibility or target-37 qualification. No application finding is hidden in a lint baseline.

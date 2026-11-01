@@ -50,6 +50,9 @@ def escaped(text):
 def excerpt(raw):
     text = ANSI.sub('', raw.decode('utf-8', errors='replace'))
     lines = [re.sub(r'^\d{4}-\d\d-\d\dT\S+\s+', '', line) for line in text.splitlines()]
+    # Stack frames can otherwise push the actual compiler/lint cause out of
+    # GitHub's short annotation limit. Full logs remain in the job artifacts.
+    lines = [line for line in lines if not re.match(r'^\s+at\s|^\s*\.\.\. \d+ more', line)]
     selected = set()
     for index, line in enumerate(lines):
         if re.search(r'error\[|error:|panicked at|^failures:|Exception|Traceback|Could not|Failed to|failed to|UnsupportedClassVersion|assertion .+failed|test result: FAILED', line, re.I):

@@ -73,7 +73,9 @@ jobs:
       - uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         id: rust-cache
         with:
-          key: rust-${{ runner.os }}-desktop-1.99.1-${{ hashFiles('Cargo.lock') }}
+          key: rust-${{ runner.os }}-desktop-1.99.1-${{ hashFiles('Cargo.lock') }}-${{ github.sha }}
+          restore-keys: |
+            rust-${{ runner.os }}-desktop-1.99.1-${{ hashFiles('Cargo.lock') }}-
           path: |
             ~/.cargo/registry
             ~/.cargo/git
@@ -89,8 +91,7 @@ jobs:
       - run: python scripts/ci/evidence.py run files-process -- python tests/process/files_security.py
       - run: python scripts/ci/evidence.py run transfers-process -- python tests/process/transfers_security.py
       - run: python scripts/ci/evidence.py run content-process -- python tests/process/content_offline.py
-      - run: python scripts/ci/evidence.py run node-tests -- node --test --test-reporter=junit --test-reporter-destination=.cache/ci-evidence/desktop-linux/node-tests.xml desktop-ui/tests
-      - run: python scripts/ci/evidence.py junit --minimum 1 node-tests '.cache/ci-evidence/desktop-linux/node-tests.xml'
+      - run: python scripts/ci/node_tests.py
       - run: python scripts/ci/evidence.py run command-surface -- node scripts/check-command-surface.mjs
       - run: npm run build
       - run: python scripts/ci/evidence.py run frontend-size -- python scripts/ci/artifacts.py frontend
@@ -136,7 +137,9 @@ jobs:
       - uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
         id: rust-cache
         with:
-          key: rust-${{ runner.os }}-native-1.99.1-${{ hashFiles('Cargo.lock') }}
+          key: rust-${{ runner.os }}-native-1.99.1-${{ hashFiles('Cargo.lock') }}-${{ github.sha }}
+          restore-keys: |
+            rust-${{ runner.os }}-native-1.99.1-${{ hashFiles('Cargo.lock') }}-
           path: |
             ~/.cargo/registry
             ~/.cargo/git
@@ -145,8 +148,7 @@ jobs:
       - run: python scripts/ci/evidence.py begin
       - run: python scripts/ci/evidence.py run native-rust-tests -- cargo test --locked --workspace --no-fail-fast --exclude narada-desktop
       - run: python scripts/ci/evidence.py run native-clippy -- cargo clippy --locked --workspace --exclude narada-desktop --all-targets -- -D warnings
-      - run: python scripts/ci/evidence.py run node-tests -- node --test --test-reporter=junit --test-reporter-destination=.cache/ci-evidence/windows/node-tests.xml desktop-ui/tests
-      - run: python scripts/ci/evidence.py junit --minimum 1 node-tests '.cache/ci-evidence/windows/node-tests.xml'
+      - run: python scripts/ci/node_tests.py
       - run: python scripts/ci/evidence.py run command-surface -- node scripts/check-command-surface.mjs
       - run: python scripts/ci/evidence.py run native-build -- node scripts/native-build.mjs
       - run: python scripts/ci/evidence.py run native-install-launch -- pwsh -NoProfile -File scripts/ci/windows-smoke.ps1
@@ -211,7 +213,9 @@ jobs:
       - uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
         id: rust-cache
         with:
-          key: rust-${{ runner.os }}-android-1.99.1-ndk30-${{ hashFiles('Cargo.lock', 'apps/android/native-*/Cargo.lock') }}
+          key: rust-${{ runner.os }}-android-1.99.1-ndk30-${{ hashFiles('Cargo.lock', 'apps/android/native-*/Cargo.lock') }}-${{ github.sha }}
+          restore-keys: |
+            rust-${{ runner.os }}-android-1.99.1-ndk30-${{ hashFiles('Cargo.lock', 'apps/android/native-*/Cargo.lock') }}-
           path: |
             ~/.cargo/registry
             ~/.cargo/git

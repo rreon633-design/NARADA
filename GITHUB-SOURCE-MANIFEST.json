@@ -1,8 +1,8 @@
 {
   "repository": "https://github.com/rreon633-design/NARADA",
   "intended_initial_tag": "v0.0.1",
-  "files": 541,
-  "bytes": 9481581,
+  "files": 542,
+  "bytes": 9484630,
   "history": "Historical source/evidence remains preserved separately; these are new CI revisions.",
   "export_push_performed": false,
   "inputs": {
@@ -17,8 +17,8 @@
       "source": ".gitattributes"
     },
     ".github/workflows/build-test-release.yml": {
-      "sha256": "0dde06eae80c9b89a7a22aba653da0629cacc11af2ec5b924fa593ffeae03cd0",
-      "bytes": 18336,
+      "sha256": "b7934ca1842b781b4932545944dde8c56210c1a80241c02c9e3857b287e5efc9",
+      "bytes": 18234,
       "source": ".github/workflows/build-test-release.yml"
     },
     ".github/workflows/ci-diagnostics.yml": {
@@ -117,8 +117,8 @@
       "source": "apps/android/app/gradle.lockfile"
     },
     "apps/android/app/lint.xml": {
-      "sha256": "fea29bb00b14ce1f313c2002208cf9e7f2da2906fdd475d8dd130c4ffae691dc",
-      "bytes": 646,
+      "sha256": "72475da5d526a6bd978eddc8e382a6ce45caa16e239381e1cc23bf276007e733",
+      "bytes": 1020,
       "source": "apps/android/app/lint.xml"
     },
     "apps/android/app/proguard-rules.pro": {
@@ -2117,8 +2117,8 @@
       "source": "docs/files-and-recovery.md"
     },
     "docs/github/ci.md": {
-      "sha256": "5cdc0bb5abbb4fc7dda400bdd916af35ee2b7b62a1289d176531644400762e1f",
-      "bytes": 8250,
+      "sha256": "449846008137414ced9a33c68841d9fa9d977d2bd645fd806211e51108c93bdf",
+      "bytes": 9023,
       "source": "docs/github/ci.md"
     },
     "docs/github/history.md": {
@@ -2397,8 +2397,8 @@
       "source": "scripts/ci/artifacts.py"
     },
     "scripts/ci/diagnostics.py": {
-      "sha256": "96ff4bbaa5e15a38fdc988028fdb9be8705653d0c0756ed896bbf3d18802ba05",
-      "bytes": 4140,
+      "sha256": "2cfe9003d151f4eda31e0bc06c9620c204a144a040f0d53809870397cd0f6658",
+      "bytes": 4386,
       "source": "scripts/ci/diagnostics.py"
     },
     "scripts/ci/emulator.py": {
@@ -2410,6 +2410,11 @@
       "sha256": "f3c8a7fb8836116500943568f24b0b008c704b3f1db1f0a01c8d34a2210419ed",
       "bytes": 8708,
       "source": "scripts/ci/evidence.py"
+    },
+    "scripts/ci/node_tests.py": {
+      "sha256": "adb3b1b2c728a5eee0e3936798cd8d316781ca28bb55216778fc4bb0341d4c6a",
+      "bytes": 1073,
+      "source": "scripts/ci/node_tests.py"
     },
     "scripts/ci/playwright.config.mjs": {
       "sha256": "06faf2f9b28661deff296eb5794bdfd60151f6aefc779bf74c225ea04a2c55a2",
@@ -2612,8 +2617,8 @@
       "source": "tests/ci/test_content_contract_fixture.py"
     },
     "tests/ci/test_diagnostics.py": {
-      "sha256": "aa80d8d6ee521ed51025c013ac0532a0304129d73e7c3a5e5ff16a7213a46974",
-      "bytes": 3176,
+      "sha256": "ef9f58879da5b108c4aba26bc7a4c628034ff78287defad98071d94ffaa8a88b",
+      "bytes": 3861,
       "source": "tests/ci/test_diagnostics.py"
     },
     "tests/ci/test_release_gates.py": {
