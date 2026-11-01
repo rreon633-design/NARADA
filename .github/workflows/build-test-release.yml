@@ -151,8 +151,8 @@ jobs:
       - run: python scripts/ci/node_tests.py
       - run: python scripts/ci/evidence.py run command-surface -- node scripts/check-command-surface.mjs
       - run: python scripts/ci/evidence.py run native-build -- node scripts/native-build.mjs
-      - run: python scripts/ci/evidence.py run native-install-launch -- pwsh -NoProfile -File scripts/ci/windows-smoke.ps1
       - run: python scripts/ci/evidence.py run collect-windows -- python scripts/ci/artifacts.py windows
+      - run: python scripts/ci/evidence.py run native-install-launch -- pwsh -NoProfile -File scripts/ci/windows-smoke.ps1
       - run: python scripts/ci/evidence.py finish
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:

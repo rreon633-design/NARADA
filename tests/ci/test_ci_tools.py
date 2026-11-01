@@ -4,6 +4,8 @@ from pathlib import Path
 import struct
 import sys
 import tempfile
+import tomllib
+import xml.etree.ElementTree as ET
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -68,6 +70,47 @@ class EvidenceTests(unittest.TestCase):
         self.assertLessEqual(artifacts.POLICY['android_apk_max_bytes'], 20 * 1024 * 1024)
         self.assertLessEqual(artifacts.POLICY['windows_installer_max_bytes'], 30 * 1024 * 1024)
         self.assertEqual(4, len(set(artifacts.POLICY['android_abis'])))
+
+    def test_small_webview_bootstrappers_are_not_bundled_browser_runtimes(self):
+        for mode in ('downloadBootstrapper', 'embedBootstrapper'):
+            self.assertEqual(mode, artifacts.webview_mode({'bundle': {'windows': {'webviewInstallMode': {'type': mode}}}}))
+
+    def test_bundled_or_unchecked_webview_runtimes_are_rejected(self):
+        for mode in ('offlineInstaller', 'fixedRuntime', 'skip', 'unknown'):
+            with self.subTest(mode=mode), self.assertRaises(RuntimeError):
+                artifacts.webview_mode({'bundle': {'windows': {'webviewInstallMode': {'type': mode}}}})
+
+    def test_instrumentation_pins_keep_agp_runtime_consistency_and_shrinking(self):
+        versions = tomllib.loads((ROOT / 'apps/android/gradle/libs.versions.toml').read_text())['versions']
+        self.assertEqual('1.3.0', versions['concurrent-futures'])
+        self.assertEqual('2.51.0', versions['test-errorprone'])
+        build = (ROOT / 'apps/android/app/build.gradle.kts').read_text()
+        self.assertIn('implementation(libs.concurrent.futures.ktx)', build)
+        self.assertIn('androidTestImplementation(libs.test.errorprone)', build)
+        self.assertNotIn('    implementation(libs.test.errorprone)', build)
+        self.assertIn('isMinifyEnabled = true', build)
+        self.assertIn('isShrinkResources = true', build)
+        locks = dict(line.split('=', 1) for line in (ROOT / 'apps/android/app/gradle.lockfile').read_text().splitlines() if line and not line.startswith('#'))
+        for variant in ('debug', 'manualTest'):
+            for module in ('androidx.concurrent:concurrent-futures:1.3.0', 'androidx.concurrent:concurrent-futures-ktx:1.3.0'):
+                self.assertIn(variant + 'RuntimeClasspath', locks[module].split(','))
+                self.assertIn(variant + 'AndroidTestRuntimeClasspath', locks[module].split(','))
+            self.assertIn(variant + 'AndroidTestRuntimeClasspath', locks['com.google.errorprone:error_prone_annotations:2.51.0'].split(','))
+
+    def test_instrumentation_runtime_jars_have_the_inspected_checksum_pins(self):
+        ns = {'v': 'https://schema.gradle.org/dependency-verification'}
+        root = ET.parse(ROOT / 'apps/android/gradle/verification-metadata.xml').getroot()
+        expected = {
+            ('androidx.concurrent', 'concurrent-futures', '1.3.0'): '9111fab38c19cac12f507ce1fed1875c155fd201f5cd5b8c7f3b7e2b18d3fc49',
+            ('androidx.concurrent', 'concurrent-futures-ktx', '1.3.0'): '8de3069a4602d487b63ba061c7d46c78739e7ae5bf3dfd14bfbb9ae80277b1d9',
+            ('com.google.errorprone', 'error_prone_annotations', '2.51.0'): '51a6d8348c7e307e47183859c07597dc8a2899c5d1b6f18a471bccaa3203d5cf',
+        }
+        for (group, name, version), sha in expected.items():
+            component = root.find(f"v:components/v:component[@group='{group}'][@name='{name}'][@version='{version}']", ns)
+            self.assertIsNotNone(component)
+            artifact = component.find(f"v:artifact[@name='{name}-{version}.jar']", ns)
+            self.assertIsNotNone(artifact)
+            self.assertEqual([sha], [value.get('value') for value in artifact.findall('v:sha256', ns)])
 
     def test_historical_directory_is_never_redirected_locally(self):
         old = os.environ.get('CI')

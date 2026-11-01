@@ -120,6 +120,8 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.hilt.work)
     implementation(libs.coroutines.android)
+    // Shared runtime version must match instrumentation under AGP consistent resolution.
+    implementation(libs.concurrent.futures.ktx)
     implementation(libs.serialization)
     ksp(libs.room.compiler)
     ksp(libs.hilt.compiler)
@@ -135,6 +137,12 @@ dependencies {
     testImplementation(libs.work.testing)
     testImplementation(platform(libs.compose.bom))
     testImplementation(libs.compose.test)
+    // Complete the minified instrumentation dependency graph. ViewCapture needs
+    // the shared futures runtime; test-only Error Prone annotations use their own
+    // Modifier enum instead of the unavailable JDK compiler model.
+    // Do not hide missing runtime types with R8 -dontwarn / -ignorewarnings.
+    androidTestImplementation(libs.concurrent.futures.ktx)
+    androidTestImplementation(libs.test.errorprone)
     androidTestImplementation(libs.test.runner)
     androidTestImplementation(libs.test.junit)
     androidTestImplementation(libs.espresso.core)

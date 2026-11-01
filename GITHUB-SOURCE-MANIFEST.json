@@ -2,7 +2,7 @@
   "repository": "https://github.com/rreon633-design/NARADA",
   "intended_initial_tag": "v0.0.1",
   "files": 542,
-  "bytes": 9484630,
+  "bytes": 9547334,
   "history": "Historical source/evidence remains preserved separately; these are new CI revisions.",
   "export_push_performed": false,
   "inputs": {
@@ -17,7 +17,7 @@
       "source": ".gitattributes"
     },
     ".github/workflows/build-test-release.yml": {
-      "sha256": "b7934ca1842b781b4932545944dde8c56210c1a80241c02c9e3857b287e5efc9",
+      "sha256": "1236238942073410132a3649c685951ab21ea5dbd73f503a46c1521ebdb67cbb",
       "bytes": 18234,
       "source": ".github/workflows/build-test-release.yml"
     },
@@ -107,13 +107,13 @@
       "source": "apps/android/README.md"
     },
     "apps/android/app/build.gradle.kts": {
-      "sha256": "e9658392350ffff6c9a98d775df0778031686c31274eae60139f60077acae4a3",
-      "bytes": 9355,
+      "sha256": "289748ace4b7d430ac7fe0ce228c66f07fa0ddd4c20433db1cd71d856acc039e",
+      "bytes": 9914,
       "source": "apps/android/app/build.gradle.kts"
     },
     "apps/android/app/gradle.lockfile": {
-      "sha256": "e7986e5bf59999e3f4c20c10ac75bb1391811c989dc46ffa8bd18d2811196bfe",
-      "bytes": 136548,
+      "sha256": "682f82c66047dfea242dde09605981b4a4489575bfbf50b9b93ac9ac5e971ae5",
+      "bytes": 187474,
       "source": "apps/android/app/gradle.lockfile"
     },
     "apps/android/app/lint.xml": {
@@ -1127,13 +1127,13 @@
       "source": "apps/android/gradle.properties"
     },
     "apps/android/gradle/libs.versions.toml": {
-      "sha256": "812bf0262d008abb9d29c7006f2cf3d622c375fd450d3c65f618d0506c0756a8",
-      "bytes": 4732,
+      "sha256": "2a6181520f68b093c4ee9bcbf907e774fb206b82215f65f75b574c2882b61d11",
+      "bytes": 5019,
       "source": "apps/android/gradle/libs.versions.toml"
     },
     "apps/android/gradle/verification-metadata.xml": {
-      "sha256": "d24f788a57115649bb74d13c2cd6a7de148f94938da6e5f7e5d2d553eb433099",
-      "bytes": 328481,
+      "sha256": "e734d854bf775b82b59bb321bf2394bfbd3c01b1e1a83ba5297d1663574c78d3",
+      "bytes": 330358,
       "source": "apps/android/gradle/verification-metadata.xml"
     },
     "apps/android/gradle/wrapper/gradle-wrapper.jar": {
@@ -1257,8 +1257,8 @@
       "source": "apps/desktop-shell/src-tauri/src/main.rs"
     },
     "apps/desktop-shell/src-tauri/tauri.conf.json": {
-      "sha256": "d0c2ee75b4242e76d2ec83ae4f34268b43eb1ae7098f5c49b3b8987ce48b080d",
-      "bytes": 1656,
+      "sha256": "eb1b90b8c61526e309fdfc924242ed0016a1d10392a7930ad59ab01cc21c5856",
+      "bytes": 1653,
       "source": "apps/desktop-shell/src-tauri/tauri.conf.json"
     },
     "apps/windows-agent/Cargo.toml": {
@@ -2117,8 +2117,8 @@
       "source": "docs/files-and-recovery.md"
     },
     "docs/github/ci.md": {
-      "sha256": "449846008137414ced9a33c68841d9fa9d977d2bd645fd806211e51108c93bdf",
-      "bytes": 9023,
+      "sha256": "ec9fd368fda30613ccd604541aeba48a09e92276bc2fde909b1035da888b8bc2",
+      "bytes": 12201,
       "source": "docs/github/ci.md"
     },
     "docs/github/history.md": {
@@ -2132,8 +2132,8 @@
       "source": "docs/github/lightweight.md"
     },
     "docs/github/manual-testing.md": {
-      "sha256": "1bf013ba470a7661a173139a5a9f71c1da33dd1d415a720536456f1a90fe5d12",
-      "bytes": 6212,
+      "sha256": "6bcc5944d839bed7be0eff781e719a84b8a222363be74d893e24c022b6fc3f8d",
+      "bytes": 6298,
       "source": "docs/github/manual-testing.md"
     },
     "docs/github/windows-filesystem.md": {
@@ -2392,8 +2392,8 @@
       "source": "scripts/check_default_boundary.py"
     },
     "scripts/ci/artifacts.py": {
-      "sha256": "71285a9c66d37e3b702991645d4ccb7ba6e6df39d4a6f68815dee1e834542a6d",
-      "bytes": 16805,
+      "sha256": "9cf1e95fa1c70970b318bc8d3df92257b4c65b54928d7ed9b2b65c444961396c",
+      "bytes": 17027,
       "source": "scripts/ci/artifacts.py"
     },
     "scripts/ci/diagnostics.py": {
@@ -2427,8 +2427,8 @@
       "source": "scripts/ci/publish.py"
     },
     "scripts/ci/windows-smoke.ps1": {
-      "sha256": "7991029c98e2cbf63b25f418d25b278606aaf27fb8bb1b53154ca0cf0069ee1f",
-      "bytes": 3197,
+      "sha256": "333d9586395ad190d477111d44608717e56d89da9ce6558a011036f6cb0ea20b",
+      "bytes": 5561,
       "source": "scripts/ci/windows-smoke.ps1"
     },
     "scripts/dev.mjs": {
@@ -2607,8 +2607,8 @@
       "source": "scripts/validate_phase4.py"
     },
     "tests/ci/test_ci_tools.py": {
-      "sha256": "8f0bc3a103c26785e9c187ffe8c30a5fa753dd914a53f88c9bd458bd6f9a8ba5",
-      "bytes": 3912,
+      "sha256": "4e38abf711c20d42216c07164ac4833222b931c7257f75601f27afa73e49ef19",
+      "bytes": 7120,
       "source": "tests/ci/test_ci_tools.py"
     },
     "tests/ci/test_content_contract_fixture.py": {

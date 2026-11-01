@@ -28,7 +28,7 @@ The accompanying build reports record the source commit, workflow run, byte size
 
 1. Use a clean test account or VM. Run the x64 NSIS installer from the trusted repository's release.
 2. The installer is **unsigned**. Windows may warn or block it. Do not disable global security controls; follow your organization's policy and review the source/reports before proceeding.
-3. The small installer uses the system **Evergreen WebView2** runtime. If missing, its bootstrapper needs Internet access to obtain Microsoft's runtime. An offline installation requires WebView2 already installed. The runtime's download/disk cost is separate from the NARADA installer size.
+3. The small installer embeds only Microsoft's bootstrapper, not Chromium or the WebView runtime. It uses the system **Evergreen WebView2** runtime. If that runtime is missing, the embedded bootstrapper needs Internet access to obtain it. An offline installation requires WebView2 already installed. The runtime's download/disk cost is separate from the NARADA installer size.
 4. Launch NARADA and first test navigation, settings, diagnostics, window scaling, close-to-tray and clean exit. The hosted bootstrap smoke does not prove rendered pixels or tray behavior.
 5. Grant access only to a new, disposable test folder. Do not broadly relax the firewall or expose the listener on public networks to make pairing work.
 

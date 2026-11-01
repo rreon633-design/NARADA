@@ -114,6 +114,12 @@ def frontend():
             "files": {p.relative_to(base).as_posix(): file_row(p) for p in files}}
 
 
+def webview_mode(config):
+    mode = config["bundle"]["windows"]["webviewInstallMode"]["type"]
+    require(mode in ("downloadBootstrapper", "embedBootstrapper"), "Do not bundle a Chromium/WebView runtime")
+    return mode
+
+
 def windows():
     require(os.name == "nt", "Windows candidates must be built on Windows")
     installers = sorted((ROOT / "target/release/bundle/nsis").glob("*.exe"))
@@ -123,7 +129,7 @@ def windows():
     require(pe_machine(exe) == pe_machine(agent) == 0x8664, "Expected x64 native Windows binaries")
     require("preview-port" not in command([agent, "--help"]), "Development HTTP bridge leaked into native binary")
     config = json.loads((ROOT / "apps/desktop-shell/src-tauri/tauri.conf.json").read_text(encoding="utf-8"))
-    require(config["bundle"]["windows"]["webviewInstallMode"]["type"] == "downloadBootstrapper", "Do not bundle a Chromium/WebView runtime")
+    mode = webview_mode(config)
     require(installers[0].stat().st_size <= POLICY["windows_installer_max_bytes"], "Windows installer size budget exceeded")
     dest = package_dir("windows")
     target = dest / f"NARADA-{release_label()}-windows-x64-setup.exe"
@@ -131,9 +137,11 @@ def windows():
     report = {**context(), "signing": POLICY["signing"]["windows"], "files": [file_row(target)],
               "installer_budget_bytes": POLICY["windows_installer_max_bytes"],
               "native_binaries": [file_row(exe), file_row(agent)], "frontend": frontend(),
-              "webview": "system Evergreen WebView2; installer downloads bootstrapper only if needed",
+              "webview": "system Evergreen WebView2; small bootstrapper, not bundled browser/runtime",
+              "webview_install_mode": mode,
               "application_version": config["version"], "unqualified": POLICY["not_qualified"]}
     write_json(dest / "windows-build-report.json", report)
+    write_json(output() / "windows-build-report.json", report)
     shutil.copy2(ROOT / "docs/github/manual-testing.md", dest / "WINDOWS-MANUAL-TEST.md")
     write_checksums(dest, "WINDOWS-SHA256SUMS.txt")
     print(json.dumps(report, indent=2))
