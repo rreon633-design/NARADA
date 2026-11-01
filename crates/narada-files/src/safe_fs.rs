@@ -151,7 +151,16 @@ pub fn version(identity: &str, meta: &Metadata, change: &str) -> Info {
         hidden: false,
     }
 }
+#[track_caller]
 pub fn io_error(e: std::io::Error) -> RpcError {
+    // Debug-build diagnostics contain OS codes and compile-time source locations
+    // only, never paths, payloads, credentials or the OS error's arbitrary text.
+    // Public RPC errors and release-build behavior remain unchanged.
+    #[cfg(debug_assertions)]
+    {
+        let location = std::panic::Location::caller();
+        eprintln!("Safe filesystem failure: OS {:?}, source {}:{}", e.raw_os_error(), location.file(), location.line());
+    }
     match e.kind(){std::io::ErrorKind::NotFound=>err("OBJECT_UNAVAILABLE","The approved object is missing or no longer accessible."),std::io::ErrorKind::AlreadyExists=>err("NAME_COLLISION","The destination exists. Nothing was overwritten."),_=>err("UNSAFE_OR_BUSY","The filesystem object is busy, unsafe, unsupported or inaccessible. Symbolic links, reparse points, special files and cross-filesystem traversal are refused.")}
 }
 #[cfg(not(windows))]

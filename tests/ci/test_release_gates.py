@@ -90,9 +90,9 @@ class ReleaseGateTests(unittest.TestCase):
 
     def test_an_existing_tag_at_another_commit_is_never_moved(self):
         ref = {'object': {'type': 'commit', 'sha': 'b' * 40}}
-        with mock.patch.dict('os.environ', self.release_environment(), clear=True), mock.patch.object(publish, 'api', side_effect=[ref, None]) as api:
+        with mock.patch.dict('os.environ', self.release_environment(), clear=True), mock.patch.object(publish, 'api', side_effect=[ref, None, []]) as api:
             publish.main()
-            self.assertEqual(2, api.call_count)
+            self.assertEqual(3, api.call_count)
             self.assertTrue(all(len(call.args) == 1 for call in api.call_args_list))
 
     def test_published_initial_release_is_not_overwritten(self):
@@ -100,6 +100,18 @@ class ReleaseGateTests(unittest.TestCase):
         with mock.patch.dict('os.environ', self.release_environment(), clear=True), mock.patch.object(publish, 'api', side_effect=[ref, {'draft': False}]) as api:
             publish.main()
             self.assertTrue(all(len(call.args) == 1 for call in api.call_args_list))
+
+    def test_existing_draft_is_found_even_when_by_tag_returns_404(self):
+        draft = {'id': 7, 'tag_name': 'v0.0.1', 'draft': True}
+        with mock.patch.object(publish, 'api', side_effect=[None, [draft]]) as api:
+            self.assertEqual(draft, publish.existing_release('v0.0.1'))
+            self.assertEqual(2, api.call_count)
+            self.assertTrue(all(len(call.args) == 1 for call in api.call_args_list))
+
+    def test_release_listing_limit_fails_closed(self):
+        rows = [{'tag_name': 'other', 'draft': True}] * 100
+        with mock.patch.object(publish, 'api', side_effect=[None] + [rows] * 10):
+            with self.assertRaises(RuntimeError): publish.existing_release('v0.0.1')
 
     def test_pull_requests_cannot_publish_or_create_refs(self):
         env = self.release_environment()

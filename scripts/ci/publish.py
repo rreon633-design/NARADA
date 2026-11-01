@@ -35,6 +35,25 @@ def api(path, method="GET", data=None, *, missing=False):
         raise RuntimeError(f"GitHub API {method} failed with HTTP {error.code}; existing tags/releases were not modified") from None
 
 
+
+def existing_release(tag):
+    # The by-tag endpoint may omit draft releases. An authenticated, bounded
+    # listing is also required before any new tag/release is created.
+    direct = api("releases/tags/" + tag, missing=True)
+    if direct is not None:
+        return direct
+    for page in range(1, 11):
+        rows = api(f"releases?per_page=100&page={page}")
+        require(isinstance(rows, list), "Malformed release listing; refusing publication")
+        found = [row for row in rows if row.get("tag_name") == tag]
+        require(len(found) <= 1, "Multiple matching releases/drafts; owner review required")
+        if found:
+            return found[0]
+        if len(rows) < 100:
+            return None
+    raise RuntimeError("Release listing exceeded its safe bound; owner review required")
+
+
 def verify_evidence(base, sha, run, attempt):
     statuses = {}
     for path in base.rglob("job-status.json"):
@@ -78,7 +97,7 @@ def main():
             if existing["type"] == "commit": break
             require(existing["type"] == "tag", "Unsupported existing tag object")
             existing = api("git/tags/" + existing["sha"])["object"]
-        old_release = api("releases/tags/" + tag, missing=True)
+        old_release = existing_release(tag)
         if existing.get("sha") != sha or (old_release is not None and not old_release["draft"]):
             print(f"Initial tag/release {tag} already exists. Leaving it untouched; this push still has fresh CI artifacts.")
             return
@@ -116,7 +135,7 @@ def main():
 
     # An initial main-branch campaign creates the requested tag only after ALL
     # checks above succeed. No API call can move or force-update an existing ref.
-    require(api("releases/tags/" + tag, missing=True) is None, "Release already exists; refusing to overwrite it (including a previous draft)")
+    require(existing_release(tag) is None, "Release already exists; refusing to overwrite it (including a previous draft)")
     if initial and existing_ref is None:
         require(api("git/ref/heads/main")["object"]["sha"] == sha, "Main advanced; do not tag an obsolete campaign")
         annotated = api("git/tags", "POST", {

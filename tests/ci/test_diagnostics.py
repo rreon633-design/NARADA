@@ -18,6 +18,18 @@ class DiagnosticsTests(unittest.TestCase):
             self.assertNotIn('synthetic-fixture-token', diagnostics.escaped('error synthetic-fixture-token'))
         self.assertEqual('[REDACTED]', diagnostics.escaped('ghp_' + 'x' * 40))
 
+    def test_public_annotation_fits_github_limit(self):
+        text = diagnostics.excerpt(('error: synthetic failure\n' * 1000).encode())
+        self.assertLessEqual(len(text), 3200)
+        self.assertIn('synthetic failure', text)
+
+    def test_ci_vault_fixture_is_exactly_32_bytes(self):
+        import re
+        workflow = (Path(__file__).resolve().parents[2] / '.github/workflows/build-test-release.yml').read_text()
+        keys = re.findall(r"NARADA_DEV_VAULT_KEY: '([0-9a-f]+)'", workflow)
+        self.assertEqual(len(keys), 1)
+        self.assertEqual(len(bytes.fromhex(keys[0])), 32)
+
     def test_excerpt_keeps_error_context(self):
         raw = b'2026-11-01T00:00:00Z compiling\n2026-11-01T00:00:01Z error[E001]: synthetic failure\n  source.rs:7\n'
         text = diagnostics.excerpt(raw)

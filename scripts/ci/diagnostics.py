@@ -55,7 +55,7 @@ def excerpt(raw):
         if re.search(r'error\[|error:|panicked at|^failures:|Exception|Traceback|Could not|Failed to|failed to|UnsupportedClassVersion|assertion .+failed|test result: FAILED', line, re.I):
             selected.update(range(max(0, index - 3), min(len(lines), index + 12)))
     if not selected: selected.update(range(max(0, len(lines) - 70), len(lines)))
-    return '\n'.join(lines[i] for i in sorted(selected))[-22000:]
+    return '\n'.join(lines[i] for i in sorted(selected))[-3200:]
 
 
 def main():

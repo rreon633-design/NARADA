@@ -2,7 +2,7 @@
   "repository": "https://github.com/rreon633-design/NARADA",
   "intended_initial_tag": "v0.0.1",
   "files": 539,
-  "bytes": 9465875,
+  "bytes": 9471038,
   "history": "Historical source/evidence remains preserved separately; these are new CI revisions.",
   "export_push_performed": false,
   "inputs": {
@@ -17,8 +17,8 @@
       "source": ".gitattributes"
     },
     ".github/workflows/build-test-release.yml": {
-      "sha256": "725c7b86cfc3391b4028a585eae37861c60b7840fa2a1d55c61016ced75da750",
-      "bytes": 16895,
+      "sha256": "acb9f9bbadb6a5fa2349b1d76a1e835dfca323df71b1b4769bb455eb75e4b6ed",
+      "bytes": 18357,
       "source": ".github/workflows/build-test-release.yml"
     },
     ".github/workflows/ci-diagnostics.yml": {
@@ -1442,8 +1442,8 @@
       "source": "crates/narada-files/src/policy.rs"
     },
     "crates/narada-files/src/safe_fs.rs": {
-      "sha256": "3e5e30a6ba4187cd06fd624329df442abadd60521f905a697355f50b379364b0",
-      "bytes": 8549,
+      "sha256": "b29a44b9687cdebd75417fafb1c1019a4e2c5f0866a941d4da5532af8cf4d421",
+      "bytes": 9016,
       "source": "crates/narada-files/src/safe_fs.rs"
     },
     "crates/narada-files/src/safe_fs/platform_linux.rs": {
@@ -2122,8 +2122,8 @@
       "source": "docs/github/ci.md"
     },
     "docs/github/history.md": {
-      "sha256": "46eedca332be8b9596b5f4083d2a4dc4d5507492539f8fba328e72831bc97790",
-      "bytes": 2642,
+      "sha256": "36ee1cf76e59afbd6cf1754ba60811c5d6a89a9168a158429953b45c3531d03f",
+      "bytes": 3799,
       "source": "docs/github/history.md"
     },
     "docs/github/lightweight.md": {
@@ -2392,8 +2392,8 @@
       "source": "scripts/ci/artifacts.py"
     },
     "scripts/ci/diagnostics.py": {
-      "sha256": "46ec1d075454b393ce54dd7c624566cf2f9b7c351f4f69dbefe28bafb451717e",
-      "bytes": 4141,
+      "sha256": "96ff4bbaa5e15a38fdc988028fdb9be8705653d0c0756ed896bbf3d18802ba05",
+      "bytes": 4140,
       "source": "scripts/ci/diagnostics.py"
     },
     "scripts/ci/emulator.py": {
@@ -2412,8 +2412,8 @@
       "source": "scripts/ci/playwright.config.mjs"
     },
     "scripts/ci/publish.py": {
-      "sha256": "051a8d13ccc792e7d54232a1e06fcc655b47a9fbe78e580a9c0400e779060625",
-      "bytes": 14437,
+      "sha256": "aff2095e37be2b3460a5910ac8e44faca77b690582c026afed08aeb9b3d51f27",
+      "bytes": 15204,
       "source": "scripts/ci/publish.py"
     },
     "scripts/ci/windows-smoke.ps1": {
@@ -2602,13 +2602,13 @@
       "source": "tests/ci/test_ci_tools.py"
     },
     "tests/ci/test_diagnostics.py": {
-      "sha256": "5001c49a428aede215ca96aa3787efa36d8273bd4776b196c55c349629b21b91",
-      "bytes": 2578,
+      "sha256": "aa80d8d6ee521ed51025c013ac0532a0304129d73e7c3a5e5ff16a7213a46974",
+      "bytes": 3176,
       "source": "tests/ci/test_diagnostics.py"
     },
     "tests/ci/test_release_gates.py": {
-      "sha256": "686108d6301afd17324ca2d51c04c2d62c22de68815801378b22f7a85065570b",
-      "bytes": 6450,
+      "sha256": "609f627160d89467d4baa19d48db4850b78feeb0552f1c8aff0e08378b971958",
+      "bytes": 7163,
       "source": "tests/ci/test_release_gates.py"
     },
     "tests/corpus/owner/oversized-cipher-manifest.json": {

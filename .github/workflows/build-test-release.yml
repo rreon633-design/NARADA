@@ -56,7 +56,7 @@ jobs:
     env:
       NARADA_CI_JOB: desktop-linux
       # Public, disposable software-vault fixture. Not used by packaged Windows code.
-      NARADA_DEV_VAULT_KEY: '6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b'
+      NARADA_DEV_VAULT_KEY: '6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b'
       NARADA_SLOW_TESTS: '1'
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -70,7 +70,8 @@ jobs:
         with:
           python-version: '3.12'
       - run: rustup toolchain install 1.99.1 --profile minimal --component clippy
-      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+      - uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        id: rust-cache
         with:
           key: rust-${{ runner.os }}-desktop-1.99.1-${{ hashFiles('Cargo.lock') }}
           path: |
@@ -80,7 +81,7 @@ jobs:
       - run: npm ci
       - run: npx --no-install playwright install --with-deps chromium
       - run: python scripts/ci/evidence.py begin
-      - run: python scripts/ci/evidence.py run rust-tests -- cargo test --locked --workspace --exclude narada-desktop --features narada-agent/dev-preview
+      - run: python scripts/ci/evidence.py run rust-tests -- cargo test --locked --workspace --no-fail-fast --exclude narada-desktop --features narada-agent/dev-preview
       - run: python scripts/ci/evidence.py run rust-clippy -- cargo clippy --locked --workspace --exclude narada-desktop --all-targets --features narada-agent/dev-preview -- -D warnings
       - run: python scripts/ci/evidence.py run peer-build -- cargo build --locked -p narada-agent --features dev-preview
       - run: python scripts/ci/evidence.py run lifecycle -- python tests/process/agent_lifecycle.py
@@ -105,6 +106,15 @@ jobs:
           include-hidden-files: true
           retention-days: 14
 
+      - uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
+        if: always() && !cancelled() && steps.rust-cache.outputs.cache-hit != 'true' && steps.rust-cache.outputs.cache-primary-key != ''
+        with:
+          key: ${{ steps.rust-cache.outputs.cache-primary-key }}
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+
   windows:
     name: Windows x64 native tests, installer and bootstrap
     runs-on: windows-2022
@@ -123,7 +133,8 @@ jobs:
         with:
           python-version: '3.12'
       - run: rustup toolchain install 1.99.1 --profile minimal --component clippy
-      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+      - uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+        id: rust-cache
         with:
           key: rust-${{ runner.os }}-native-1.99.1-${{ hashFiles('Cargo.lock') }}
           path: |
@@ -132,7 +143,7 @@ jobs:
             target
       - run: npm ci
       - run: python scripts/ci/evidence.py begin
-      - run: python scripts/ci/evidence.py run native-rust-tests -- cargo test --locked --workspace --exclude narada-desktop
+      - run: python scripts/ci/evidence.py run native-rust-tests -- cargo test --locked --workspace --no-fail-fast --exclude narada-desktop
       - run: python scripts/ci/evidence.py run native-clippy -- cargo clippy --locked --workspace --exclude narada-desktop --all-targets -- -D warnings
       - run: python scripts/ci/evidence.py run node-tests -- node --test --test-reporter=junit --test-reporter-destination=.cache/ci-evidence/windows/node-tests.xml desktop-ui/tests
       - run: python scripts/ci/evidence.py junit --minimum 1 node-tests '.cache/ci-evidence/windows/node-tests.xml'
@@ -155,6 +166,15 @@ jobs:
           path: .cache/ci-evidence/windows/
           include-hidden-files: true
           retention-days: 14
+
+      - uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
+        if: always() && !cancelled() && steps.rust-cache.outputs.cache-hit != 'true' && steps.rust-cache.outputs.cache-primary-key != ''
+        with:
+          key: ${{ steps.rust-cache.outputs.cache-primary-key }}
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
 
   android:
     name: Android host, real-peer, lint and minified per-ABI APKs
@@ -188,7 +208,8 @@ jobs:
           echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/30.0.16248370" >> "$GITHUB_ENV"
           rustup toolchain install 1.99.1 --profile minimal
           rustup target add --toolchain 1.99.1 aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android
-      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+      - uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+        id: rust-cache
         with:
           key: rust-${{ runner.os }}-android-1.99.1-ndk30-${{ hashFiles('Cargo.lock', 'apps/android/native-*/Cargo.lock') }}
           path: |
@@ -246,6 +267,19 @@ jobs:
             apps/android/app/build/outputs/mapping/manualTest/
           include-hidden-files: true
           retention-days: 14
+
+      - uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
+        if: always() && !cancelled() && steps.rust-cache.outputs.cache-hit != 'true' && steps.rust-cache.outputs.cache-primary-key != ''
+        with:
+          key: ${{ steps.rust-cache.outputs.cache-primary-key }}
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+            apps/android/native-age/target
+            apps/android/native-olm/target
+            apps/android/app/build/native-age-target
+            apps/android/app/build/native-olm-target
 
   android-emulator:
     name: Minified APK native execution (API ${{ matrix.api }})
