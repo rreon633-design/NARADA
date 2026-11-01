@@ -1,8 +1,8 @@
 {
   "repository": "https://github.com/rreon633-design/NARADA",
   "intended_initial_tag": "v0.0.1",
-  "files": 543,
-  "bytes": 9563447,
+  "files": 545,
+  "bytes": 9601982,
   "history": "Historical source/evidence remains preserved separately; these are new CI revisions.",
   "export_push_performed": false,
   "inputs": {
@@ -107,8 +107,8 @@
       "source": "apps/android/README.md"
     },
     "apps/android/app/build.gradle.kts": {
-      "sha256": "289748ace4b7d430ac7fe0ce228c66f07fa0ddd4c20433db1cd71d856acc039e",
-      "bytes": 9914,
+      "sha256": "0fcbfc77d0b7e181d0d6faad8991c9bc6e02064127358ae24839597e18ef8055",
+      "bytes": 25210,
       "source": "apps/android/app/build.gradle.kts"
     },
     "apps/android/app/gradle.lockfile": {
@@ -2116,14 +2116,19 @@
       "bytes": 7439,
       "source": "docs/files-and-recovery.md"
     },
+    "docs/github/android-instrumentation.md": {
+      "sha256": "551a3f711b8bedef6c5e9f8b5cb3adead6ba05ddf4292eaf7124b58d6692f664",
+      "bytes": 4646,
+      "source": "docs/github/android-instrumentation.md"
+    },
     "docs/github/apk-audit.md": {
-      "sha256": "3fa7bf622b6c2ceb993d733e05bbc61fc1d21f7b81d252e6336b3594de5f6405",
-      "bytes": 2431,
+      "sha256": "8b723acf1b0093181288e90cad5c87c4fac8994dd3f93903cf88583426610608",
+      "bytes": 2725,
       "source": "docs/github/apk-audit.md"
     },
     "docs/github/ci.md": {
-      "sha256": "0c2e6575f63ca6532047f1e1e16e247b36968f9fc478e9818281d92aeaaf0523",
-      "bytes": 12479,
+      "sha256": "80f56e413fb54fa63ce771b8b70ab217cdbb275c6c8734d247863c98c1224eb8",
+      "bytes": 12904,
       "source": "docs/github/ci.md"
     },
     "docs/github/history.md": {
@@ -2142,9 +2147,14 @@
       "source": "docs/github/manual-testing.md"
     },
     "docs/github/windows-filesystem.md": {
-      "sha256": "b1d80796483070f698607c922a0a238fc5374d9e9200fa2264006967b7f57916",
-      "bytes": 4404,
+      "sha256": "2bd6a90e9987fc3351f8dfc5e4d8369db51b1dfba17951180edfbcbe29ba472c",
+      "bytes": 4746,
       "source": "docs/github/windows-filesystem.md"
+    },
+    "docs/github/windows-packaging.md": {
+      "sha256": "7e7499ff98ddab0c4a345e0284e6f75a5aaa652510f2eb2483155cf7e46ff037",
+      "bytes": 3063,
+      "source": "docs/github/windows-packaging.md"
     },
     "docs/pairing-and-recovery.md": {
       "sha256": "97ec3f487f7bff2efb040e10c5c1fbd2b4ffdc2d5c29b7689f26fcd182604dc0",
@@ -2397,8 +2407,8 @@
       "source": "scripts/check_default_boundary.py"
     },
     "scripts/ci/artifacts.py": {
-      "sha256": "19f91bf2147f2cc37c36d0f576d4c01921ee4fa99c3544974b5ffcf5dfb4e00e",
-      "bytes": 19128,
+      "sha256": "dc6c1027bfb7696c049d127ac6b9597d936d6db276d142f58d819e83d7e3104c",
+      "bytes": 24397,
       "source": "scripts/ci/artifacts.py"
     },
     "scripts/ci/diagnostics.py": {
@@ -2427,13 +2437,13 @@
       "source": "scripts/ci/playwright.config.mjs"
     },
     "scripts/ci/publish.py": {
-      "sha256": "aff2095e37be2b3460a5910ac8e44faca77b690582c026afed08aeb9b3d51f27",
-      "bytes": 15204,
+      "sha256": "7cb7e03f22c3dfc4d061f2233e32e1a18165741f0626b9d16dd52ddef1d43601",
+      "bytes": 16324,
       "source": "scripts/ci/publish.py"
     },
     "scripts/ci/windows-smoke.ps1": {
-      "sha256": "333d9586395ad190d477111d44608717e56d89da9ce6558a011036f6cb0ea20b",
-      "bytes": 5561,
+      "sha256": "978c9d616acc74f14f34dfe89abb3ef3b2316157475e0acec9cddeb7c7ed1c7f",
+      "bytes": 7606,
       "source": "scripts/ci/windows-smoke.ps1"
     },
     "scripts/dev.mjs": {
@@ -2612,8 +2622,8 @@
       "source": "scripts/validate_phase4.py"
     },
     "tests/ci/test_ci_tools.py": {
-      "sha256": "89b54854c952278f8c11d4b665ccb79b3f76891a861b130b34d6c2d2366f5407",
-      "bytes": 9894,
+      "sha256": "c81650acda9a90f717430fdd16a60144c15726e727b214b941438f7d05674940",
+      "bytes": 14108,
       "source": "tests/ci/test_ci_tools.py"
     },
     "tests/ci/test_content_contract_fixture.py": {
@@ -2627,8 +2637,8 @@
       "source": "tests/ci/test_diagnostics.py"
     },
     "tests/ci/test_release_gates.py": {
-      "sha256": "609f627160d89467d4baa19d48db4850b78feeb0552f1c8aff0e08378b971958",
-      "bytes": 7163,
+      "sha256": "5e91ddf4a71e5480469ca0ffc8e85644c413de56f163691cdfb87acaa9f7bc71",
+      "bytes": 8984,
       "source": "tests/ci/test_release_gates.py"
     },
     "tests/corpus/owner/oversized-cipher-manifest.json": {

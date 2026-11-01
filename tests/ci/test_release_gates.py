@@ -120,6 +120,28 @@ class ReleaseGateTests(unittest.TestCase):
             with self.assertRaises(RuntimeError): publish.main()
             api.assert_not_called()
 
+    def windows_records(self):
+        patch = {"cli_version": "2.12.4", "changed_bytes": 3, "marker_offset": 32, "input_sha256": "a" * 64, "packaged_sha256": "b" * 64}
+        report = {"native_binaries": [{"name": "narada-desktop.exe", "bytes": 128, "sha256": "b" * 64}, {"name": "narada-agent.exe", "bytes": 64, "sha256": "c" * 64}], "compiler_application": {"bytes": 128, "sha256": "a" * 64}, "nsis_bundle_transformation": patch}
+        smoke = {"commit": self.sha, "installer_exit_code": 0, "application_stayed_alive_seconds": 15, "installed_application_sha256": "b" * 64, "installed_agent_sha256": "c" * 64, "compiled_application_sha256": "a" * 64, "nsis_bundle_transformation": dict(patch)}
+        return report, smoke
+
+    def test_exact_reproduced_nsis_payload_and_bootstrap_pass(self):
+        report, smoke = self.windows_records()
+        publish.verify_windows_bootstrap(report, smoke, self.sha)
+
+    def test_installed_mutation_or_wrong_compiler_input_cannot_pass(self):
+        for key in ("installed_application_sha256", "installed_agent_sha256", "compiled_application_sha256"):
+            report, smoke = self.windows_records()
+            smoke[key] = "d" * 64
+            with self.subTest(key=key), self.assertRaises(RuntimeError): publish.verify_windows_bootstrap(report, smoke, self.sha)
+
+    def test_unreviewed_or_disconnected_nsis_transformation_cannot_pass(self):
+        for key, value in (("changed_bytes", 4), ("cli_version", "2.12.5"), ("marker_offset", -1), ("marker_offset", 127), ("input_sha256", "d" * 64), ("packaged_sha256", "d" * 64)):
+            report, smoke = self.windows_records()
+            report["nsis_bundle_transformation"][key] = value
+            with self.subTest(key=key), self.assertRaises(RuntimeError): publish.verify_windows_bootstrap(report, smoke, self.sha)
+
     def test_source_export_excludes_credentials_history_and_build_outputs(self):
         for path in ('.ssh/id_ed25519', '.historical-runtime/private.zip', '.cache/profile.bin', 'artifacts/phase-4/report.json', 'apps/android/app/build/output.apk', 'apps/android/signing.jks', '.env.local', 'apps/desktop-shell/src-tauri/binaries/narada-agent-x86_64.exe', '.github/workflows/phase-1.yml'):
             self.assertFalse(prepare.allowed(path), path)

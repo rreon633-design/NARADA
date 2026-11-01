@@ -28,3 +28,5 @@ The parser now accepts either explicitly named minimum-SDK field, requires exact
 SDK repository: https://dl.google.com/android/repository/repository2-3.xml
 
 Inspected tool archive: https://dl.google.com/android/repository/build-tools_r35_linux.zip
+
+The eighth campaign subsequently passed all four APK audits. Its exact-APK emulator attempts then exposed a separate cross-APK R8 entry-point issue; see [instrumentation boundary and qualification](android-instrumentation.md). Artifact-audit success remains distinct from native test success.

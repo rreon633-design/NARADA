@@ -69,6 +69,38 @@ class EvidenceTests(unittest.TestCase):
             manifest = ET.fromstring('<manifest xmlns:android="http://schemas.android.com/apk/res/android">' + body + '</manifest>')
             with self.subTest(body=body), self.assertRaises(RuntimeError): artifacts.manifest_sdk_bounds(manifest)
 
+    def test_instrumentation_rules_are_exact_class_member_boundaries(self):
+        text = "-keep,allowaccessmodification class androidx.tracing.Trace {\n  public static void endSection();\n}\n"
+        self.assertEqual({"Landroidx/tracing/Trace;"}, artifacts.instrumentation_entrypoint_classes(text))
+        for broken in (text + text, text.replace("allowaccessmodification", "allowobfuscation"), text.replace("androidx.tracing.Trace", "*"), text + "-dontoptimize\n", "-keep class * { *; }"):
+            with self.subTest(broken=broken), self.assertRaises(RuntimeError): artifacts.instrumentation_entrypoint_classes(broken)
+
+    def test_dex_references_do_not_count_as_class_definitions(self):
+        text = "Class #0 -\n  Class descriptor  : 'Lfixture/Defined;'\n  referenced type: 'Landroidx/tracing/Trace;'\n"
+        self.assertEqual({"Lfixture/Defined;"}, artifacts.dex_definitions(text))
+        with self.assertRaises(RuntimeError): artifacts.verify_instrumentation_boundary({"Landroidx/tracing/Trace;"}, artifacts.dex_definitions(text), {"Ljava/beans/BeanInfo;"})
+
+    def test_missing_and_duplicate_dex_definitions_fail(self):
+        line = "  Class descriptor  : 'Lfixture/Defined;'\n"
+        for text in ("referenced type: Lfixture/Defined;", line + line):
+            with self.subTest(text=text), self.assertRaises(RuntimeError): artifacts.dex_definitions(text)
+
+    def test_analysis_only_platform_classes_must_not_ship(self):
+        required = {"Landroidx/tracing/Trace;"}
+        artifacts.verify_instrumentation_boundary(required, required, {"Ljava/beans/BeanInfo;"})
+        with self.assertRaises(RuntimeError): artifacts.verify_instrumentation_boundary(required, required | {"Ljava/beans/BeanInfo;"}, {"Ljava/beans/BeanInfo;"})
+
+    def test_entrypoint_generation_is_manual_only_and_not_a_shrinker_bypass(self):
+        build = (ROOT / "apps/android/app/build.gradle.kts").read_text()
+        self.assertIn('providers.gradleProperty("naradaTestBuildType").orNull == "manualTest"', build)
+        self.assertIn('variant.proguardFiles.add(inference.flatMap { it.rules })', build)
+        self.assertIn('ScopedArtifacts.Scope.ALL', build)
+        self.assertIn('isMinifyEnabled = true', build)
+        self.assertIn('isShrinkResources = true', build)
+        self.assertNotIn('--map-diagnostics', build)
+        workflow = (ROOT / '.github/workflows/build-test-release.yml').read_text()
+        self.assertNotIn('-x :app:verify', workflow)
+
     def test_abi_is_per_architecture(self):
         self.assertEqual('arm64-v8a', artifacts.abi_in_zip(['lib/arm64-v8a/libnarada_age.so', 'classes.dex']))
         for names in ([], ['lib/mips/foo.so'], ['lib/arm64-v8a/a.so', 'lib/x86_64/b.so']):
@@ -104,6 +136,30 @@ class EvidenceTests(unittest.TestCase):
         self.assertIn('"bytes":1234', text)
         self.assertIn("a" * 64, text)
         self.assertNotIn("DO-NOT-PRINT", text)
+
+    def test_nsis_marker_reproduction_changes_only_reviewed_bytes(self):
+        original = b"INERT FIXTURE PREFIX" + b"__TAURI_BUNDLE_TYPE_VAR_UNK" + b"UNCHANGED SUFFIX"
+        patched, receipt = artifacts.nsis_application_image(original, "2.12.4")
+        self.assertEqual(original.replace(b"__TAURI_BUNDLE_TYPE_VAR_UNK", b"__TAURI_BUNDLE_TYPE_VAR_NSS"), patched)
+        self.assertEqual(3, sum(a != b for a, b in zip(original, patched)))
+        self.assertEqual(len(original), len(patched))
+        self.assertEqual(artifacts.hashlib.sha256(original).hexdigest(), receipt["input_sha256"])
+        self.assertEqual(artifacts.hashlib.sha256(patched).hexdigest(), receipt["packaged_sha256"])
+        self.assertEqual(len(b"INERT FIXTURE PREFIX"), receipt["marker_offset"])
+
+    def test_nsis_marker_reproduction_rejects_missing_or_duplicate_marker(self):
+        for data in (b"INERT NO MARKER", b"__TAURI_BUNDLE_TYPE_VAR_NSS", b"__TAURI_BUNDLE_TYPE_VAR_UNK" * 2):
+            with self.subTest(data=data), self.assertRaises(RuntimeError): artifacts.nsis_application_image(data, "2.12.4")
+
+    def test_nsis_marker_reproduction_requires_reviewed_cli(self):
+        for version in ("2.12.3", "2.12.5", "unknown"):
+            with self.subTest(version=version), self.assertRaises(RuntimeError): artifacts.nsis_application_image(b"__TAURI_BUNDLE_TYPE_VAR_UNK", version)
+
+    def test_nsis_full_payload_hash_still_detects_unrelated_mutation(self):
+        original = b"INERT PREFIX" + b"__TAURI_BUNDLE_TYPE_VAR_UNK" + b"SUFFIX"
+        patched, receipt = artifacts.nsis_application_image(original, "2.12.4")
+        corrupt = b"X" + patched[1:]
+        self.assertNotEqual(receipt["packaged_sha256"], artifacts.hashlib.sha256(corrupt).hexdigest())
 
     def test_size_guards_are_enabled(self):
         self.assertLessEqual(artifacts.POLICY['android_apk_max_bytes'], 20 * 1024 * 1024)

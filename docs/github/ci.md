@@ -92,3 +92,7 @@ The repair regenerates debug/release/manual-test app and test classpath locks an
 ## APK SDK-audit correction
 
 The seventh campaign built minified app/instrumentation APKs but failed the old AAPT-label SDK check. See [the reproduced tool-format mismatch and strict manifest cross-check](apk-audit.md). That run did not execute emulators or publish a release.
+
+## Exact packaged images and instrumentation ABI
+
+The eighth campaign passed Android collection and Windows native Rust/Clippy, but stopped at a Windows payload-reference mismatch and two instrumentation startup crashes. See [Windows package-byte provenance](windows-packaging.md) and [the inferred instrumentation boundary](android-instrumentation.md). Subsequent repairs still require a complete new same-source campaign.

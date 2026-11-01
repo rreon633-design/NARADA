@@ -82,6 +82,22 @@ def verify_checksum_file(path):
     require(seen == {p.name for p in path.parent.iterdir() if p.is_file() and p != path}, "Unlisted/extra package asset")
 
 
+def verify_windows_bootstrap(windows, smoke, sha):
+    rows = windows["native_binaries"]
+    require(len(rows) == 2 and {r["name"] for r in rows} == {"narada-desktop.exe", "narada-agent.exe"}, "Ambiguous Windows payload inventory")
+    native = {r["name"]: r for r in rows}
+    app = native["narada-desktop.exe"]
+    compiled = windows["compiler_application"]
+    patch = windows["nsis_bundle_transformation"]
+    require(patch.get("cli_version") == "2.12.4" and patch.get("changed_bytes") == 3, "Unreviewed Windows bundle transformation")
+    offset = patch.get("marker_offset")
+    require(isinstance(offset, int) and 0 <= offset <= compiled["bytes"] - len(b"__TAURI_BUNDLE_TYPE_VAR_UNK"), "Invalid bundle marker location")
+    require(app["bytes"] == compiled["bytes"] and patch.get("input_sha256") == compiled["sha256"] and patch.get("packaged_sha256") == app["sha256"] and compiled["sha256"] != app["sha256"], "Windows compiler/payload provenance differs")
+    require(smoke.get("compiled_application_sha256") == compiled["sha256"] and smoke.get("nsis_bundle_transformation") == patch, "Windows smoke used another compiler input or transformation")
+    require(smoke["commit"] == sha and smoke["installer_exit_code"] == 0 and smoke["application_stayed_alive_seconds"] >= 15, "Windows bootstrap failed")
+    require(smoke["installed_application_sha256"] == app["sha256"] and smoke["installed_agent_sha256"] == native["narada-agent.exe"]["sha256"], "Installed Windows binaries differ from reproduced release payloads")
+
+
 def main():
     require(os.environ.get("GITHUB_REPOSITORY") == REPOSITORY and os.environ.get("GITHUB_EVENT_NAME") == "push" and (os.environ.get("GITHUB_REF", "").startswith("refs/tags/v") or os.environ.get("GITHUB_REF") == "refs/heads/main"), "Release is restricted to an owner-repository tag/main push")
     sha, run, attempt = os.environ["GITHUB_SHA"], os.environ["GITHUB_RUN_ID"], os.environ["GITHUB_RUN_ATTEMPT"]
@@ -129,9 +145,7 @@ def main():
     smoke_files = list((base / "evidence").rglob("windows-native-smoke.json"))
     require(len(smoke_files) == 1, "Missing Windows native installer/bootstrap evidence")
     smoke = json.loads(smoke_files[0].read_text(encoding="utf-8-sig"))
-    native_hashes = {r["name"]: r["sha256"] for r in windows["native_binaries"]}
-    require(smoke["commit"] == sha and smoke["installer_exit_code"] == 0 and smoke["application_stayed_alive_seconds"] >= 15, "Windows bootstrap failed")
-    require(smoke["installed_application_sha256"] == native_hashes["narada-desktop.exe"] and smoke["installed_agent_sha256"] == native_hashes["narada-agent.exe"], "Installed Windows binaries differ from release build")
+    verify_windows_bootstrap(windows, smoke, sha)
 
     # An initial main-branch campaign creates the requested tag only after ALL
     # checks above succeed. No API call can move or force-update an existing ref.

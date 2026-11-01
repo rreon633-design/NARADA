@@ -27,3 +27,5 @@ Three deterministic acknowledgement/cancellation tests and a Windows-only 24-cyc
 Pinned upstream source: https://static.crates.io/crates/notify/notify-8.2.1.crate (SHA-256 is pinned in Cargo.lock).
 
 The proposed lifecycle source has now passed **52 Linux filesystem unit tests (zero failures/ignored)** and `cargo clippy --locked -p narada-files --all-targets -- -D warnings`, using Rust 1.99.1. These results cover the three generic acknowledgement/cancellation regressions, not the Windows-only 24-cycle test or a Windows installation. Strict fixture cleanup now records bounded remaining top-level names on failure; it still fails immediately without retrying or reading file contents. A new same-source Windows campaign remains mandatory.
+
+Fresh campaign `41288851145` subsequently passed all **52 Windows filesystem cases**, including the 24-cycle native watcher cleanup test, plus strict workspace Clippy. That is new native evidence, not a rewrite of earlier failures. Its later installer assertion is tracked separately in [Windows packaging provenance](windows-packaging.md).

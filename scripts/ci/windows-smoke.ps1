@@ -6,8 +6,30 @@ $installer = @(Get-ChildItem 'target/release/bundle/nsis/*.exe')
 if ($installer.Count -ne 1) { throw 'Expected one fresh NSIS installer' }
 $destination = Join-Path $env:RUNNER_TEMP 'NARADA-CI-Manual-Test'
 if (Test-Path $destination) { throw 'Refusing to overwrite an existing install' }
-$buildHash = (Get-FileHash 'target/release/narada-desktop.exe' -Algorithm SHA256).Hash
-$agentHash = (Get-FileHash 'target/release/narada-agent.exe' -Algorithm SHA256).Hash
+function Get-NativeBuildExpectation([string]$repository, [string]$evidenceDirectory, [string]$commit) {
+    $report = Get-Content -LiteralPath (Join-Path $evidenceDirectory 'windows-build-report.json') -Raw | ConvertFrom-Json
+    if ($report.commit -ne $commit) { throw 'Windows build report identifies another commit' }
+    $apps = @($report.native_binaries | Where-Object { $_.name -eq 'narada-desktop.exe' })
+    $agents = @($report.native_binaries | Where-Object { $_.name -eq 'narada-agent.exe' })
+    if ($apps.Count -ne 1 -or $agents.Count -ne 1) { throw 'Ambiguous native build inventory' }
+    $compiled = Get-FileHash -LiteralPath (Join-Path $repository 'target/release/narada-desktop.exe') -Algorithm SHA256
+    $packaged = Get-FileHash -LiteralPath (Join-Path $repository '.cache/ci-native-audit/windows/narada-desktop.exe') -Algorithm SHA256
+    $agent = Get-FileHash -LiteralPath (Join-Path $repository 'target/release/narada-agent.exe') -Algorithm SHA256
+    $patch = $report.nsis_bundle_transformation
+    if ($patch.cli_version -ne '2.12.4' -or $patch.changed_bytes -ne 3) { throw 'Unreviewed NSIS binary transformation' }
+    if ($compiled.Hash -ne $report.compiler_application.sha256 -or $compiled.Hash -ne $patch.input_sha256) { throw 'Compiler output changed after native audit' }
+    if ($packaged.Hash -ne $apps[0].sha256 -or $packaged.Hash -ne $patch.packaged_sha256) { throw 'Reproduced NSIS image changed after native audit' }
+    if ($agent.Hash -ne $agents[0].sha256) { throw 'Agent changed after native audit' }
+    return [pscustomobject]@{
+        compiled_application_sha256 = $compiled.Hash.ToLowerInvariant()
+        application_sha256 = $packaged.Hash.ToLowerInvariant()
+        agent_sha256 = $agent.Hash.ToLowerInvariant()
+        transformation = $patch
+    }
+}
+$expected = Get-NativeBuildExpectation $root $evidence $env:GITHUB_SHA
+$buildHash = $expected.application_sha256
+$agentHash = $expected.agent_sha256
 
 # Bounded, synthetic hosted-runner diagnostics. Never search the whole disk or
 # substitute a different installed binary when exact bytes are missing.
@@ -50,6 +72,8 @@ $installRecord = @{
     commit = $env:GITHUB_SHA
     installer_exit_code = $install.ExitCode
     expected_application_sha256 = $buildHash
+    compiled_application_sha256 = $expected.compiled_application_sha256
+    nsis_bundle_transformation = $expected.transformation
     expected_agent_sha256 = $agentHash
     installed_files = $inventory
     default_location_files = @(Get-NativeInventory (Join-Path $env:LOCALAPPDATA 'NARADA'))
@@ -78,6 +102,8 @@ try {
         installer_exit_code = $install.ExitCode
         application_stayed_alive_seconds = 15
         installed_application_sha256 = (Get-FileHash $exe -Algorithm SHA256).Hash.ToLower()
+        compiled_application_sha256 = $expected.compiled_application_sha256
+        nsis_bundle_transformation = $expected.transformation
         installed_agent_sha256 = (Get-FileHash $agent -Algorithm SHA256).Hash.ToLower()
         application_working_set_sample_bytes = $app.WorkingSet64
         scope = 'Fresh Windows hosted runner: silent NSIS installation and native bootstrap only; memory sample excludes WebView/agent and is not a performance qualification.'

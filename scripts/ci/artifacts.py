@@ -55,6 +55,32 @@ def manifest_sdk_bounds(manifest):
     return {"min_sdk": 29, "target_sdk": 36}
 
 
+def instrumentation_entrypoint_classes(text):
+    require("*" not in text and "-dontwarn" not in text and "-ignorewarnings" not in text, "Broad/suppressed instrumentation rules are forbidden")
+    directives = [line.strip() for line in text.splitlines() if line.strip().startswith("-")]
+    pattern = re.compile(r"-keep,allowaccessmodification (?:class|interface|enum|@interface) ([A-Za-z0-9_.$]+) \{")
+    matches = [pattern.fullmatch(line) for line in directives]
+    require(matches and all(matches), "Unexpected instrumentation rule directive")
+    names = [m.group(1) for m in matches]
+    require(len(names) == len(set(names)) and "androidx.tracing.Trace" in names, "Missing/ambiguous instrumentation boundary")
+    return {"L" + name.replace(".", "/") + ";" for name in names}
+
+
+def dex_definitions(text):
+    # The pinned SDK dexdump verifies DEX by default. Definitions, not mere
+    # string/type references, are required; campaign eight had references only.
+    names = re.findall(r"^\s*Class descriptor\s*:\s*'([^']+)'\s*$", text, re.MULTILINE)
+    require(names and len(names) == len(set(names)), "Missing or duplicate DEX class definitions")
+    require(all(name.startswith("L") and name.endswith(";") for name in names), "Malformed DEX class descriptor")
+    return set(names)
+
+
+def verify_instrumentation_boundary(required, defined, analysis_only):
+    missing = sorted(required - defined)
+    require(not missing, "Minified APK removed instrumentation entry points: " + str(missing[:12]))
+    require(not (analysis_only & defined), "Analysis-only JDK/SDK definitions leaked into the APK")
+
+
 def abi_in_zip(names):
     abis = {n.split("/")[1] for n in names if n.startswith("lib/") and n.endswith(".so") and len(n.split("/")) == 3}
     require(len(abis) == 1 and abis <= ABI_MACHINE.keys(), f"Expected one supported ABI, got {abis}")
@@ -86,6 +112,23 @@ def elf_check(data, abi):
             alignments.append(align)
     require(bool(alignments), "No ELF load segments")
     return {"elf_bits": bits * 32, "load_alignments": alignments}
+
+
+def nsis_application_image(data, cli_version):
+    # Pinned Tauri CLI patches this marker before NSIS bundling, then restores
+    # the unpatched Cargo output. Reproduce only that reviewed transformation.
+    require(cli_version == "2.12.4", "Review the bundle marker transformation for a changed Tauri CLI")
+    before = b"__TAURI_BUNDLE_TYPE_VAR_UNK"
+    after = b"__TAURI_BUNDLE_TYPE_VAR_NSS"
+    require(data.count(before) == 1, "Expected exactly one unpatched Tauri bundle marker")
+    offset = data.index(before)
+    result = data[:offset] + after + data[offset + len(before):]
+    require(len(result) == len(data), "Bundle marker changed executable length")
+    return result, {"cli_version": cli_version, "marker_offset": offset, "changed_bytes": 3,
+                    "input_sha256": hashlib.sha256(data).hexdigest(),
+                    "packaged_sha256": hashlib.sha256(result).hexdigest(),
+                    "transformation": "single __TAURI_BUNDLE_TYPE_VAR_UNK to __TAURI_BUNDLE_TYPE_VAR_NSS marker",
+                    "upstream": "https://github.com/tauri-apps/tauri/blob/tauri-cli-v2.12.4/crates/tauri-bundler/src/bundle.rs"}
 
 
 def pe_machine(path):
@@ -159,13 +202,24 @@ def windows():
     require("preview-port" not in command([agent, "--help"]), "Development HTTP bridge leaked into native binary")
     config = json.loads((ROOT / "apps/desktop-shell/src-tauri/tauri.conf.json").read_text(encoding="utf-8"))
     mode = webview_mode(config)
+    require(config["bundle"]["targets"] == ["nsis"], "Only the reviewed NSIS candidate is supported")
+    require(not config["bundle"]["windows"].get("certificateThumbprint") and not config["bundle"]["windows"].get("signCommand"), "Manual-test Windows policy requires unsigned candidates")
+    cli_version = json.loads((ROOT / "package-lock.json").read_text())["packages"]["node_modules/@tauri-apps/cli"]["version"]
+    packaged_bytes, transformation = nsis_application_image(exe.read_bytes(), cli_version)
+    reproduced = ROOT / ".cache/ci-native-audit/windows/narada-desktop.exe"
+    reproduced.parent.mkdir(parents=True, exist_ok=True)
+    with reproduced.open("xb") as stream:
+        stream.write(packaged_bytes)
+    require(pe_machine(reproduced) == 0x8664, "Reproduced NSIS application is not x64 PE")
     require(installers[0].stat().st_size <= POLICY["windows_installer_max_bytes"], "Windows installer size budget exceeded")
     dest = package_dir("windows")
     target = dest / f"NARADA-{release_label()}-windows-x64-setup.exe"
     shutil.copy2(installers[0], target)
     report = {**context(), "signing": POLICY["signing"]["windows"], "files": [file_row(target)],
               "installer_budget_bytes": POLICY["windows_installer_max_bytes"],
-              "native_binaries": [file_row(exe), file_row(agent)], "frontend": frontend(),
+              "native_binaries": [file_row(reproduced), file_row(agent)],
+              "compiler_application": file_row(exe), "nsis_bundle_transformation": transformation,
+              "frontend": frontend(),
               "webview": "system Evergreen WebView2; small bootstrapper, not bundled browser/runtime",
               "webview_install_mode": mode,
               "application_version": config["version"], "unqualified": POLICY["not_qualified"]}
@@ -197,6 +251,16 @@ def android():
     emu = ROOT / ".cache/ci-emulator-inputs"
     emu.mkdir(parents=True, exist_ok=False)
     reports, seen, signers = [], set(), set()
+    rule_file = ROOT / "apps/android/app/build/generated/ci/manual-test-entrypoints.pro"
+    rule_receipt = ROOT / "apps/android/app/build/generated/ci/manual-test-entrypoints.json"
+    boundary = json.loads(rule_receipt.read_text(encoding="utf-8"))
+    required_classes = instrumentation_entrypoint_classes(rule_file.read_text(encoding="utf-8"))
+    require(boundary["schema"] == 1 and boundary["variant"] == "manualTest" and boundary["rules_sha256"] == digest(rule_file), "Stale instrumentation entry-point proof")
+    require(boundary["kept_class_headers"] == len(required_classes), "Entry-point rule count differs")
+    analysis_only = {"L" + name.removesuffix(".class") + ";" for name in boundary["analysis_only_api_classes"]}
+    require(analysis_only and not (required_classes & analysis_only), "Analysis definitions must not become app entry points")
+    shutil.copy2(rule_file, output() / rule_file.name)
+    shutil.copy2(rule_receipt, output() / rule_receipt.name)
     receipt_maps = {}
     for lib in ("age", "olm"):
         receipt = json.loads((ROOT / f"apps/android/app/build/generated/{lib}/build-receipt.json").read_text())
@@ -229,6 +293,8 @@ def android():
         require(application.attrib.get(namespace + "debuggable", "false") == "false", "APK is unexpectedly debuggable")
         for attribute in ("allowBackup", "usesCleartextTraffic"):
             require(application.attrib.get(namespace + attribute) == "false", "Required manifest boundary missing: " + attribute)
+        defined_classes = dex_definitions(command([tools / "dexdump", apk]))
+        verify_instrumentation_boundary(required_classes, defined_classes, analysis_only)
         with zipfile.ZipFile(apk) as z:
             names = z.namelist()
             require(len(names) == len(set(names)), "Duplicate APK archive entries")
@@ -279,13 +345,16 @@ def android():
                 require(included == plain, "Native notices changed or missing")
         target = dest / f"NARADA-{release_label()}-android-{abi}.apk"
         shutil.copy2(apk, target)
-        reports.append({**file_row(target), "abi": abi, "sdk_bounds": sdk_bounds, "native_libraries": native, "signer_sha256": signer[0].lower()})
+        reports.append({**file_row(target), "abi": abi, "sdk_bounds": sdk_bounds, "verified_instrumentation_entrypoint_classes": len(required_classes), "native_libraries": native, "signer_sha256": signer[0].lower()})
         (output() / f"apk-{abi}-signature.txt").write_text(signature, encoding="utf-8")
         (output() / f"apk-{abi}-badging.txt").write_text(badging, encoding="utf-8")
         if abi == "x86_64": shutil.copy2(apk, emu / "app-x86_64.apk")
     require(seen == set(POLICY["android_abis"]) and len(signers) == 1, "Incomplete ABI set or inconsistent signer")
     tests = sorted((ROOT / "apps/android/app/build/outputs/apk/androidTest/manualTest").rglob("*.apk"))
     require(len(tests) == 1, "Missing matching manual-test instrumentation APK")
+    test_definitions = dex_definitions(command([tools / "dexdump", tests[0]]))
+    require("Landroidx/test/runner/AndroidJUnitRunner;" in test_definitions, "Instrumentation runner definition missing")
+    require(not (test_definitions & analysis_only), "Analysis-only platform definitions leaked into instrumentation")
     signature = command([tools / "apksigner", "verify", "--print-certs", tests[0]])
     test_signer = re.findall(r"Signer #1 certificate SHA-256 digest: ([0-9a-fA-F]{64})", signature)
     require(len(test_signer) == 1 and test_signer[0].lower() in signers, "App and instrumentation signers differ")
@@ -295,6 +364,7 @@ def android():
               "version_code": POLICY["android_version_code"], "signing": POLICY["signing"]["android"],
               "apk_budget_bytes_each": POLICY["android_apk_max_bytes"], "files": reports,
               "minified": True, "resource_shrunk": True, "universal_apk": False,
+              "instrumentation_boundary": boundary,
               "page_alignment": "Static ELF/ZIP check only; 16 KiB runtime not executed", "unqualified": POLICY["not_qualified"]}
     mapping = ROOT / "apps/android/app/build/outputs/mapping/manualTest/mapping.txt"
     require(mapping.is_file() and mapping.stat().st_size > 0, "Missing R8 mapping: minification not evidenced")
