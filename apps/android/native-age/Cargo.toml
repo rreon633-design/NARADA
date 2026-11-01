@@ -1,0 +1,26 @@
+[package]
+name = "narada-android-age"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.99"
+license = "LicenseRef-Proprietary"
+publish = false
+
+[workspace]
+members = ["."]
+
+[lib]
+name = "narada_age"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+age = { version = "=0.12.1", default-features = false }
+jni = { version = "=0.21.1", default-features = false }
+zeroize = "=1.9.0"
+
+[profile.release]
+opt-level = "s"
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+panic = "unwind"

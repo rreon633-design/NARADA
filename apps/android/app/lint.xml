@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- Explicit Phase 1 policy: a newer release is an update advisory, not an
+         instruction to mutate the pinned/locked compatible toolchain during CI.
+         Keep these notices visible as information. No security/API/accessibility
+         detector is disabled and no baseline hides application findings.
+         Upgrade/advisory/license review remains a Phase 8 release gate. -->
+    <issue id="GradleDependency" severity="informational" />
+    <issue id="NewerVersionAvailable" severity="informational" />
+    <issue id="AndroidGradlePluginVersion" severity="informational" />
+</lint>

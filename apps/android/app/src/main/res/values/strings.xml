@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">NARADA</string>
+    <string name="notification_channel">Local activity</string>
+    <string name="notification_channel_description">Generic local workspace updates. No names, paths or content previews.</string>
+    <string name="notification_generic">Local workspace activity is ready to review.</string>
+    <string name="share_report">Share reviewed NARADA report</string>
+</resources>

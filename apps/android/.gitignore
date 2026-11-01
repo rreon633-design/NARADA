@@ -1,0 +1,12 @@
+.gradle/
+.cache/
+**/build/
+local.properties
+*.jks
+*.keystore
+*.p12
+captures/
+.externalNativeBuild/
+.cxx/
+
+.kotlin/

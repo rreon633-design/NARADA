@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f5f5f5">
+<title>Instant File Bridge — Desktop UI</title>
+<style>
+:root{
+  --bg:#f3f3f3;--panel:#fff;--panel2:#f8f8f8;--ink:#111;--muted:#777;
+  --line:#e7e7e7;--soft:#efefef;--black:#090909;--shadow:0 14px 42px rgba(0,0,0,.07);
+  --radius:16px;--sidebar:230px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh;padding:18px;display:grid;grid-template-columns:var(--sidebar) minmax(0,1fr);grid-template-rows:72px minmax(650px,calc(100vh - 108px));gap:12px;max-width:1800px;margin:auto}
+.topbar{grid-column:1/-1;background:var(--panel);border:1px solid var(--line);border-radius:18px;display:flex;align-items:center;padding:0 22px;gap:24px;box-shadow:0 4px 18px rgba(0,0,0,.025)}
+.brand{display:flex;align-items:center;gap:12px;min-width:260px}
+.brand-mark{width:36px;height:36px;border-radius:11px;background:#080808;color:#fff;display:grid;place-items:center;font-weight:800;font-size:19px;box-shadow:0 4px 12px #0002}
+.brand-name{font-weight:750;font-size:16px;letter-spacing:-.4px}.brand-sub{color:var(--muted);font-size:11px}
+.top-search{width:min(470px,40vw);height:40px;border:1px solid var(--line);background:#fafafa;border-radius:12px;display:flex;align-items:center;gap:9px;padding:0 13px;margin:auto}
+.top-search input{border:0;outline:0;background:transparent;width:100%;color:var(--ink)}
+.top-actions{display:flex;align-items:center;gap:9px}
+.icon-btn{width:38px;height:38px;border:1px solid transparent;background:transparent;border-radius:11px;display:grid;place-items:center;color:#333;transition:.18s}
+.icon-btn:hover{background:var(--soft);border-color:var(--line)}
+.connection-pill{display:flex;align-items:center;gap:9px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;font-size:12px;white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:50%;background:#111;display:inline-block}.dot.off{background:#aaa}
+.sidebar{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px 11px;display:flex;flex-direction:column;min-height:0}
+.nav-label{font-size:10px;color:#999;text-transform:uppercase;letter-spacing:1.2px;padding:12px 12px 8px}
+.nav-btn{width:100%;border:0;background:transparent;color:#555;padding:11px 13px;border-radius:11px;display:flex;align-items:center;gap:12px;text-align:left;margin:2px 0;transition:.18s}
+.nav-btn .ico{width:20px;text-align:center;font-size:17px;color:#333}
+.nav-btn:hover{background:#f4f4f4;color:#111}.nav-btn.active{background:#090909;color:#fff;box-shadow:0 5px 14px #0002}
+.nav-btn.active .ico{color:#fff}
+.nav-count{margin-left:auto;font-size:10px;background:#eee;color:#333;border-radius:20px;padding:2px 7px}.nav-btn.active .nav-count{background:#333;color:#fff}
+.sidebar-spacer{flex:1}
+.device-mini{border:1px solid var(--line);background:#fafafa;border-radius:13px;padding:13px;margin:10px 2px 2px}
+.device-mini-top{display:flex;align-items:center;gap:10px}.device-glyph{width:34px;height:34px;border:1px solid var(--line);border-radius:10px;display:grid;place-items:center;background:#fff;font-size:17px}
+.device-mini strong{font-size:12px}.device-mini small{display:block;color:var(--muted);font-size:11px}
+.storage-line{height:5px;background:#e5e5e5;border-radius:9px;margin:12px 0 6px;overflow:hidden}.storage-line span{display:block;width:46%;height:100%;background:#111;border-radius:9px}
+.main{min-width:0;min-height:0;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:26px;box-shadow:0 4px 18px rgba(0,0,0,.025)}
+.screen{display:none;animation:fade .2s ease}.screen.active{display:block}
+@keyframes fade{from{opacity:.55;transform:translateY(4px)}to{opacity:1;transform:none}}
+.page-head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:23px}
+.page-title{font-size:25px;letter-spacing:-.8px;font-weight:750;margin:0 0 4px}.page-desc{color:var(--muted);margin:0;font-size:13px}
+.eyebrow{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:1.4px;font-weight:700;margin-bottom:7px}
+.btn{border:1px solid var(--line);background:#fff;color:#111;padding:9px 14px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:12px;transition:.18s}
+.btn:hover{border-color:#aaa;background:#f7f7f7;transform:translateY(-1px)}
+.btn.primary{background:#090909;color:#fff;border-color:#090909}.btn.primary:hover{background:#333}
+.btn.ghost{background:transparent}.btn.danger{color:#a11;border-color:#eadede}
+.btn.small{padding:6px 10px;font-size:11px}
+.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:17px}
+.card.soft{background:#fafafa}
+.grid{display:grid;gap:14px}.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.stat{display:flex;align-items:flex-start;gap:13px}.stat-icon{width:40px;height:40px;border-radius:12px;background:#f1f1f1;display:grid;place-items:center;font-size:18px}.stat strong{display:block;font-size:22px;letter-spacing:-.6px}.stat small{color:var(--muted)}
+.section-title{font-size:14px;font-weight:700;margin:0 0 13px}.muted{color:var(--muted)}.tiny{font-size:11px}.divider{height:1px;background:var(--line);margin:15px 0}
+.field{height:38px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:0 11px;outline:none;color:#111;min-width:0}.field:focus,textarea:focus{border-color:#999;box-shadow:0 0 0 3px #0000000a}
+.search-field{position:relative;display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:0 10px;height:38px;background:#fff}.search-field input{border:0;outline:0;min-width:0;width:100%}
+.table-wrap{border:1px solid var(--line);border-radius:13px;overflow:hidden}
+table{width:100%;border-collapse:collapse;text-align:left}th{background:#fafafa;color:#888;font-size:10px;text-transform:uppercase;letter-spacing:.7px;font-weight:650;padding:12px 14px}td{padding:12px 14px;border-top:1px solid #eee;font-size:12px}tr.data-row{cursor:pointer;transition:.15s}tr.data-row:hover{background:#fafafa}tr.data-row.selected{background:#f1f1f1}
+.file-icon{width:31px;height:31px;border:1px solid var(--line);border-radius:9px;display:inline-grid;place-items:center;margin-right:9px;background:#fafafa}
+.file-name{display:inline-flex;align-items:center;font-weight:600}.status{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:#555}.status:before{content:"";width:6px;height:6px;border-radius:50%;background:#111}.status.pending:before{background:#aaa}
+.split{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:16px}
+.preview-box{background:#f5f5f5;border:1px solid var(--line);border-radius:14px;min-height:210px;display:grid;place-items:center;text-align:center;padding:20px}
+.preview-file{width:72px;height:88px;border:1px solid #ccc;background:linear-gradient(145deg,#fff,#eaeaea);border-radius:8px;display:grid;place-items:center;margin:0 auto 12px;font-size:27px;box-shadow:0 8px 18px #0000000a}
+.list{display:flex;flex-direction:column;gap:0}.list-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #eee}.list-row:last-child{border:0}
+.avatar{width:35px;height:35px;border-radius:50%;background:#111;color:#fff;display:grid;place-items:center;font-size:11px;font-weight:700;flex:none}
+.chat-layout{display:grid;grid-template-columns:240px minmax(0,1fr);height:540px;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.chat-list{border-right:1px solid var(--line);padding:13px;background:#fcfcfc}.chat-contact{display:flex;align-items:center;gap:9px;padding:10px;border-radius:10px;cursor:pointer}.chat-contact:hover,.chat-contact.active{background:#eee}
+.chat-window{display:flex;flex-direction:column;min-width:0}.chat-top{padding:13px 17px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}.messages{padding:18px;flex:1;overflow:auto;display:flex;flex-direction:column;gap:12px;background:#fdfdfd}
+.bubble{max-width:70%;padding:10px 13px;border-radius:13px;background:#eee;font-size:12px;align-self:flex-start}.bubble.mine{background:#111;color:#fff;align-self:flex-end}.bubble small{display:block;opacity:.55;font-size:9px;margin-top:4px}
+.chat-compose{padding:12px;border-top:1px solid var(--line);display:flex;gap:8px}.chat-compose input{flex:1}
+.progress{height:7px;background:#eee;border-radius:20px;overflow:hidden}.progress span{display:block;height:100%;background:#111;border-radius:20px;transition:width .3s}
+.transfer-row{display:grid;grid-template-columns:34px minmax(0,1fr) auto;align-items:center;gap:12px;padding:15px 0;border-bottom:1px solid #eee}
+.transfer-row:last-child{border:0}.transfer-meta{display:flex;justify-content:space-between;gap:10px;margin:4px 0 8px;font-size:11px}
+.qr{width:174px;height:174px;padding:10px;background:#fff;border:1px solid #ddd;border-radius:10px;display:grid;grid-template-columns:repeat(17,1fr);gap:1px}
+.qr span{background:#fff}.qr span.on{background:#111}
+.step{display:flex;align-items:center;gap:10px;color:#888;font-size:12px;margin:13px 0}.step b{width:22px;height:22px;border:1px solid #ddd;border-radius:50%;display:grid;place-items:center;font-size:10px}.step.done{color:#111}.step.done b{background:#111;color:#fff;border-color:#111}
+.toggle{width:38px;height:22px;border:0;border-radius:20px;background:#ddd;padding:3px;display:flex;align-items:center;transition:.2s}.toggle:after{content:"";width:16px;height:16px;border-radius:50%;background:#fff;transition:.2s}.toggle.on{background:#111;justify-content:flex-end}
+.setting-row{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px 0;border-bottom:1px solid #eee}.setting-row:last-child{border:0}
+.device-card{display:flex;align-items:center;gap:13px}.device-large{width:48px;height:48px;border:1px solid var(--line);border-radius:13px;display:grid;place-items:center;font-size:22px;background:#fafafa}
+.empty{padding:38px;text-align:center;color:#777}.empty-icon{font-size:32px;margin-bottom:10px;color:#222}
+.toast{position:fixed;right:28px;bottom:25px;background:#111;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:0 12px 35px #0003;opacity:0;transform:translateY(12px);pointer-events:none;transition:.25s;z-index:100;font-size:12px}.toast.show{opacity:1;transform:none}
+.modal-backdrop{position:fixed;inset:0;background:#0006;display:none;place-items:center;z-index:90;padding:20px}.modal-backdrop.show{display:grid}.modal{width:min(440px,100%);background:#fff;border-radius:17px;padding:22px;box-shadow:0 24px 70px #0004}.modal h3{margin:0 0 8px}.modal p{color:#777;font-size:12px}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}
+.context-menu{position:fixed;display:none;z-index:80;background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px;box-shadow:var(--shadow);min-width:175px}.context-menu.show{display:block}.context-menu button{display:block;width:100%;border:0;background:transparent;text-align:left;padding:9px 11px;border-radius:7px;font-size:12px}.context-menu button:hover{background:#f1f1f1}
+.welcome{max-width:760px;margin:55px auto;text-align:center}.welcome-mark{width:74px;height:74px;border-radius:22px;background:#090909;color:#fff;display:grid;place-items:center;font-size:34px;margin:0 auto 22px;box-shadow:0 12px 25px #0002}
+.onboard-layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:28px;max-width:850px;margin:55px auto}
+.onboard-art{min-height:230px;background:linear-gradient(145deg,#f8f8f8,#e8e8e8);border:1px solid var(--line);border-radius:17px;display:grid;place-items:center;font-size:48px}
+.dark-preview{background:#0b0b0b;color:#fff;border-radius:15px;padding:17px;border:1px solid #333}.dark-preview .list-row{border-color:#333}.dark-preview .muted{color:#aaa}
+.media-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.media-tile{aspect-ratio:1.25;border-radius:10px;background:linear-gradient(135deg,#eee,#bbb);display:grid;place-items:center;font-size:25px;color:#333;border:1px solid #ddd}
+.notification-demo{max-width:400px;margin:80px auto;background:#111;color:#fff;border-radius:15px;padding:18px;box-shadow:0 15px 35px #0002}
+.tray-demo{width:340px;margin:60px auto;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;box-shadow:var(--shadow)}
+.tray-demo button{display:block;width:100%;text-align:left;background:transparent;border:0;padding:11px;border-radius:8px}.tray-demo button:hover{background:#f2f2f2}
+.footer-note{font-size:11px;color:#999;margin-top:18px}
+@media(max-width:1100px){:root{--sidebar:190px}.split{grid-template-columns:1fr}.grid.four{grid-template-columns:repeat(2,1fr)}.top-search{width:30vw}}
+@media(max-width:760px){.app{padding:8px;grid-template-columns:1fr;grid-template-rows:auto auto 1fr}.topbar{grid-column:1;padding:12px;flex-wrap:wrap}.brand{min-width:0}.top-search{order:3;width:100%;margin:0}.sidebar{flex-direction:row;overflow:auto;min-height:auto;padding:6px}.nav-label,.sidebar-spacer,.device-mini{display:none}.nav-btn{white-space:nowrap;width:auto}.main{padding:16px}.grid.two,.grid.three,.grid.four{grid-template-columns:1fr}.chat-layout{grid-template-columns:1fr;height:650px}.chat-list{display:none}.onboard-layout{grid-template-columns:1fr;margin:15px auto}.page-head{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><div class="brand-mark">◇</div><div><div class="brand-name">Instant File Bridge</div><div class="brand-sub">Your files · Your chat · Always connected</div></div></div>
+    <div class="connection-pill"><span class="dot"></span><span><b>Connected</b> · Android Phone</span><span class="muted">192.168.1.105</span></div>
+    <div class="top-search">⌕ <input id="globalSearch" placeholder="Search files, chats, or devices…"></div>
+    <div class="top-actions"><button class="icon-btn" title="Notifications" onclick="showScreen('notifications')">♧</button><button class="icon-btn" title="Settings" onclick="showScreen('settings')">⚙</button></div>
+  </header>
+
+  <aside class="sidebar">
+    <div class="nav-label">Workspace</div>
+    <button class="nav-btn active" data-screen="home" onclick="showScreen('home')"><span class="ico">⌂</span>Home</button>
+    <button class="nav-btn" data-screen="files" onclick="showScreen('files')"><span class="ico">▰</span>Files</button>
+    <button class="nav-btn" data-screen="chat" onclick="showScreen('chat')"><span class="ico">◌</span>Chat<span class="nav-count">2</span></button>
+    <button class="nav-btn" data-screen="transfers" onclick="showScreen('transfers')"><span class="ico">⇅</span>Transfers<span class="nav-count">2</span></button>
+    <button class="nav-btn" data-screen="sync" onclick="showScreen('sync')"><span class="ico">⟳</span>Sync</button>
+    <button class="nav-btn" data-screen="devices" onclick="showScreen('devices')"><span class="ico">▯</span>Devices</button>
+    <div class="nav-label">Application</div>
+    <button class="nav-btn" data-screen="settings" onclick="showScreen('settings')"><span class="ico">⚙</span>Settings</button>
+    <div class="sidebar-spacer"></div>
+    <div class="device-mini"><div class="device-mini-top"><div class="device-glyph">▯</div><div><strong>Android Phone</strong><small><span class="dot"></span> Online · Wi-Fi</small></div></div><div class="storage-line"><span></span></div><small>236 GB free of 512 GB</small></div>
+  </aside>
+
+  <main class="main">
+    <!-- 1: Splash -->
+    <section class="screen" id="splash">
+      <div class="welcome"><div class="welcome-mark">◇</div><div class="eyebrow">Local-first · Private · Simple</div><h1 class="page-title" style="font-size:38px">Instant File Bridge</h1><p class="page-desc">Your files. Your chat. Always connected.</p><div style="height:20px"></div><div class="progress" style="max-width:230px;margin:0 auto"><span style="width:100%"></span></div><p class="tiny muted">Ready to connect your devices</p><button class="btn primary" onclick="showScreen('onboarding')">Continue →</button></div>
+    </section>
+    <!-- 2: Onboarding -->
+    <section class="screen" id="onboarding">
+      <div class="onboard-layout"><div><div class="eyebrow">Getting started</div><div class="step done"><b>1</b> Welcome</div><div class="step"><b>2</b> Pair device</div><div class="step"><b>3</b> Select folders</div><div class="step"><b>4</b> Start using IFB</div></div><div><div class="onboard-art">▰　⇄　▯</div><h1 class="page-title" style="margin-top:20px">Your devices, in sync.</h1><p class="page-desc">Browse laptop files, transfer content and chat securely from your Android phone. Your local network works even without internet.</p><div class="toolbar" style="margin-top:22px"><button class="btn primary" onclick="showScreen('pairing')">Get started →</button><button class="btn" onclick="showScreen('home')">Skip for now</button></div></div></div>
+    </section>
+    <!-- 3: Pairing -->
+    <section class="screen" id="pairing">
+      <div class="page-head"><div><div class="eyebrow">Secure setup · Step 1 of 2</div><h1 class="page-title">Pair your Android phone</h1><p class="page-desc">Scan this temporary QR code from the IFB Android app.</p></div><span class="status">Waiting for device</span></div>
+      <div class="grid two" style="max-width:760px;margin:35px auto"><div class="card soft" style="display:grid;place-items:center"><div class="qr" id="qrGrid"></div><p class="tiny muted">Invitation expires in <b id="expiry">01:58</b></p><button class="btn small" onclick="makeQR()">↻ Generate new code</button></div><div class="card"><h3 class="section-title">Pairing instructions</h3><div class="step done"><b>1</b> Open IFB on Android</div><div class="step done"><b>2</b> Tap “Scan QR Code”</div><div class="step done"><b>3</b> Scan the code on this screen</div><div class="divider"></div><p class="tiny muted">Or use this one-time pairing code</p><h2 style="letter-spacing:5px">739 421</h2><div class="toolbar"><button class="btn" onclick="toast('Pairing code copied')">Copy code</button><button class="btn primary" onclick="toast('Waiting for Android confirmation…')">I have scanned it</button></div><div class="divider"></div><p class="tiny muted">Encrypted connection · One-time invitation · No internet required</p></div></div>
+    </section>
+    <!-- 4: Home -->
+    <section class="screen active" id="home">
+      <div class="page-head"><div><div class="eyebrow">Overview</div><h1 class="page-title">Good morning</h1><p class="page-desc">Your devices are connected and ready.</p></div><button class="btn" onclick="showScreen('devices')">Manage devices →</button></div>
+      <div class="grid four">
+        <div class="card stat"><div class="stat-icon">▰</div><div><strong>12</strong><small>Shared folders</small></div></div>
+        <div class="card stat"><div class="stat-icon">⇅</div><div><strong>2</strong><small>Active transfers</small></div></div>
+        <div class="card stat"><div class="stat-icon">⟳</div><div><strong>Up to date</strong><small>Sync status</small></div></div>
+        <div class="card stat"><div class="stat-icon">▯</div><div><strong>1</strong><small>Connected device</small></div></div>
+      </div>
+      <div class="grid two" style="margin-top:16px">
+        <div class="card"><div class="toolbar" style="justify-content:space-between"><h3 class="section-title">Recent files</h3><button class="btn small ghost" onclick="showScreen('files')">View all</button></div><div class="list">
+          <div class="list-row"><span class="file-icon">▤</span><div style="flex:1"><b>Project Plan.pdf</b><div class="tiny muted">2.4 MB · Documents</div></div><span class="tiny muted">10:24 AM</span></div>
+          <div class="list-row"><span class="file-icon">▧</span><div style="flex:1"><b>Meeting Notes.txt</b><div class="tiny muted">12 KB · Documents</div></div><span class="tiny muted">09:18 AM</span></div>
+          <div class="list-row"><span class="file-icon">▣</span><div style="flex:1"><b>Vacation.jpg</b><div class="tiny muted">3.1 MB · Photos</div></div><span class="tiny muted">Yesterday</span></div>
+        </div></div>
+        <div class="card"><div class="toolbar" style="justify-content:space-between"><h3 class="section-title">Recent chats</h3><button class="btn small ghost" onclick="showScreen('chat')">Open chat</button></div><div class="list">
+          <div class="list-row"><div class="avatar">AP</div><div style="flex:1"><b>Android Phone</b><div class="tiny muted">Hey! The files are ready.</div></div><span class="tiny muted">10:24 AM</span></div>
+          <div class="list-row"><div class="avatar">IF</div><div style="flex:1"><b>Saved messages</b><div class="tiny muted">Project reference attached</div></div><span class="tiny muted">Yesterday</span></div>
+        </div></div>
+      </div>
+    </section>
+    <!-- 5: Files -->
+    <section class="screen" id="files">
+      <div class="page-head"><div><div class="eyebrow">Laptop storage</div><h1 class="page-title">Files</h1><p class="page-desc">Browse and manage approved folders on your Windows laptop.</p></div><button class="btn primary" onclick="toast('Folder picker would open from the Windows service')">＋ Select folder</button></div>
+      <div class="toolbar" style="margin-bottom:13px"><button class="btn small" onclick="toast('Back')">←</button><button class="btn small" onclick="toast('Forward')">→</button><button class="btn small" onclick="toast('Root folder')">⌂</button><span class="field" style="display:flex;align-items:center;flex:1">D:　›　IFB　›　Shared</span><div class="search-field" style="width:220px">⌕ <input id="fileSearch" placeholder="Search files…" oninput="filterFiles()"></div><button class="btn small" onclick="toast('Filter options')">☷ Filter</button></div>
+      <div class="split"><div class="table-wrap"><table><thead><tr><th>Name</th><th>Size</th><th>Type</th><th>Modified</th><th></th></tr></thead><tbody id="fileRows">
+        <tr class="data-row" data-name="Documents" onclick="selectFile(this,'Documents','Folder','—','Folder')"><td><span class="file-name"><span class="file-icon">📁</span>Documents</span></td><td>12 items</td><td>Folder</td><td>Today</td><td>···</td></tr>
+        <tr class="data-row" data-name="Photos" onclick="selectFile(this,'Photos','Folder','—','Folder')"><td><span class="file-name"><span class="file-icon">📁</span>Photos</span></td><td>34 items</td><td>Folder</td><td>Today</td><td>···</td></tr>
+        <tr class="data-row" data-name="Videos" onclick="selectFile(this,'Videos','Folder','—','Folder')"><td><span class="file-name"><span class="file-icon">📁</span>Videos</span></td><td>18 items</td><td>Folder</td><td>Yesterday</td><td>···</td></tr>
+        <tr class="data-row" data-name="Projects" onclick="selectFile(this,'Projects','Folder','—','Folder')"><td><span class="file-name"><span class="file-icon">📁</span>Projects</span></td><td>6 items</td><td>Folder</td><td>Today</td><td>···</td></tr>
+        <tr class="data-row selected" data-name="Project Plan.pdf" onclick="selectFile(this,'Project Plan.pdf','PDF Document','2.4 MB','Today, 10:24 AM')"><td><span class="file-name"><span class="file-icon">▤</span>Project Plan.pdf</span></td><td>2.4 MB</td><td>PDF Document</td><td>Today, 10:24 AM</td><td>···</td></tr>
+        <tr class="data-row" data-name="Meeting Notes.txt" onclick="selectFile(this,'Meeting Notes.txt','Text Document','12 KB','Today, 09:18 AM')"><td><span class="file-name"><span class="file-icon">▤</span>Meeting Notes.txt</span></td><td>12 KB</td><td>Text Document</td><td>Today, 09:18 AM</td><td>···</td></tr>
+        <tr class="data-row" data-name="Presentation.pptx" onclick="selectFile(this,'Presentation.pptx','PowerPoint','4.1 MB','Yesterday')"><td><span class="file-name"><span class="file-icon">▣</span>Presentation.pptx</span></td><td>4.1 MB</td><td>PowerPoint</td><td>Yesterday</td><td>···</td></tr>
+        <tr class="data-row" data-name="Budget.xlsx" onclick="selectFile(this,'Budget.xlsx','Spreadsheet','1.2 MB','Jan 12')"><td><span class="file-name"><span class="file-icon">▤</span>Budget.xlsx</span></td><td>1.2 MB</td><td>Spreadsheet</td><td>Jan 12</td><td>···</td></tr>
+        <tr class="data-row" data-name="Demo Video.mp4" onclick="selectFile(this,'Demo Video.mp4','MP4 Video','24.8 MB','Jan 11')"><td><span class="file-name"><span class="file-icon">▶</span>Demo Video.mp4</span></td><td>24.8 MB</td><td>MP4 Video</td><td>Jan 11</td><td>···</td></tr>
+      </tbody></table></div>
+      <aside class="card" id="fileDetails"><div class="preview-box" style="min-height:145px"><div><div class="preview-file">▤</div><b id="detailName">Project Plan.pdf</b><div class="tiny muted" id="detailType">PDF Document</div></div></div><div class="toolbar" style="margin-top:12px"><button class="btn primary" style="flex:1" onclick="toast('Download queued')">↓ Download</button><button class="btn" onclick="toast('Opening preview…')">Open</button></div><div class="toolbar" style="margin-top:9px"><button class="btn small" onclick="toast('Share dialog')">Share</button><button class="btn small" onclick="openModal('Rename file','Enter a new file name','Rename')">Rename</button><button class="btn small" onclick="toast('Copied')">Copy</button><button class="btn small" onclick="toast('Move dialog')">Move</button><button class="btn small danger" onclick="openModal('Delete file?','This action may permanently remove the selected file.','Delete')">Delete</button></div><div class="divider"></div><h3 class="section-title">Details</h3><div class="tiny muted">Size <span style="float:right;color:#111" id="detailSize">2.4 MB</span></div><div class="divider"></div><div class="tiny muted">Path <span style="float:right;color:#111">D:\\IFB\\Shared</span></div></aside></div>
+    </section>
+    <!-- 6: File preview -->
+    <section class="screen" id="preview">
+      <div class="page-head"><div><div class="eyebrow">File preview</div><h1 class="page-title">Project Plan.pdf</h1><p class="page-desc">Preview content and manage this file.</p></div><button class="btn" onclick="showScreen('files')">← Back to files</button></div>
+      <div class="split"><div class="preview-box" style="min-height:490px;background:#f7f7f7"><div style="width:70%;max-width:440px;background:#fff;border:1px solid #ddd;box-shadow:0 8px 25px #0001;padding:35px;text-align:left;min-height:390px"><div class="eyebrow">INSTANT FILE BRIDGE</div><h2>Project Plan</h2><p class="tiny muted">Product and engineering overview</p><div class="divider"></div><p style="font-size:11px;line-height:2">1. Product overview<br>2. System architecture<br>3. Development phases<br>4. Security and testing<br>5. Release milestones</p></div></div><div class="card"><h3 class="section-title">File details</h3><p class="muted tiny">PDF Document · 2.4 MB</p><div class="toolbar" style="margin:16px 0"><button class="btn primary" onclick="toast('Download queued')">↓ Download</button><button class="btn" onclick="toast('Open with system viewer')">↗ Open</button></div><div class="divider"></div><div class="setting-row"><span class="muted tiny">Modified</span><b class="tiny">Today, 10:24 AM</b></div><div class="setting-row"><span class="muted tiny">Location</span><b class="tiny">Shared / Documents</b></div><div class="setting-row"><span class="muted tiny">Integrity</span><b class="tiny">Verified</b></div><button class="btn" style="width:100%;margin-top:12px" onclick="toast('Share options')">Share file</button></div></div>
+    </section>
+    <!-- 7: Chat -->
+    <section class="screen" id="chat">
+      <div class="page-head"><div><div class="eyebrow">Private messaging</div><h1 class="page-title">Chat</h1><p class="page-desc">Messages are end-to-end encrypted between trusted devices.</p></div><button class="btn" onclick="toast('New conversation')">＋ New chat</button></div>
+      <div class="chat-layout"><div class="chat-list"><div class="search-field" style="margin-bottom:12px">⌕ <input placeholder="Search chats"></div><div class="chat-contact active"><div class="avatar">AP</div><div><b class="tiny">Android Phone</b><div class="tiny muted">Online now</div></div></div><div class="chat-contact"><div class="avatar" style="background:#777">IF</div><div><b class="tiny">Saved messages</b><div class="tiny muted">Personal notes</div></div></div></div><div class="chat-window"><div class="chat-top"><div class="avatar">AP</div><div><b>Android Phone</b><div class="tiny muted">● Online · End-to-end encrypted</div></div><button class="icon-btn" style="margin-left:auto" onclick="toast('Conversation options')">···</button></div><div class="messages" id="messages"><div class="bubble">Hey! The files are ready.<small>10:24 AM</small></div><div class="bubble mine">Great! Sending the photos now.<small>10:25 AM · ✓✓</small></div><div class="bubble">Vacation Photos.zip · 245 MB<small>Attachment · 10:26 AM</small></div><div class="bubble">Got it! 👍<small>10:27 AM</small></div></div><div class="chat-compose"><button class="btn" onclick="toast('Choose attachment')">＋</button><input class="field" id="chatInput" placeholder="Type a message…" onkeydown="if(event.key==='Enter')sendMessage()"><button class="btn primary" onclick="sendMessage()">Send ↑</button></div></div></div>
+    </section>
+    <!-- 8: Shared media -->
+    <section class="screen" id="media">
+      <div class="page-head"><div><div class="eyebrow">Conversation library</div><h1 class="page-title">Shared media</h1><p class="page-desc">Files and media exchanged in your conversation.</p></div><button class="btn" onclick="showScreen('chat')">← Back to chat</button></div>
+      <div class="toolbar" style="margin-bottom:18px"><button class="btn primary" onclick="filterMedia('all',this)">All</button><button class="btn" onclick="filterMedia('image',this)">Images</button><button class="btn" onclick="filterMedia('video',this)">Videos</button><button class="btn" onclick="filterMedia('document',this)">Documents</button></div>
+      <div class="media-grid" id="mediaGrid"><div class="media-tile" data-kind="image">▧</div><div class="media-tile" data-kind="image">▧</div><div class="media-tile" data-kind="image">▧</div><div class="media-tile" data-kind="video">▶</div><div class="media-tile" data-kind="image">▧</div><div class="media-tile" data-kind="document">▤</div><div class="media-tile" data-kind="document">▤</div><div class="media-tile" data-kind="image">▧</div></div>
+    </section>
+    <!-- 9: Transfers -->
+    <section class="screen" id="transfers">
+      <div class="page-head"><div><div class="eyebrow">File movement</div><h1 class="page-title">Transfers</h1><p class="page-desc">Monitor uploads and downloads across your devices.</p></div><button class="btn" onclick="toast('All transfers paused')">Ⅱ Pause all</button></div>
+      <div class="toolbar" style="margin-bottom:15px"><button class="btn primary" onclick="transferTab('active',this)">Active (2)</button><button class="btn" onclick="transferTab('completed',this)">Completed</button><button class="btn" onclick="transferTab('failed',this)">Failed</button></div>
+      <div class="card" id="transferList"><div class="transfer-row"><span class="file-icon">▣</span><div><b>Vacation Photos.zip</b><div class="transfer-meta"><span class="muted">245 MB / 245 MB</span><b>100%</b></div><div class="progress"><span style="width:100%"></span></div></div><span class="status">Done</span></div><div class="transfer-row"><span class="file-icon">▤</span><div><b>Project Files</b><div class="transfer-meta"><span class="muted">1.2 GB / 2.4 GB</span><b id="progressLabel">50%</b></div><div class="progress"><span id="progressBar" style="width:50%"></span></div></div><button class="btn small" id="pauseTransfer" onclick="toggleTransfer()">Ⅱ Pause</button></div></div>
+    </section>
+    <!-- 10: Sync -->
+    <section class="screen" id="sync">
+      <div class="page-head"><div><div class="eyebrow">Local synchronization</div><h1 class="page-title">Sync</h1><p class="page-desc">Keep selected files available and changes consistent.</p></div><button class="btn primary" onclick="toast('Sync started');">⟳ Sync now</button></div>
+      <div class="card soft" style="display:flex;align-items:center;gap:18px;margin-bottom:15px"><div class="welcome-mark" style="width:55px;height:55px;margin:0;font-size:25px">⟳</div><div><h3 style="margin:0 0 3px">Everything is up to date</h3><p class="tiny muted" style="margin:0">Last synced 2 minutes ago · No conflicts detected</p></div><span class="status" style="margin-left:auto">Healthy</span></div>
+      <div class="grid two"><div class="card"><h3 class="section-title">Sync activity</h3><div class="list"><div class="list-row"><span>✓</span><div><b class="tiny">File changes detected</b><div class="tiny muted">3 files checked</div></div></div><div class="list-row"><span>✓</span><div><b class="tiny">Metadata synchronized</b><div class="tiny muted">Up to date</div></div></div><div class="list-row"><span>✓</span><div><b class="tiny">No conflicts</b><div class="tiny muted">All versions consistent</div></div></div></div></div><div class="card"><h3 class="section-title">Offline availability</h3><div class="stat"><div class="stat-icon">▣</div><div><strong>8.4 GB</strong><small>Available offline on Android</small></div></div><div class="progress" style="margin:15px 0"><span style="width:34%"></span></div><button class="btn" onclick="showScreen('files')">Manage pinned files</button></div></div>
+    </section>
+    <!-- 11: Devices -->
+    <section class="screen" id="devices">
+      <div class="page-head"><div><div class="eyebrow">Trusted connections</div><h1 class="page-title">Devices</h1><p class="page-desc">Manage devices that can access your shared folders and chat.</p></div><button class="btn primary" onclick="showScreen('pairing')">＋ Add device</button></div>
+      <div class="grid two"><div class="card"><div class="device-card"><div class="device-large">▯</div><div style="flex:1"><b>Android Phone</b><div class="tiny muted">192.168.1.105 · This device's peer</div><div class="status" style="margin-top:5px">Online now</div></div><button class="btn small" onclick="deviceMenu()">···</button></div><div class="divider"></div><div class="toolbar"><span class="tiny muted">Permissions</span><span class="tiny" style="margin-left:auto">Read · Upload · Download</span></div></div><div class="card"><div class="device-card"><div class="device-large">▰</div><div style="flex:1"><b>Windows Laptop</b><div class="tiny muted">192.168.1.104 · Primary host</div><div class="status" style="margin-top:5px">This device</div></div></div><div class="divider"></div><div class="toolbar"><span class="tiny muted">Shared roots</span><b class="tiny" style="margin-left:auto">3 folders</b></div></div></div>
+    </section>
+    <!-- 12: Settings -->
+    <section class="screen" id="settings">
+      <div class="page-head"><div><div class="eyebrow">Preferences</div><h1 class="page-title">Settings</h1><p class="page-desc">Configure how IFB connects, transfers and protects your data.</p></div></div>
+      <div class="grid two"><div class="card"><h3 class="section-title">General</h3>
+        <div class="setting-row"><div><b class="tiny">Start with Windows</b><div class="tiny muted">Keep IFB available in the background</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+        <div class="setting-row"><div><b class="tiny">Show notifications</b><div class="tiny muted">Transfers and new messages</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+        <div class="setting-row"><div><b class="tiny">Auto-connect trusted devices</b><div class="tiny muted">Reconnect on your local network</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+        <div class="setting-row"><div><b class="tiny">Launch minimized</b><div class="tiny muted">Open in system tray</div></div><button class="toggle" onclick="this.classList.toggle('on')"></button></div>
+      </div><div class="card"><h3 class="section-title">Privacy & security</h3>
+        <div class="setting-row"><div><b class="tiny">Require confirmation for deletion</b><div class="tiny muted">Prevent accidental removal</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+        <div class="setting-row"><div><b class="tiny">Hide notification previews</b><div class="tiny muted">Keep message contents private</div></div><button class="toggle" onclick="this.classList.toggle('on')"></button></div>
+        <div class="setting-row"><div><b class="tiny">Local network only</b><div class="tiny muted">No public internet access</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+        <div class="setting-row"><div><b class="tiny">App lock</b><div class="tiny muted">Require authentication to open</div></div><button class="toggle" onclick="this.classList.toggle('on')"></button></div>
+      </div></div>
+    </section>
+    <!-- 13: Notifications -->
+    <section class="screen" id="notifications">
+      <div class="page-head"><div><div class="eyebrow">System messages</div><h1 class="page-title">Notifications</h1><p class="page-desc">Recent events from your devices and transfers.</p></div><button class="btn" onclick="toast('Notifications cleared')">Clear all</button></div>
+      <div class="notification-demo"><div class="toolbar"><span style="font-size:20px">◇</span><b>Instant File Bridge</b><span class="tiny" style="margin-left:auto;opacity:.6">now</span></div><h3 style="margin:14px 0 4px">Transfer complete</h3><p style="font-size:12px;opacity:.75;margin:0">Vacation Photos.zip · 245 MB</p><p class="tiny" style="opacity:.55">Saved to D:\\IFB\\Downloads</p></div>
+      <div class="card" style="max-width:700px;margin:auto"><div class="list"><div class="list-row"><span class="file-icon">↓</span><div style="flex:1"><b class="tiny">Download completed</b><div class="tiny muted">Vacation Photos.zip · 2 minutes ago</div></div><span class="status">Done</span></div><div class="list-row"><span class="file-icon">▯</span><div style="flex:1"><b class="tiny">Android Phone connected</b><div class="tiny muted">Local Wi-Fi · 10 minutes ago</div></div></div><div class="list-row"><span class="file-icon">⟳</span><div style="flex:1"><b class="tiny">Sync completed</b><div class="tiny muted">No conflicts · 12 minutes ago</div></div></div></div></div>
+    </section>
+    <!-- 14: System tray -->
+    <section class="screen" id="tray">
+      <div class="page-head"><div><div class="eyebrow">Windows integration</div><h1 class="page-title">System tray</h1><p class="page-desc">Quick actions remain available while the desktop window is minimized.</p></div></div>
+      <div class="tray-demo"><div style="padding:10px 12px;border-bottom:1px solid #eee"><b>◇　Instant File Bridge</b><div class="tiny muted">● Connected · Android Phone</div></div><button onclick="showScreen('home')">⌂　Open IFB</button><button onclick="showScreen('files')">▰　Recent files</button><button onclick="showScreen('transfers')">⇅　Transfers</button><button onclick="showScreen('settings')">⚙　Settings</button><div class="divider" style="margin:4px"></div><button onclick="toast('IFB service continues in background')">×　Quit window</button></div>
+    </section>
+    <!-- 15: Context menu -->
+    <section class="screen" id="context">
+      <div class="page-head"><div><div class="eyebrow">Contextual actions</div><h1 class="page-title">File actions</h1><p class="page-desc">Right-click a file to reveal actions relevant to that selected item.</p></div><button class="btn" onclick="showScreen('files')">Open file manager</button></div>
+      <div class="card" style="max-width:680px;margin:35px auto"><div class="list-row" oncontextmenu="event.preventDefault();showContext(event)" onclick="toast('Selected Project Plan.pdf')"><span class="file-icon">▤</span><div style="flex:1"><b>Project Plan.pdf</b><div class="tiny muted">PDF Document · 2.4 MB</div></div><button class="btn small" onclick="showContext(event)">···</button></div><p class="tiny muted">Right-click the file row or use the three-dot action button.</p></div>
+    </section>
+    <!-- 16: Dark mode -->
+    <section class="screen" id="dark">
+      <div class="page-head"><div><div class="eyebrow">Appearance preview</div><h1 class="page-title">Dark mode</h1><p class="page-desc">An optional low-light theme using the same layout and interaction model.</p></div><button class="btn" onclick="toggleDark()">Toggle preview</button></div>
+      <div class="dark-preview" id="darkPreview"><div class="toolbar" style="justify-content:space-between"><b>◇ Instant File Bridge</b><span class="tiny">Connected · Android Phone</span></div><div class="divider"></div><h2 style="font-size:22px">Files</h2><p class="tiny muted">D:　›　IFB　›　Shared</p><div class="list"><div class="list-row"><span>📁</span><b>Documents</b><span class="tiny muted" style="margin-left:auto">12 items</span></div><div class="list-row"><span>📁</span><b>Photos</b><span class="tiny muted" style="margin-left:auto">34 items</span></div><div class="list-row"><span>▤</span><b>Project Plan.pdf</b><span class="tiny muted" style="margin-left:auto">2.4 MB</span></div></div></div>
+    </section>
+    <p class="footer-note">IFB desktop prototype · Local-only concept · UI interactions are simulated; connect the Rust service and Android client for production behavior.</p>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this)closeModal()"><div class="modal"><h3 id="modalTitle">Confirm action</h3><p id="modalText">Continue?</p><input class="field" id="modalInput" style="width:100%;display:none" placeholder="Enter value"><div class="modal-actions"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" id="modalConfirm" onclick="confirmModal()">Confirm</button></div></div></div>
+<div class="context-menu" id="contextMenu"><button onclick="toast('Open selected file')">↗　Open</button><button onclick="toast('Download queued')">↓　Download to phone</button><button onclick="toast('Share dialog')">⌯　Share via chat</button><button onclick="toast('Rename action')">✎　Rename</button><button onclick="toast('Move dialog')">▱　Move to…</button><button onclick="toast('Delete confirmation')">⌫　Delete</button><button onclick="toast('Properties opened')">ⓘ　Properties</button></div>
+
+<script>
+const screens=['splash','onboarding','pairing','home','files','preview','chat','media','transfers','sync','devices','settings','notifications','tray','context','dark'];
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.screen===id || (id==='notifications'&&b.dataset.screen==='settings') || (id==='tray'&&b.dataset.screen==='settings') || (id==='context'&&b.dataset.screen==='files') || (id==='media'&&b.dataset.screen==='chat') || (id==='preview'&&b.dataset.screen==='files')));
+  document.querySelector('.main').scrollTop=0;
+}
+let toastTimer;
+function toast(message){const el=document.getElementById('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2400)}
+function selectFile(row,name,type,size,modified){
+  document.querySelectorAll('#fileRows tr').forEach(r=>r.classList.remove('selected'));row.classList.add('selected');
+  document.getElementById('detailName').textContent=name;document.getElementById('detailType').textContent=type;document.getElementById('detailSize').textContent=size;
+}
+function filterFiles(){const q=document.getElementById('fileSearch').value.toLowerCase();document.querySelectorAll('#fileRows tr').forEach(r=>r.style.display=r.dataset.name.toLowerCase().includes(q)?'':'none')}
+function sendMessage(){const input=document.getElementById('chatInput');const value=input.value.trim();if(!value)return;const bubble=document.createElement('div');bubble.className='bubble mine';bubble.textContent=value;const time=document.createElement('small');time.textContent='Now · ✓';bubble.appendChild(time);document.getElementById('messages').appendChild(bubble);input.value='';document.getElementById('messages').scrollTop=99999;toast('Message added to local outbox')}
+function filterMedia(kind,button){document.querySelectorAll('#mediaGrid .media-tile').forEach(tile=>tile.style.display=kind==='all'||tile.dataset.kind===kind?'grid':'none');button.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('primary'));button.classList.add('primary')}
+let transferPaused=false;function toggleTransfer(){transferPaused=!transferPaused;document.getElementById('pauseTransfer').textContent=transferPaused?'▶ Resume':'Ⅱ Pause';toast(transferPaused?'Transfer paused':'Transfer resumed')}
+function transferTab(tab,button){button.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('primary'));button.classList.add('primary');const list=document.getElementById('transferList');if(tab==='active'){list.innerHTML='<div class="transfer-row"><span class="file-icon">▣</span><div><b>Vacation Photos.zip</b><div class="transfer-meta"><span class="muted">245 MB / 245 MB</span><b>100%</b></div><div class="progress"><span style="width:100%"></span></div></div><span class="status">Done</span></div><div class="transfer-row"><span class="file-icon">▤</span><div><b>Project Files</b><div class="transfer-meta"><span class="muted">1.2 GB / 2.4 GB</span><b>50%</b></div><div class="progress"><span style="width:50%"></span></div></div><span class="status">Active</span></div>'}else if(tab==='completed'){list.innerHTML='<div class="empty"><div class="empty-icon">✓</div><b>All caught up</b><p class="tiny">Completed transfers will appear here.</p></div>'}else{list.innerHTML='<div class="empty"><div class="empty-icon">↻</div><b>No failed transfers</b><p class="tiny">Failed jobs will appear here with retry options.</p></div>'}}
+function openModal(title,text,confirm){document.getElementById('modalTitle').textContent=title;document.getElementById('modalText').textContent=text;document.getElementById('modalConfirm').textContent=confirm;document.getElementById('modalInput').style.display=title.toLowerCase().includes('rename')?'block':'none';document.getElementById('modalBackdrop').classList.add('show')}
+function closeModal(){document.getElementById('modalBackdrop').classList.remove('show')}
+function confirmModal(){toast(document.getElementById('modalConfirm').textContent+' requested');closeModal()}
+function showContext(event){const menu=document.getElementById('contextMenu');menu.style.left=Math.min(event.clientX||window.innerWidth/2,window.innerWidth-200)+'px';menu.style.top=Math.min(event.clientY||window.innerHeight/2,window.innerHeight-260)+'px';menu.classList.add('show')}
+function deviceMenu(){toast('Device actions: rename · permissions · revoke')}
+function toggleDark(){document.getElementById('darkPreview').style.background=document.getElementById('darkPreview').style.background?'':'#0b0b0b';toast('Dark preview toggled')}
+function makeQR(){const qr=document.getElementById('qrGrid');qr.innerHTML='';for(let i=0;i<289;i++){const cell=document.createElement('span');const x=i%17,y=Math.floor(i/17);const finder=(x<5&&y<5)||(x>11&&y<5)||(x<5&&y>11);let on=finder?((x%4===0||y%4===0||x%4===1&&y%4===1)):((x*7+y*11+x*y)%5<2);if(on)cell.className='on';qr.appendChild(cell)}}
+document.addEventListener('click',e=>{if(!e.target.closest('.context-menu')&&!e.target.closest('[onclick*="showContext"]'))document.getElementById('contextMenu').classList.remove('show')});
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();document.getElementById('globalSearch').focus()}if(e.key==='Escape'){closeModal();document.getElementById('contextMenu').classList.remove('show')}});
+document.getElementById('globalSearch').addEventListener('keydown',e=>{if(e.key==='Enter'){showScreen('files');document.getElementById('fileSearch').value=e.target.value;filterFiles()}});
+makeQR();
+</script>
+</body>
+</html>

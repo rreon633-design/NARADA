@@ -1,0 +1,21 @@
+[package]
+name = "narada-agent"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+[features]
+default = []
+dev-preview = ["dep:axum", "dep:subtle", "narada-connection/dev-vault"]
+[dependencies]
+narada-connection = { path = "../../crates/narada-connection" }
+narada-core = { path = "../../crates/narada-core" }
+narada-protocol = { path = "../../crates/narada-protocol" }
+narada-ipc = { path = "../../crates/narada-ipc" }
+tokio.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+fs2.workspace = true
+clap = { version = "4", features = ["derive"] }
+axum = { version = "0.8", optional = true }
+subtle = { version = "2", optional = true }

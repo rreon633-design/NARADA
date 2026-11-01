@@ -1,0 +1,30 @@
+[package]
+name = "narada-android-olm"
+version = "0.2.0"
+edition = "2021"
+rust-version = "1.99"
+license = "LicenseRef-Proprietary"
+publish = false
+
+# Deliberately isolated: the delivered desktop workspace/lockfile is unchanged.
+[workspace]
+members = ["."]
+
+[lib]
+name = "narada_olm"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+vodozemac = { version = "=0.11.1", default-features = false }
+jni = { version = "=0.21.1", default-features = false }
+serde = { version = "=1.0.229", features = ["derive"] }
+serde_json = "=1.0.151"
+base64 = "=0.23.1"
+zeroize = "=1.9.0"
+
+[profile.release]
+opt-level = "s"
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+panic = "unwind"

@@ -1,0 +1,16 @@
+{
+  "application": "NARADA",
+  "source_version": "0.7.0",
+  "release_channel": "development-only",
+  "android": "deferred-by-user",
+  "approvals": {
+    "windows_msvc_tauri_installer": {"status": "pending", "evidence_path": null, "sha256": null, "reviewer": null},
+    "dpapi_named_pipe_acl": {"status": "pending", "evidence_path": null, "sha256": null, "reviewer": null},
+    "filesystem_share_modes_power_loss": {"status": "pending", "evidence_path": null, "sha256": null, "reviewer": null},
+    "physical_lan_sleep_wake_matrix": {"status": "pending", "evidence_path": null, "sha256": null, "reviewer": null},
+    "screen_reader_keyboard_high_dpi": {"status": "pending", "evidence_path": null, "sha256": null, "reviewer": null},
+    "crypto_integration_independent_review": {"status": "pending", "evidence_path": null, "sha256": null, "reviewer": null},
+    "dependency_and_license_review": {"status": "pending", "evidence_path": null, "sha256": null, "reviewer": null},
+    "pilot_and_product_go_no_go": {"status": "pending", "evidence_path": null, "sha256": null, "reviewer": null}
+  }
+}

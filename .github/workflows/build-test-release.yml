@@ -1,0 +1,321 @@
+name: Test, build and publish manual-test candidates
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: narada-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+env:
+  CI: 'true'
+  RUSTUP_TOOLCHAIN: '1.99.1'
+  CARGO_BUILD_JOBS: '2'
+  CARGO_INCREMENTAL: '0'
+
+jobs:
+  tooling:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      NARADA_CI_JOB: tooling
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - run: python scripts/ci/evidence.py begin
+      - run: python scripts/ci/evidence.py run ci-tools -- python -m unittest discover -s tests/ci -v
+      - run: python scripts/ci/evidence.py run source-export-audit -- python scripts/prepare_github.py
+      - run: python scripts/ci/evidence.py run packaging-tools -- python scripts/test_apk_bundle_delta.py
+      - run: python scripts/ci/evidence.py run release-tools -- python tests/tooling/release_tools.py
+      - run: python scripts/ci/evidence.py finish
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: evidence-tooling-attempt-${{ github.run_attempt }}
+          path: .cache/ci-evidence/tooling/
+          include-hidden-files: true
+          retention-days: 14
+
+  desktop-linux:
+    name: Desktop host regression, real peers and browser UI
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    env:
+      NARADA_CI_JOB: desktop-linux
+      # Public, disposable software-vault fixture. Not used by packaged Windows code.
+      NARADA_DEV_VAULT_KEY: '6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b'
+      NARADA_SLOW_TESTS: '1'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - run: rustup toolchain install 1.99.1 --profile minimal --component clippy
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          key: rust-${{ runner.os }}-desktop-1.99.1-${{ hashFiles('Cargo.lock') }}
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+      - run: npm ci
+      - run: npx --no-install playwright install --with-deps chromium
+      - run: python scripts/ci/evidence.py begin
+      - run: python scripts/ci/evidence.py run rust-tests -- cargo test --locked --workspace --exclude narada-desktop --features narada-agent/dev-preview
+      - run: python scripts/ci/evidence.py run rust-clippy -- cargo clippy --locked --workspace --exclude narada-desktop --all-targets --features narada-agent/dev-preview -- -D warnings
+      - run: python scripts/ci/evidence.py run peer-build -- cargo build --locked -p narada-agent --features dev-preview
+      - run: python scripts/ci/evidence.py run lifecycle -- python tests/process/agent_lifecycle.py
+      - run: python scripts/ci/evidence.py run pairing-process -- python tests/process/pairing_security.py
+      - run: python scripts/ci/evidence.py run files-process -- python tests/process/files_security.py
+      - run: python scripts/ci/evidence.py run transfers-process -- python tests/process/transfers_security.py
+      - run: python scripts/ci/evidence.py run content-process -- python tests/process/content_offline.py
+      - run: python scripts/ci/evidence.py run node-tests -- node --test --test-reporter=junit --test-reporter-destination=.cache/ci-evidence/desktop-linux/node-tests.xml desktop-ui/tests
+      - run: python scripts/ci/evidence.py junit --minimum 1 node-tests '.cache/ci-evidence/desktop-linux/node-tests.xml'
+      - run: python scripts/ci/evidence.py run command-surface -- node scripts/check-command-surface.mjs
+      - run: npm run build
+      - run: python scripts/ci/evidence.py run frontend-size -- python scripts/ci/artifacts.py frontend
+      - run: python scripts/ci/evidence.py browser-redirect
+      - run: npx --no-install playwright test -c scripts/ci/playwright.config.mjs
+      - run: python scripts/ci/evidence.py junit --minimum 1 browser '.cache/ci-evidence/desktop-linux/browser-results.xml'
+      - run: python scripts/ci/evidence.py finish
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: evidence-desktop-linux-attempt-${{ github.run_attempt }}
+          path: .cache/ci-evidence/desktop-linux/
+          include-hidden-files: true
+          retention-days: 14
+
+  windows:
+    name: Windows x64 native tests, installer and bootstrap
+    runs-on: windows-2022
+    timeout-minutes: 90
+    env:
+      NARADA_CI_JOB: windows
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - run: rustup toolchain install 1.99.1 --profile minimal --component clippy
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          key: rust-${{ runner.os }}-native-1.99.1-${{ hashFiles('Cargo.lock') }}
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+      - run: npm ci
+      - run: python scripts/ci/evidence.py begin
+      - run: python scripts/ci/evidence.py run native-rust-tests -- cargo test --locked --workspace --exclude narada-desktop
+      - run: python scripts/ci/evidence.py run native-clippy -- cargo clippy --locked --workspace --exclude narada-desktop --all-targets -- -D warnings
+      - run: python scripts/ci/evidence.py run node-tests -- node --test --test-reporter=junit --test-reporter-destination=.cache/ci-evidence/windows/node-tests.xml desktop-ui/tests
+      - run: python scripts/ci/evidence.py junit --minimum 1 node-tests '.cache/ci-evidence/windows/node-tests.xml'
+      - run: python scripts/ci/evidence.py run command-surface -- node scripts/check-command-surface.mjs
+      - run: python scripts/ci/evidence.py run native-build -- node scripts/native-build.mjs
+      - run: python scripts/ci/evidence.py run native-install-launch -- pwsh -NoProfile -File scripts/ci/windows-smoke.ps1
+      - run: python scripts/ci/evidence.py run collect-windows -- python scripts/ci/artifacts.py windows
+      - run: python scripts/ci/evidence.py finish
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: windows-x64-manual-test-attempt-${{ github.run_attempt }}
+          path: .cache/ci-packages/windows/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: evidence-windows-attempt-${{ github.run_attempt }}
+          path: .cache/ci-evidence/windows/
+          include-hidden-files: true
+          retention-days: 14
+
+  android:
+    name: Android host, real-peer, lint and minified per-ABI APKs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      NARADA_CI_JOB: android
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+          cache-dependency-path: |
+            apps/android/**/*.gradle.kts
+            apps/android/gradle/libs.versions.toml
+            apps/android/gradle/verification-metadata.xml
+      - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+      - name: Pinned SDK and Rust toolchains
+        run: |
+          sdkmanager 'platforms;android-36' 'build-tools;35.0.0' 'ndk;30.0.16248370'
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/30.0.16248370" >> "$GITHUB_ENV"
+          rustup toolchain install 1.99.1 --profile minimal
+          rustup target add --toolchain 1.99.1 aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          key: rust-${{ runner.os }}-android-1.99.1-ndk30-${{ hashFiles('Cargo.lock', 'apps/android/native-*/Cargo.lock') }}
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+            apps/android/native-age/target
+            apps/android/native-olm/target
+            apps/android/app/build/native-age-target
+            apps/android/app/build/native-olm-target
+      - run: python scripts/ci/evidence.py begin
+      - run: python scripts/ci/evidence.py run age-host-tests -- cargo test --locked --manifest-path apps/android/native-age/Cargo.toml
+      - run: python scripts/ci/evidence.py run olm-host-tests -- cargo test --locked --manifest-path apps/android/native-olm/Cargo.toml
+      - run: python scripts/ci/evidence.py run age-jni-build -- python scripts/build_android_age.py --host --android
+      - run: python scripts/ci/evidence.py run olm-jni-build -- python scripts/build_android_olm67.py --host --android
+      - run: python scripts/ci/evidence.py run real-peer-build -- cargo build --locked -p narada-agent --features narada-connection/dev-vault
+      - name: Execute JVM, JNI, real-peer and Robolectric tests; strict debug lint
+        run: |
+          python scripts/ci/evidence.py run --cwd apps/android android-regression -- bash gradlew --no-daemon --no-build-cache --max-workers=2 --dependency-verification=strict --stacktrace '-Dorg.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=1g -XX:ActiveProcessorCount=2 -Dfile.encoding=UTF-8' "-PnaradaAgentBinary=$GITHUB_WORKSPACE/target/debug/narada-agent" "-PnaradaEvidenceDir=$GITHUB_WORKSPACE/.cache/ci-evidence/android/renders" :core:domain:test :core:connection:test :core:connection:interopTest :app:testDebugUnitTest :app:lintDebug
+      - run: python scripts/ci/evidence.py junit --minimum 22 domain 'apps/android/core/domain/build/test-results/test/TEST-*.xml'
+      - run: python scripts/ci/evidence.py junit --minimum 418 connection 'apps/android/core/connection/build/test-results/test/TEST-*.xml'
+      - run: python scripts/ci/evidence.py junit --minimum 65 real-peer-interop 'apps/android/core/connection/build/test-results/interopTest/TEST-*.xml'
+      - run: python scripts/ci/evidence.py junit --minimum 259 android-host 'apps/android/app/build/test-results/testDebugUnitTest/TEST-*.xml'
+      - name: Build the minified, signed manual-test APKs and matching instrumentation APK
+        run: |
+          python scripts/ci/evidence.py run --cwd apps/android manual-test-build -- bash gradlew --no-daemon --no-build-cache --max-workers=2 --dependency-verification=strict --stacktrace '-Dorg.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=1g -XX:ActiveProcessorCount=2 -Dfile.encoding=UTF-8' -PnaradaAbiSplits=true -PnaradaTestBuildType=manualTest :app:assembleManualTest :app:assembleManualTestAndroidTest :app:lintManualTest
+      - run: python scripts/ci/evidence.py run collect-apks -- python scripts/ci/artifacts.py android
+      - run: python scripts/ci/evidence.py finish
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: android-per-abi-manual-test-attempt-${{ github.run_attempt }}
+          path: .cache/ci-packages/android/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: android-emulator-inputs-attempt-${{ github.run_attempt }}
+          path: .cache/ci-emulator-inputs/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: evidence-android-attempt-${{ github.run_attempt }}
+          path: |
+            .cache/ci-evidence/android/
+            apps/android/app/build/reports/
+            apps/android/app/build/test-results/
+            apps/android/core/domain/build/test-results/
+            apps/android/core/connection/build/test-results/
+            apps/android/app/build/generated/olm/build-receipt.json
+            apps/android/app/build/generated/age/build-receipt.json
+            apps/android/app/build/outputs/mapping/manualTest/
+          include-hidden-files: true
+          retention-days: 14
+
+  android-emulator:
+    name: Minified APK native execution (API ${{ matrix.api }})
+    needs: android
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        api: [29, 35]
+    env:
+      NARADA_CI_JOB: emulator-api${{ matrix.api }}
+      NARADA_EMULATOR_API: ${{ matrix.api }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: android-emulator-inputs-attempt-${{ github.run_attempt }}
+          path: .cache/ci-emulator-inputs/
+      - run: python scripts/ci/evidence.py begin
+      - name: Enable hosted emulator KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - uses: reactivecircus/android-emulator-runner@4c44018e59b437e86cdfc41da381398f93ed8808 # v2
+        with:
+          api-level: ${{ matrix.api }}
+          target: google_apis
+          arch: x86_64
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none -no-snapshot
+          script: python scripts/ci/evidence.py run native-instrumentation -- python scripts/ci/emulator.py
+      - run: python scripts/ci/evidence.py finish
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: evidence-emulator-api${{ matrix.api }}-attempt-${{ github.run_attempt }}
+          path: .cache/ci-evidence/emulator-api${{ matrix.api }}/
+          include-hidden-files: true
+          retention-days: 14
+
+  release:
+    name: Publish gated development prerelease
+    if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main') && github.repository == 'rreon633-design/NARADA'
+    needs: [tooling, desktop-linux, windows, android, android-emulator]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          pattern: '*-manual-test-attempt-${{ github.run_attempt }}'
+          path: .cache/release-inputs/packages/
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          pattern: evidence-*-attempt-${{ github.run_attempt }}
+          path: .cache/release-inputs/evidence/
+      - name: Verify all gates; create initial tag once if absent; publish prerelease last
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/ci/publish.py

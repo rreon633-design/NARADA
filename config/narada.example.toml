@@ -1,0 +1,6 @@
+# Non-secret design example; this file is not automatically loaded.
+# Connection consent/interface settings are persisted through the owner UI/IPC.
+# Never put identity wrapping keys, pairing tokens or certificates in this example.
+log_level = "info"
+rpc_timeout_ms = 5000
+max_clients = 16

@@ -1,0 +1,2690 @@
+{
+  "repository": "https://github.com/rreon633-design/NARADA",
+  "intended_initial_tag": "v0.0.1",
+  "files": 536,
+  "bytes": 9456936,
+  "history": "Original archives and campaigns remain in the handoff workspace, not relabeled as new CI.",
+  "push_performed": false,
+  "inputs": {
+    ".editorconfig": {
+      "sha256": "85733a3ec5f0f58bf696f991761788deecd116cc4250a1f6ae2fbb4406190381",
+      "bytes": 137,
+      "source": ".editorconfig"
+    },
+    ".gitattributes": {
+      "sha256": "51ddb8e6b8c3a583d89c411180ec993c673b1f899c0afab51c8a2ed32c460e2d",
+      "bytes": 128,
+      "source": ".gitattributes"
+    },
+    ".github/workflows/build-test-release.yml": {
+      "sha256": "bb01da34e62998bcab6317dc991121e0d1ab3a279ab13b03bf4285de0fd51afd",
+      "bytes": 16756,
+      "source": ".github/workflows/build-test-release.yml"
+    },
+    ".gitignore": {
+      "sha256": "8f15d9c7566f439e51ca90abf87fb706fe5b6e9dee967064082b24c911c00ff8",
+      "bytes": 733,
+      "source": ".gitignore"
+    },
+    ".prettierignore": {
+      "sha256": "6f7d891b78fc3bb061f799ab5e63f40218ed60effec81bd7b10308e03030a3bd",
+      "bytes": 68,
+      "source": ".prettierignore"
+    },
+    "ANDROID-PHASE1-HANDOFF.md": {
+      "sha256": "3d75753ba36b987a7a29bb145a392f9bcb7d07310cbebd2d35256e9f00d4e68b",
+      "bytes": 4159,
+      "source": "ANDROID-PHASE1-HANDOFF.md"
+    },
+    "ANDROID-PHASE2-HANDOFF.md": {
+      "sha256": "8eecfe67f08af42c7fcd76e969139a9bf03dd29b3faea2afd493f31af2fd9711",
+      "bytes": 5773,
+      "source": "ANDROID-PHASE2-HANDOFF.md"
+    },
+    "ANDROID-PHASE3-HANDOFF.md": {
+      "sha256": "4f276aca1a6c25f88b9725f8f5da7f79fcc83677924e6e6d9c489b6f5c097467",
+      "bytes": 7060,
+      "source": "ANDROID-PHASE3-HANDOFF.md"
+    },
+    "ANDROID-PHASE4-HANDOFF.md": {
+      "sha256": "c3c553a7ff8372b8bb5c12e3a15669a19784bc9212c40ce871e0d940bcbb97ba",
+      "bytes": 4329,
+      "source": "ANDROID-PHASE4-HANDOFF.md"
+    },
+    "ANDROID-PHASE5-HANDOFF.md": {
+      "sha256": "fc896401c8d61123fc619856fb17e374b7561efdcee12408b93ed75683d23c02",
+      "bytes": 5794,
+      "source": "ANDROID-PHASE5-HANDOFF.md"
+    },
+    "ANDROID-PHASE6-7-HANDOFF.md": {
+      "sha256": "cdb3b37fc65c96efb7f746c11a5d7df26b5b4cdc4f083dc33e591faa4ad804d8",
+      "bytes": 6171,
+      "source": "ANDROID-PHASE6-7-HANDOFF.md"
+    },
+    "Cargo.lock": {
+      "sha256": "ba59a560acdaa5ba8c644655d73cca84591a83fcf9c18a1538731da96297c6aa",
+      "bytes": 178353,
+      "source": "Cargo.lock"
+    },
+    "Cargo.toml": {
+      "sha256": "1652a54230029373f921c689ed2f6c18b4ac45c0ee8ce794e4cc46bc59bc2738",
+      "bytes": 1502,
+      "source": "Cargo.toml"
+    },
+    "DESKTOP-5-9-HANDOFF.md": {
+      "sha256": "4dfe1bb3b6083262e920c4605326d09993e991c35da1948783c055b5a62596e9",
+      "bytes": 3580,
+      "source": "DESKTOP-5-9-HANDOFF.md"
+    },
+    "PHASE-4-HANDOFF.md": {
+      "sha256": "b5b02c5e67a52c7fcbe52142fdcf4d2d18a1a0ca8610048d7261d4b2d17f272a",
+      "bytes": 2773,
+      "source": "PHASE-4-HANDOFF.md"
+    },
+    "README.md": {
+      "sha256": "6a710602bb943b7d03e6e46baedf969deff653b890622f4d42ee021449dc4092",
+      "bytes": 4082,
+      "source": "release/github-readme.md.in"
+    },
+    "android-plan.md": {
+      "sha256": "d9425b498caa67d3dbbadd02107060f295ae0cacdb17963519aa3932788e0497",
+      "bytes": 15804,
+      "source": "android-plan.md"
+    },
+    "apps/android/.gitignore": {
+      "sha256": "102f53e74d2451da65a9e84f0f00e677f3aad1d0e4cabc3817d32d5dd41f9779",
+      "bytes": 115,
+      "source": "apps/android/.gitignore"
+    },
+    "apps/android/README.md": {
+      "sha256": "a9d49510cc78853bc1f75a18d2d95ac50726f8cbadd627543018d48e36e6b87d",
+      "bytes": 6049,
+      "source": "apps/android/README.md"
+    },
+    "apps/android/app/build.gradle.kts": {
+      "sha256": "e9658392350ffff6c9a98d775df0778031686c31274eae60139f60077acae4a3",
+      "bytes": 9355,
+      "source": "apps/android/app/build.gradle.kts"
+    },
+    "apps/android/app/gradle.lockfile": {
+      "sha256": "e7986e5bf59999e3f4c20c10ac75bb1391811c989dc46ffa8bd18d2811196bfe",
+      "bytes": 136548,
+      "source": "apps/android/app/gradle.lockfile"
+    },
+    "apps/android/app/lint.xml": {
+      "sha256": "fea29bb00b14ce1f313c2002208cf9e7f2da2906fdd475d8dd130c4ffae691dc",
+      "bytes": 646,
+      "source": "apps/android/app/lint.xml"
+    },
+    "apps/android/app/proguard-rules.pro": {
+      "sha256": "227f4afb051808c0a9f408f8be71f32c3813e0e54e2793df03f042d4aca95464",
+      "bytes": 342,
+      "source": "apps/android/app/proguard-rules.pro"
+    },
+    "apps/android/app/schemas/com.narada.android.data.MetadataDatabase/2.json": {
+      "sha256": "2200d0bae9f9acd7ec739756d8e684d41d128f262d312e628359763096e2a208",
+      "bytes": 4597,
+      "source": "apps/android/app/schemas/com.narada.android.data.MetadataDatabase/2.json"
+    },
+    "apps/android/app/schemas/com.narada.android.data.MetadataDatabase/3.json": {
+      "sha256": "d1f86bb44d1a31169baef8aae76358cb754987e35a7b078a9f72ddaa60f1f9b8",
+      "bytes": 5752,
+      "source": "apps/android/app/schemas/com.narada.android.data.MetadataDatabase/3.json"
+    },
+    "apps/android/app/src/androidTest/assets/bounded-preview-fixture.jpg": {
+      "sha256": "e8ed2787fa2d6bcb82ca8b014b43ca3b4dc5e545c2c1898b9e602a11eb6e28e3",
+      "bytes": 636,
+      "source": "apps/android/app/src/androidTest/assets/bounded-preview-fixture.jpg"
+    },
+    "apps/android/app/src/androidTest/java/com/narada/android/AgeNativeInstrumentedTest.kt": {
+      "sha256": "b73c514a208689d113b89127d5d1924e50c14286eddc3540cc739bc82a557975",
+      "bytes": 2209,
+      "source": "apps/android/app/src/androidTest/java/com/narada/android/AgeNativeInstrumentedTest.kt"
+    },
+    "apps/android/app/src/androidTest/java/com/narada/android/NativeConnectionKeysTest.kt": {
+      "sha256": "0845efd41320a041691c1251464a79bb30dc41a13786954ce1d2149d4b214285",
+      "bytes": 1907,
+      "source": "apps/android/app/src/androidTest/java/com/narada/android/NativeConnectionKeysTest.kt"
+    },
+    "apps/android/app/src/androidTest/java/com/narada/android/NativeFilesBoundaryTest.kt": {
+      "sha256": "240ce05dd8b6d31f874bc8b09b3c5f018048d07ac8a64b3feefbc8ce88ebf69f",
+      "bytes": 2909,
+      "source": "apps/android/app/src/androidTest/java/com/narada/android/NativeFilesBoundaryTest.kt"
+    },
+    "apps/android/app/src/androidTest/java/com/narada/android/NativeFoundationSmokeTest.kt": {
+      "sha256": "167d8726b357e8ab4756dd18cb5ff976a0c02661f8304795137281b1408b0cb1",
+      "bytes": 1389,
+      "source": "apps/android/app/src/androidTest/java/com/narada/android/NativeFoundationSmokeTest.kt"
+    },
+    "apps/android/app/src/androidTest/java/com/narada/android/NativeTransferBoundaryTest.kt": {
+      "sha256": "c5e47d79fdf1543e61a5fbf060b214d397aabff3a9f7d002bbdd14ea345c4217",
+      "bytes": 4567,
+      "source": "apps/android/app/src/androidTest/java/com/narada/android/NativeTransferBoundaryTest.kt"
+    },
+    "apps/android/app/src/androidTest/java/com/narada/android/OlmNativeInstrumentedTest.kt": {
+      "sha256": "462507d8a12d3d10725fbf4b7aa6b6a66b4f100fe6c82b89e72ca7c6aa749d9c",
+      "bytes": 1439,
+      "source": "apps/android/app/src/androidTest/java/com/narada/android/OlmNativeInstrumentedTest.kt"
+    },
+    "apps/android/app/src/debug/AndroidManifest.xml": {
+      "sha256": "ad6f989d58bc54bcef9efbf1f62c5b97346108e9254be7424760b83aa9bc3ba6",
+      "bytes": 398,
+      "source": "apps/android/app/src/debug/AndroidManifest.xml"
+    },
+    "apps/android/app/src/main/AndroidManifest.xml": {
+      "sha256": "e56854dfbb126707c19c3dffb496488008c993beade767d85e5376ce3d6f198f",
+      "bytes": 2664,
+      "source": "apps/android/app/src/main/AndroidManifest.xml"
+    },
+    "apps/android/app/src/main/assets/native-age-notices.txt.gz": {
+      "sha256": "3a8515237f41073d75c8e7a339305de5cf7fd396990af91ff4ec035d9837402d",
+      "bytes": 48828,
+      "source": "apps/android/app/src/main/assets/native-age-notices.txt.gz"
+    },
+    "apps/android/app/src/main/assets/native-olm-notices.txt.gz": {
+      "sha256": "d8c512bfc90eea09fabf06d42b52a758b5adcbc05eb379f6b0f3700c1d067123",
+      "bytes": 28875,
+      "source": "apps/android/app/src/main/assets/native-olm-notices.txt.gz"
+    },
+    "apps/android/app/src/main/java/com/narada/android/MainActivity.kt": {
+      "sha256": "bebda4c99d82ffad5ab2b64d4c808be9e5e8c337387eb7e1ae8a947aa0ac5545",
+      "bytes": 14100,
+      "source": "apps/android/app/src/main/java/com/narada/android/MainActivity.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/NaradaApplication.kt": {
+      "sha256": "93ff6c8c0f82de13a4971949eeb55b8b2bfb242a4a20e114cd12dd7054f0b774",
+      "bytes": 1259,
+      "source": "apps/android/app/src/main/java/com/narada/android/NaradaApplication.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/attachments/AttachmentPickerBinding.kt": {
+      "sha256": "8367cf07598a83d5bb9d0793ca2b597740d6760c9842eba5460da8ed5da33fdb",
+      "bytes": 1535,
+      "source": "apps/android/app/src/main/java/com/narada/android/attachments/AttachmentPickerBinding.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/attachments/AttachmentPlatform.kt": {
+      "sha256": "d0318c95f6fca5f8e0e389664d070eaf48928bae7f8c7341165d2e827139d6a5",
+      "bytes": 7447,
+      "source": "apps/android/app/src/main/java/com/narada/android/attachments/AttachmentPlatform.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/attachments/AttachmentsCoordinator.kt": {
+      "sha256": "233157b84750ddd2696b82faac4d281a5b00045742b2007a605bf7dc9813dda0",
+      "bytes": 12900,
+      "source": "apps/android/app/src/main/java/com/narada/android/attachments/AttachmentsCoordinator.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/chat/ChatCoordinator.kt": {
+      "sha256": "11ffe211cab06ff8d16e89a8761f79fb8ab7b8fda8fa3561f6f3c91cf2b0bd0b",
+      "bytes": 13324,
+      "source": "apps/android/app/src/main/java/com/narada/android/chat/ChatCoordinator.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/chat/ChatPlatform.kt": {
+      "sha256": "fbac193bc7a178ad18c78e077a5a11d5faa11ce86c5d8211c49d461c801c4d5a",
+      "bytes": 2116,
+      "source": "apps/android/app/src/main/java/com/narada/android/chat/ChatPlatform.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/connection/ConnectionModule.kt": {
+      "sha256": "8fa453b7513e811a8920700b0fd5011125832bd929b79245bf50ae03cef28252",
+      "bytes": 1280,
+      "source": "apps/android/app/src/main/java/com/narada/android/connection/ConnectionModule.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/connection/ConnectionsCoordinator.kt": {
+      "sha256": "baeeeb0eb67f9d72f45e14a033d5af9b8e46b4a1c59d688a8be41938b2fdc48f",
+      "bytes": 20262,
+      "source": "apps/android/app/src/main/java/com/narada/android/connection/ConnectionsCoordinator.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/connection/ConnectionsViewModel.kt": {
+      "sha256": "4e83cf399e276afd4fe45aba2f3eceae9c2187b802107e34e7ded4d7c19c81f3",
+      "bytes": 1235,
+      "source": "apps/android/app/src/main/java/com/narada/android/connection/ConnectionsViewModel.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/connection/DevicesScreen.kt": {
+      "sha256": "9372cc2cbe56f7336534140144c3e1be18e32b1793e95dc0f7800f4fff919842",
+      "bytes": 14884,
+      "source": "apps/android/app/src/main/java/com/narada/android/connection/DevicesScreen.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/connection/LocalNetwork.kt": {
+      "sha256": "0a500d599b26ea5001b5652bf74d79f799a19f8b1d6659998d3bc6694d45fb2e",
+      "bytes": 9459,
+      "source": "apps/android/app/src/main/java/com/narada/android/connection/LocalNetwork.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/connection/PairingQr.kt": {
+      "sha256": "f8c3fbc629acc7a6920ad772158258f792825012984b1fbbce8c361fe0a666a2",
+      "bytes": 9841,
+      "source": "apps/android/app/src/main/java/com/narada/android/connection/PairingQr.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/connection/ProtectedConnections.kt": {
+      "sha256": "910e7ce99d1a63ce0b93a88beae51202e5c1f132b74d1c3013de5cb6e36f145d",
+      "bytes": 12200,
+      "source": "apps/android/app/src/main/java/com/narada/android/connection/ProtectedConnections.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/data/MetadataDatabase.kt": {
+      "sha256": "e3b929baa5aa2a5afe93be8ea9ea7e38272718398c220e4fc83d5b3fb3a2227f",
+      "bytes": 8321,
+      "source": "apps/android/app/src/main/java/com/narada/android/data/MetadataDatabase.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/data/MetadataStore.kt": {
+      "sha256": "1a9f2cff8d4456361f2e7758e4d4cb1c5c4e88916c1ef3fef7c75b07a59e0ddb",
+      "bytes": 4794,
+      "source": "apps/android/app/src/main/java/com/narada/android/data/MetadataStore.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/data/SettingsStore.kt": {
+      "sha256": "f64fc5ee2658ebeaa6ff39cfb926c56463c09f3101cb855c2e698bd0950cf73e",
+      "bytes": 1681,
+      "source": "apps/android/app/src/main/java/com/narada/android/data/SettingsStore.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/di/FoundationModule.kt": {
+      "sha256": "1e86b5d06c950f164eba5f201ac6be6b51e76d487070dac87c7ca493b7ffe46d",
+      "bytes": 1906,
+      "source": "apps/android/app/src/main/java/com/narada/android/di/FoundationModule.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/files/FilesViewModel.kt": {
+      "sha256": "fbd13f691380ce10e0e37278e9f93852eea8dc2ddc41c90a08e01fb67bfa68e2",
+      "bytes": 7062,
+      "source": "apps/android/app/src/main/java/com/narada/android/files/FilesViewModel.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/offline/OfflineCoordinator.kt": {
+      "sha256": "52346d12316700e8043308434a7a1ce9f12d158db88961da8a6c6f49ca460be2",
+      "bytes": 9661,
+      "source": "apps/android/app/src/main/java/com/narada/android/offline/OfflineCoordinator.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/offline/OfflinePlatform.kt": {
+      "sha256": "3fec0193f387b10b81cc8c22688cfe5c655bbc6fd5d64eca267c4598570fa180",
+      "bytes": 1223,
+      "source": "apps/android/app/src/main/java/com/narada/android/offline/OfflinePlatform.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/platform/BoundedInput.kt": {
+      "sha256": "8c7e10fdaa60c4f0d5d4f663b15a307aa42e8919ca280784dd2d45fedc0022e5",
+      "bytes": 550,
+      "source": "apps/android/app/src/main/java/com/narada/android/platform/BoundedInput.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/platform/FolderPermissions.kt": {
+      "sha256": "4a0d633e90eac5747aca9f014b3f202c8bba51009b60cf0a9f155ddfa2921b53",
+      "bytes": 3403,
+      "source": "apps/android/app/src/main/java/com/narada/android/platform/FolderPermissions.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/platform/PrivateFiles.kt": {
+      "sha256": "3e0b6290ee9f0aa961fe3c689d504f721f40c0e187a9aeda24f3613f3435ea45",
+      "bytes": 2562,
+      "source": "apps/android/app/src/main/java/com/narada/android/platform/PrivateFiles.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/platform/PrivateNotifications.kt": {
+      "sha256": "3f26a1b02b47434dedbe0771a0e1abebea4fd87fa3edc9b68805ea932ef4ced5",
+      "bytes": 4468,
+      "source": "apps/android/app/src/main/java/com/narada/android/platform/PrivateNotifications.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/transfers/BoundedProviderIo.kt": {
+      "sha256": "e4e9ce908ba2ae6e9b03233fa65cd81600c4262648c9ee53c885a45ceb035893",
+      "bytes": 3124,
+      "source": "apps/android/app/src/main/java/com/narada/android/transfers/BoundedProviderIo.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/transfers/ExportPickerBinding.kt": {
+      "sha256": "15fe0541ff014d0be22d7b49b771acd59ae730baced6715197142013caa79472",
+      "bytes": 1387,
+      "source": "apps/android/app/src/main/java/com/narada/android/transfers/ExportPickerBinding.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/transfers/TransferMessages.kt": {
+      "sha256": "34b25f10f3fa46c10d914d2ff9aca60bc6e41e74ebf081ece92486e6aa32e6ca",
+      "bytes": 4896,
+      "source": "apps/android/app/src/main/java/com/narada/android/transfers/TransferMessages.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/transfers/TransferPlatform.kt": {
+      "sha256": "482b3812c133e4242efba63c6ce17c447714204f46a76e9cc8d183466d30bab3",
+      "bytes": 12628,
+      "source": "apps/android/app/src/main/java/com/narada/android/transfers/TransferPlatform.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/transfers/TransfersCoordinator.kt": {
+      "sha256": "f24a80308ac3d5673610f450a0bd8a86b5f9ed368e915d1ec9696734767f1caf",
+      "bytes": 11013,
+      "source": "apps/android/app/src/main/java/com/narada/android/transfers/TransfersCoordinator.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/ui/Components.kt": {
+      "sha256": "18d3478554eb3680634bd061b2be8a5fe4b74cdc4fe0d8f207c7d56423bd309d",
+      "bytes": 5496,
+      "source": "apps/android/app/src/main/java/com/narada/android/ui/Components.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/ui/NaradaTheme.kt": {
+      "sha256": "f56fe0d854b293b49497d1d90da178d5a8da49d75494de0741b78b974d7ff0f2",
+      "bytes": 2610,
+      "source": "apps/android/app/src/main/java/com/narada/android/ui/NaradaTheme.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/ui/WorkspaceApp.kt": {
+      "sha256": "aa1acb01be0c07824312b313aef89bbb2bf35b969f4f2bb1d61304d9122f66e7",
+      "bytes": 13649,
+      "source": "apps/android/app/src/main/java/com/narada/android/ui/WorkspaceApp.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/ui/WorkspaceViewModel.kt": {
+      "sha256": "addd869a7a43ec225e504f9ff4ab9b566b2aa1936fb6326dcbb07e273a4422ff",
+      "bytes": 7976,
+      "source": "apps/android/app/src/main/java/com/narada/android/ui/WorkspaceViewModel.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/ui/screens/AttachmentsPanel.kt": {
+      "sha256": "3c16cb9524701d5360fed08f95807d06af13599461815358e9414cee0a9c78a2",
+      "bytes": 11719,
+      "source": "apps/android/app/src/main/java/com/narada/android/ui/screens/AttachmentsPanel.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/ui/screens/ChatScreen.kt": {
+      "sha256": "a984e099ab16c805f92af6e0571b70e33e96edf1a8d2732098a9cbed0782e000",
+      "bytes": 14364,
+      "source": "apps/android/app/src/main/java/com/narada/android/ui/screens/ChatScreen.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/ui/screens/DiagnosticsScreen.kt": {
+      "sha256": "560c977da2c7797194507436970028ee8fe8741c0b701c72289024e9f06c2359",
+      "bytes": 5201,
+      "source": "apps/android/app/src/main/java/com/narada/android/ui/screens/DiagnosticsScreen.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/ui/screens/FilesScreen.kt": {
+      "sha256": "a9a8101b7a79895fc16ea0157c3c04345f4742ac59f1287d579c04b998cba709",
+      "bytes": 25243,
+      "source": "apps/android/app/src/main/java/com/narada/android/ui/screens/FilesScreen.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/ui/screens/HomeScreen.kt": {
+      "sha256": "38dedfb21c6cc1edacd31b6d97819426bee9aa83967496b87dccc7c35a74e367",
+      "bytes": 6940,
+      "source": "apps/android/app/src/main/java/com/narada/android/ui/screens/HomeScreen.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/ui/screens/MoreScreen.kt": {
+      "sha256": "d53a87fa4ac6c3bc3866efc4ecefcaf6a17598930fb2b19c75b80c3f1d95e85c",
+      "bytes": 1945,
+      "source": "apps/android/app/src/main/java/com/narada/android/ui/screens/MoreScreen.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/ui/screens/NotificationsScreen.kt": {
+      "sha256": "fea6b300ffee8162b18d08f2a59931dd86b3c00d989c1468e70400dd73cf377a",
+      "bytes": 3558,
+      "source": "apps/android/app/src/main/java/com/narada/android/ui/screens/NotificationsScreen.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/ui/screens/OfflineScreen.kt": {
+      "sha256": "ae4cbebb104199b03ee94ee4c513ff774648574ce4cdbff940eb919b385a0e33",
+      "bytes": 13137,
+      "source": "apps/android/app/src/main/java/com/narada/android/ui/screens/OfflineScreen.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/ui/screens/OnboardingScreen.kt": {
+      "sha256": "8ac4c7ed9fdb136535bf54f55c2d68df16ea318382b3728d8679e45d539443eb",
+      "bytes": 4151,
+      "source": "apps/android/app/src/main/java/com/narada/android/ui/screens/OnboardingScreen.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/ui/screens/SettingsScreens.kt": {
+      "sha256": "2fbb497b6b97d273c0ea43cd795bf07912a2a1ffb7f9f538a4e09cc38261005b",
+      "bytes": 7432,
+      "source": "apps/android/app/src/main/java/com/narada/android/ui/screens/SettingsScreens.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/ui/screens/TransfersScreen.kt": {
+      "sha256": "335f2d019b3ea7a79aea6266cd1ef2fe304649391515348e35e0c48906ba3ed4",
+      "bytes": 16173,
+      "source": "apps/android/app/src/main/java/com/narada/android/ui/screens/TransfersScreen.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/work/WorkCoordinator.kt": {
+      "sha256": "452d3ef876897f6e4018c9ab6c8ab4720802a8d35aa83955d66d42ab9a3dea62",
+      "bytes": 2352,
+      "source": "apps/android/app/src/main/java/com/narada/android/work/WorkCoordinator.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/work/WorkScheduler.kt": {
+      "sha256": "fb2a1ed3907ab223a92e0a151c00dfa6b6bc62db743d447f7d92fde3889cf787",
+      "bytes": 2005,
+      "source": "apps/android/app/src/main/java/com/narada/android/work/WorkScheduler.kt"
+    },
+    "apps/android/app/src/main/java/com/narada/android/work/WorkspaceHealthWorker.kt": {
+      "sha256": "52794aa21ec4e7f36856cd91698c1799450e651376efa20c63c67531c3c03858",
+      "bytes": 3011,
+      "source": "apps/android/app/src/main/java/com/narada/android/work/WorkspaceHealthWorker.kt"
+    },
+    "apps/android/app/src/main/res/drawable/ic_appearance.xml": {
+      "sha256": "45e56c788a2fcb3f5ff6a6ff5ed43977fb031154afe19237fc215dee20ac270b",
+      "bytes": 625,
+      "source": "apps/android/app/src/main/res/drawable/ic_appearance.xml"
+    },
+    "apps/android/app/src/main/res/drawable/ic_back.xml": {
+      "sha256": "fab9ddee65987b88929538faced23c75e2efee718ebe73915f30518c1fed93cf",
+      "bytes": 393,
+      "source": "apps/android/app/src/main/res/drawable/ic_back.xml"
+    },
+    "apps/android/app/src/main/res/drawable/ic_bell.xml": {
+      "sha256": "7aadf6fde1f0e08d9aa02650c5aaebb479b114b76327b97d92c45da149ca8332",
+      "bytes": 840,
+      "source": "apps/android/app/src/main/res/drawable/ic_bell.xml"
+    },
+    "apps/android/app/src/main/res/drawable/ic_chat.xml": {
+      "sha256": "dfcdc51c1dd35e3af9bb3f21826999976b000af142ceb82378b748a6e57cd9df",
+      "bytes": 857,
+      "source": "apps/android/app/src/main/res/drawable/ic_chat.xml"
+    },
+    "apps/android/app/src/main/res/drawable/ic_check.xml": {
+      "sha256": "30b315e006cacaae392d2b9b4a90f3494bed6c8838d95fbbfabf21fd73b8d9b0",
+      "bytes": 392,
+      "source": "apps/android/app/src/main/res/drawable/ic_check.xml"
+    },
+    "apps/android/app/src/main/res/drawable/ic_devices.xml": {
+      "sha256": "b9ee93cebfcbc013072b4f166bfeeea3d7e426d0638280b815394be34890232a",
+      "bytes": 1017,
+      "source": "apps/android/app/src/main/res/drawable/ic_devices.xml"
+    },
+    "apps/android/app/src/main/res/drawable/ic_diagnostics.xml": {
+      "sha256": "1d5e20bc0b8dbd693fefd318007324d94dd904fb885cefed16363fff9ded9375",
+      "bytes": 831,
+      "source": "apps/android/app/src/main/res/drawable/ic_diagnostics.xml"
+    },
+    "apps/android/app/src/main/res/drawable/ic_file.xml": {
+      "sha256": "11404525f23867446e467b0b7a763d15378ebdd493763fe92c94203abc22124d",
+      "bytes": 464,
+      "source": "apps/android/app/src/main/res/drawable/ic_file.xml"
+    },
+    "apps/android/app/src/main/res/drawable/ic_folder.xml": {
+      "sha256": "a72bb600251cf22335a9e35adf5a8581ca17f58c9400b4dca94ee35ac4c78175",
+      "bytes": 447,
+      "source": "apps/android/app/src/main/res/drawable/ic_folder.xml"
+    },
+    "apps/android/app/src/main/res/drawable/ic_help.xml": {
+      "sha256": "8e9b68af6cb4c6ab6940639d640bedaa6ad8e3713483da7cf9a1963d00c7808d",
+      "bytes": 862,
+      "source": "apps/android/app/src/main/res/drawable/ic_help.xml"
+    },
+    "apps/android/app/src/main/res/drawable/ic_home.xml": {
+      "sha256": "c8a039202f9e639365dfc9c64c6037d29426a5d1e9c27c144af8e9a6346804f7",
+      "bytes": 623,
+      "source": "apps/android/app/src/main/res/drawable/ic_home.xml"
+    },
+    "apps/android/app/src/main/res/drawable/ic_lock.xml": {
+      "sha256": "7a281c063557b6788ede6f3475a54bf6bd23db3cb9c95d8f3cb45a2f0fd42795",
+      "bytes": 829,
+      "source": "apps/android/app/src/main/res/drawable/ic_lock.xml"
+    },
+    "apps/android/app/src/main/res/drawable/ic_more.xml": {
+      "sha256": "95ed6f715ce85bfe43a25e10b5c69300b0a385d7d4804dd22c1860207e76a932",
+      "bytes": 890,
+      "source": "apps/android/app/src/main/res/drawable/ic_more.xml"
+    },
+    "apps/android/app/src/main/res/drawable/ic_narada.xml": {
+      "sha256": "f1cfd2e7c84e2cad57fe95cf33e16abf1f1e5bc553260a5d20b3bf0bc7d0d011",
+      "bytes": 375,
+      "source": "apps/android/app/src/main/res/drawable/ic_narada.xml"
+    },
+    "apps/android/app/src/main/res/drawable/ic_notification.xml": {
+      "sha256": "8f36f73d41102c5f8c86aaa138decb1baa4d38a9f46b9477c5750a34a27d53cf",
+      "bytes": 283,
+      "source": "apps/android/app/src/main/res/drawable/ic_notification.xml"
+    },
+    "apps/android/app/src/main/res/drawable/ic_offline.xml": {
+      "sha256": "445f4d6e9ea9a365b6098031954c27eef1009c218ae5c878145ee42aeb83109f",
+      "bytes": 818,
+      "source": "apps/android/app/src/main/res/drawable/ic_offline.xml"
+    },
+    "apps/android/app/src/main/res/drawable/ic_phone.xml": {
+      "sha256": "dbc9174d7b08eeae92529227f8d5c4eb60fbcf96e1092f82b84a1fcbb3524c38",
+      "bytes": 856,
+      "source": "apps/android/app/src/main/res/drawable/ic_phone.xml"
+    },
+    "apps/android/app/src/main/res/drawable/ic_right.xml": {
+      "sha256": "33b83e339955955eb23f5a86d32aa2dc929018e1771409774fb8c9f2d6449be9",
+      "bytes": 392,
+      "source": "apps/android/app/src/main/res/drawable/ic_right.xml"
+    },
+    "apps/android/app/src/main/res/drawable/ic_settings.xml": {
+      "sha256": "bf511c24a39042d307205c51b9a6caff5b0826704cd3ffa850b2c048983a24cf",
+      "bytes": 699,
+      "source": "apps/android/app/src/main/res/drawable/ic_settings.xml"
+    },
+    "apps/android/app/src/main/res/drawable/ic_share.xml": {
+      "sha256": "312834fc2ff75b95b68c9ecb72aa96870701aec756cd7501e09e652e6a1d381e",
+      "bytes": 815,
+      "source": "apps/android/app/src/main/res/drawable/ic_share.xml"
+    },
+    "apps/android/app/src/main/res/drawable/ic_shield.xml": {
+      "sha256": "56491d4061dfb9b12c1ab35186710c98cde4c7bf778df6cfb260007cdad9c696",
+      "bytes": 636,
+      "source": "apps/android/app/src/main/res/drawable/ic_shield.xml"
+    },
+    "apps/android/app/src/main/res/drawable/ic_sync.xml": {
+      "sha256": "3fb20322019c3e0f32d4bd4970ddf535c6eadb7da9a71587dab74faff1dc66ff",
+      "bytes": 1050,
+      "source": "apps/android/app/src/main/res/drawable/ic_sync.xml"
+    },
+    "apps/android/app/src/main/res/drawable/ic_transfers.xml": {
+      "sha256": "50223dd0030d0277980e837b188c0f2b39a397effd0f44ac0bda714dd8f8af51",
+      "bytes": 1026,
+      "source": "apps/android/app/src/main/res/drawable/ic_transfers.xml"
+    },
+    "apps/android/app/src/main/res/mipmap-anydpi/ic_launcher.xml": {
+      "sha256": "ef7a467b31b0910730d77569e8f730e2a05918b957d59e14b51c538af8d8b22b",
+      "bytes": 279,
+      "source": "apps/android/app/src/main/res/mipmap-anydpi/ic_launcher.xml"
+    },
+    "apps/android/app/src/main/res/values/colors.xml": {
+      "sha256": "c35c026c5ca57cd5927bcd508a34eba6a9890e962117d241dd623c2d9b9ceb01",
+      "bytes": 120,
+      "source": "apps/android/app/src/main/res/values/colors.xml"
+    },
+    "apps/android/app/src/main/res/values/strings.xml": {
+      "sha256": "6c6360aa276ca8ddbb37a724fe738228209aa26f2688754d8373a1f27d500c18",
+      "bytes": 428,
+      "source": "apps/android/app/src/main/res/values/strings.xml"
+    },
+    "apps/android/app/src/main/res/values/themes.xml": {
+      "sha256": "0e626932961fefbe6df997c096fc749535363f8953d9d653a4c833b7b3cf8896",
+      "bytes": 877,
+      "source": "apps/android/app/src/main/res/values/themes.xml"
+    },
+    "apps/android/app/src/main/res/xml/backup_rules.xml": {
+      "sha256": "7cf28206dfb89a07b079f6ff679b50e24cff85c89ca1492f5d8de145963eab79",
+      "bytes": 244,
+      "source": "apps/android/app/src/main/res/xml/backup_rules.xml"
+    },
+    "apps/android/app/src/main/res/xml/data_extraction_rules.xml": {
+      "sha256": "fa8a661b417532d1088fa37282a41a0599fc337d307351271244bb096d01c723",
+      "bytes": 596,
+      "source": "apps/android/app/src/main/res/xml/data_extraction_rules.xml"
+    },
+    "apps/android/app/src/main/res/xml/support_paths.xml": {
+      "sha256": "0cfd9f688e29cbf8452f66cdf50d200ce74a2a110840b4e712bc672e9fd7e961",
+      "bytes": 135,
+      "source": "apps/android/app/src/main/res/xml/support_paths.xml"
+    },
+    "apps/android/app/src/manualTest/res/values/strings.xml": {
+      "sha256": "af497c0bd3847b8eb9fa865b7422e890c563c20e757e29b383d6b21d5086aad2",
+      "bytes": 109,
+      "source": "apps/android/app/src/manualTest/res/values/strings.xml"
+    },
+    "apps/android/app/src/test/java/com/narada/android/ApplicationIntegrationTest.kt": {
+      "sha256": "90576207d315abc9550a943957d57d6fe4224c6cf29a7bdd05c1adbf415f4156",
+      "bytes": 1646,
+      "source": "apps/android/app/src/test/java/com/narada/android/ApplicationIntegrationTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/AttachmentPickerBindingTest.kt": {
+      "sha256": "a3c1fde071f8b08b5e3845267b8d69c1861796ae7ffcb763185d5abd4628d4a2",
+      "bytes": 4249,
+      "source": "apps/android/app/src/test/java/com/narada/android/AttachmentPickerBindingTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/AttachmentsCoordinatorTest.kt": {
+      "sha256": "89a63f4bb2e8a38ed00d0c2ea024f6a7d7a9f6e9c70f2693bf638b1e3aace993",
+      "bytes": 7070,
+      "source": "apps/android/app/src/test/java/com/narada/android/AttachmentsCoordinatorTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/BoundedProviderIoTest.kt": {
+      "sha256": "e5160611187a87f56a25277504773fbd14dd780916c2ed40713cf45bfb3917f7",
+      "bytes": 3327,
+      "source": "apps/android/app/src/test/java/com/narada/android/BoundedProviderIoTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/ChatCoordinatorTest.kt": {
+      "sha256": "e4de8f9b8c26a2a396a5190154b4541358eecc0b1ead1174a623438253915d59",
+      "bytes": 10137,
+      "source": "apps/android/app/src/test/java/com/narada/android/ChatCoordinatorTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/ChatUiTest.kt": {
+      "sha256": "5f98e878050f7b72f040e48a39da9d298b05b78a670c66e3e77243f27032168f",
+      "bytes": 8673,
+      "source": "apps/android/app/src/test/java/com/narada/android/ChatUiTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/ComposeShellTest.kt": {
+      "sha256": "0b80a94b1530146f4076f3cb02c217848cef55516877bdbbbf06ec8387e886a2",
+      "bytes": 8683,
+      "source": "apps/android/app/src/test/java/com/narada/android/ComposeShellTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/ConnectionFixtures.kt": {
+      "sha256": "780cfacf805d86428ac86346c37736dc1aa84f8adfee2caecaf0ad7096bdb552",
+      "bytes": 2612,
+      "source": "apps/android/app/src/test/java/com/narada/android/ConnectionFixtures.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/ConnectionQrTest.kt": {
+      "sha256": "d18f815e9d2bddb6ab7b6b28e320e735c5e675bb520d375997e9f484010de2cf",
+      "bytes": 2513,
+      "source": "apps/android/app/src/test/java/com/narada/android/ConnectionQrTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/ConnectionUiTest.kt": {
+      "sha256": "f81748d7c966e63ad9b6c79c583c644d37dfbc228d571422341e9c9efaed7611",
+      "bytes": 4857,
+      "source": "apps/android/app/src/test/java/com/narada/android/ConnectionUiTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/ConnectionsCoordinatorTest.kt": {
+      "sha256": "7964d7889dca93584293f2090590a16cc3a98e263c464aa8d8e4579b32216f08",
+      "bytes": 7408,
+      "source": "apps/android/app/src/test/java/com/narada/android/ConnectionsCoordinatorTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/ContentCoordinatorFixture.kt": {
+      "sha256": "b46350cded7117cd9b264b1e9efc3b5b72afacf9d8f3354aa94c5cc2e9d5c50c",
+      "bytes": 12740,
+      "source": "apps/android/app/src/test/java/com/narada/android/ContentCoordinatorFixture.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/ContentUiTest.kt": {
+      "sha256": "133099e61c2926e14cb6d380a0f053971ed3954fb8634587fc496bdc0b22fae4",
+      "bytes": 12481,
+      "source": "apps/android/app/src/test/java/com/narada/android/ContentUiTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/DocumentsExportProviderTest.kt": {
+      "sha256": "3da087109fd7d5266454b88ec0bbd8a18509398512d3d6dae99b6d5312ad3c5b",
+      "bytes": 8143,
+      "source": "apps/android/app/src/test/java/com/narada/android/DocumentsExportProviderTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/DocumentsImportProviderTest.kt": {
+      "sha256": "1a77090eaec6706381c941e2851ecb9144d1a8331fb552cd47b29361b6c003ff",
+      "bytes": 6049,
+      "source": "apps/android/app/src/test/java/com/narada/android/DocumentsImportProviderTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/ExportPickerBindingTest.kt": {
+      "sha256": "481bc742e6def27554767beaa1388ffe19398de3e43ed5ce4e7675d8547eff7a",
+      "bytes": 3869,
+      "source": "apps/android/app/src/test/java/com/narada/android/ExportPickerBindingTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/FileLeaseCoordinatorTest.kt": {
+      "sha256": "cdd1805d022903844767c38e497c215c4d264625c1456ee1f8d1b206c9e9c709",
+      "bytes": 8465,
+      "source": "apps/android/app/src/test/java/com/narada/android/FileLeaseCoordinatorTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/FilesActionsUiTest.kt": {
+      "sha256": "726adacfb8d1fd06fcd5f4463286e8fc7d39fcb50406293a3b57f6af8efe77c4",
+      "bytes": 4792,
+      "source": "apps/android/app/src/test/java/com/narada/android/FilesActionsUiTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/FilesDownloadUiTest.kt": {
+      "sha256": "e03654c399165442d31f031e2dcdac188bef2a8149699ae28d637366157ff2e9",
+      "bytes": 2738,
+      "source": "apps/android/app/src/test/java/com/narada/android/FilesDownloadUiTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/FilesUiTest.kt": {
+      "sha256": "9f6ea6efb6b28d61b35d569c5ad0c1a121a122e14532f62c885978a7642df9ff",
+      "bytes": 5368,
+      "source": "apps/android/app/src/test/java/com/narada/android/FilesUiTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/MetadataStoreTest.kt": {
+      "sha256": "814cda8530f9e873c70268d4bde17f57911ca198534a6cae0f90e958d2bed2af",
+      "bytes": 8526,
+      "source": "apps/android/app/src/test/java/com/narada/android/MetadataStoreTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/NativeAdaptersTest.kt": {
+      "sha256": "71f426411678feb3e40f831553c690c9d0ee6656bfae234235c566b5a8e7b2d8",
+      "bytes": 7071,
+      "source": "apps/android/app/src/test/java/com/narada/android/NativeAdaptersTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/OfflineCoordinatorTest.kt": {
+      "sha256": "e3754fe65c9d7612ac725c3b07ed429f169c0547cbc7c4bb9fa1f1bee83699ac",
+      "bytes": 4792,
+      "source": "apps/android/app/src/test/java/com/narada/android/OfflineCoordinatorTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/ProtectedChatJournalTest.kt": {
+      "sha256": "887610891d76bd3ff72108b6f4dc084fc10540dc5f18fce0b52c67e9449f52c3",
+      "bytes": 6685,
+      "source": "apps/android/app/src/test/java/com/narada/android/ProtectedChatJournalTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/ProtectedConnectionsTest.kt": {
+      "sha256": "0161430d54d1206bd59255cc59b08e74856a5311b7bf26e48c6a434d275979b5",
+      "bytes": 6787,
+      "source": "apps/android/app/src/test/java/com/narada/android/ProtectedConnectionsTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/ProtectedContentJournalTest.kt": {
+      "sha256": "385791a2448b86df13026ea5fdcc319b06886f3dd69bf42e11c778795314d1d6",
+      "bytes": 8085,
+      "source": "apps/android/app/src/test/java/com/narada/android/ProtectedContentJournalTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/ProtectedDownloadJournalTest.kt": {
+      "sha256": "3ac5d8184fce10d74b8f189f0afc932cc4296eb1a2520cf8bd322d44654a8a05",
+      "bytes": 5483,
+      "source": "apps/android/app/src/test/java/com/narada/android/ProtectedDownloadJournalTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/ProtectedFileJournalTest.kt": {
+      "sha256": "3e8d72b0f839166ee06a8b81cdd44ee218c002594deb559677d3ff1e2ccb781d",
+      "bytes": 5240,
+      "source": "apps/android/app/src/test/java/com/narada/android/ProtectedFileJournalTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/SettingsAndPlatformTest.kt": {
+      "sha256": "e4aae22a3c0d24fef3444401f3f2e343a3ca0c86397ec96977d28ce1aba91542",
+      "bytes": 8387,
+      "source": "apps/android/app/src/test/java/com/narada/android/SettingsAndPlatformTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/TestFixture.kt": {
+      "sha256": "f628c385933eb8190bc6515e865d123a313915dd1c67e37b09dca2ace6d57a81",
+      "bytes": 2450,
+      "source": "apps/android/app/src/test/java/com/narada/android/TestFixture.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/TransferTestData.kt": {
+      "sha256": "9efab2ba1075ba3d035001ab6bed9a1490f62c427ffb7eb38084ea1c6ee88d3e",
+      "bytes": 2699,
+      "source": "apps/android/app/src/test/java/com/narada/android/TransferTestData.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/TransfersCoordinatorTest.kt": {
+      "sha256": "d33f4b4bab645821a4ba934d40b7dbadea3686ab7cdb720c7eb0dfc692c91df5",
+      "bytes": 10535,
+      "source": "apps/android/app/src/test/java/com/narada/android/TransfersCoordinatorTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/TransfersUiTest.kt": {
+      "sha256": "002fa036eb15ff8334896579674f276c4b82da6b01f1be9c1734dfd083e29125",
+      "bytes": 8151,
+      "source": "apps/android/app/src/test/java/com/narada/android/TransfersUiTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/ViewModelStateTest.kt": {
+      "sha256": "4ace96645219c5a50e323580d037efc5af0de6301ed07eb345d6ba85e10e73b0",
+      "bytes": 2515,
+      "source": "apps/android/app/src/test/java/com/narada/android/ViewModelStateTest.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/WorkOwnershipTest.kt": {
+      "sha256": "e6c819a60b767412b05605eb67bd2e36063c29d29c95266bb9b42a6ff00f4cb3",
+      "bytes": 3624,
+      "source": "apps/android/app/src/test/java/com/narada/android/WorkOwnershipTest.kt"
+    },
+    "apps/android/app/src/test/resources/bounded-preview-fixture.jpg": {
+      "sha256": "e8ed2787fa2d6bcb82ca8b014b43ca3b4dc5e545c2c1898b9e602a11eb6e28e3",
+      "bytes": 636,
+      "source": "apps/android/app/src/test/resources/bounded-preview-fixture.jpg"
+    },
+    "apps/android/build.gradle.kts": {
+      "sha256": "45e4df939e1760ff8bef2bf540f5ddbb49941094252f35da521bef64ee5893b9",
+      "bytes": 662,
+      "source": "apps/android/build.gradle.kts"
+    },
+    "apps/android/core/connection/build.gradle.kts": {
+      "sha256": "c56d6a1f5a94999b57bb1d4a4a7dbef03a4d1c432a1cf9cf269812e8cd050b62",
+      "bytes": 2329,
+      "source": "apps/android/core/connection/build.gradle.kts"
+    },
+    "apps/android/core/connection/gradle.lockfile": {
+      "sha256": "e8dce50acb5076563d3d0d83dca1b9a83c522654691e882ba62a743014bd16ae",
+      "bytes": 7095,
+      "source": "apps/android/core/connection/gradle.lockfile"
+    },
+    "apps/android/core/connection/src/main/kotlin/com/narada/connection/AgeCryptography.kt": {
+      "sha256": "d6ddca9bfab0c4844754c29e4be35aaa0683a91dabf1e455a72f38402432f6ab",
+      "bytes": 4121,
+      "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/AgeCryptography.kt"
+    },
+    "apps/android/core/connection/src/main/kotlin/com/narada/connection/AttachmentExport.kt": {
+      "sha256": "02e290aad59eb87255d4e153d52286cb23364be4ea4f3f637df1174e47e48f9c",
+      "bytes": 6162,
+      "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/AttachmentExport.kt"
+    },
+    "apps/android/core/connection/src/main/kotlin/com/narada/connection/AttachmentsClient.kt": {
+      "sha256": "8bfae48dbdc55a74c8f7344e1857062f146b902458aa5c7e5dacda62517f449b",
+      "bytes": 7099,
+      "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/AttachmentsClient.kt"
+    },
+    "apps/android/core/connection/src/main/kotlin/com/narada/connection/AttachmentsEngine.kt": {
+      "sha256": "0502d03b2d9f7ce59518654a986df977a9e7ec0303c2f78e3a08cc053364346f",
+      "bytes": 19604,
+      "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/AttachmentsEngine.kt"
+    },
+    "apps/android/core/connection/src/main/kotlin/com/narada/connection/AttachmentsProtocol.kt": {
+      "sha256": "ae30f1fe56d3732ed3aac04388c18ae26d1d8f3b50d934686503304c593b5fdd",
+      "bytes": 9207,
+      "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/AttachmentsProtocol.kt"
+    },
+    "apps/android/core/connection/src/main/kotlin/com/narada/connection/ChatClient.kt": {
+      "sha256": "d344bae7a5b375a2081a29e41d6bdb524aeedddf8b7a4365fc8aaeb4335c0799",
+      "bytes": 6780,
+      "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/ChatClient.kt"
+    },
+    "apps/android/core/connection/src/main/kotlin/com/narada/connection/ChatEngine.kt": {
+      "sha256": "b234ab36caa93f4946737b7bed30b91036532d19ba32a274606ba8e4817bb0ef",
+      "bytes": 16894,
+      "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/ChatEngine.kt"
+    },
+    "apps/android/core/connection/src/main/kotlin/com/narada/connection/ChatProtocol.kt": {
+      "sha256": "8bbe60f6e5a384c95bc6890da448c3060d0fea90b3047aca060a4b56f69b0c48",
+      "bytes": 12241,
+      "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/ChatProtocol.kt"
+    },
+    "apps/android/core/connection/src/main/kotlin/com/narada/connection/DownloadEngine.kt": {
+      "sha256": "ee9d0b90bf65c319b185e1ed8f3131f819729c836d3d143e16c4856ce2c65b55",
+      "bytes": 11430,
+      "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/DownloadEngine.kt"
+    },
+    "apps/android/core/connection/src/main/kotlin/com/narada/connection/FileBrowser.kt": {
+      "sha256": "a03942136584d5a47c15c7073047eadabe65ef3de566d6047f258806cd210e5b",
+      "bytes": 14810,
+      "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/FileBrowser.kt"
+    },
+    "apps/android/core/connection/src/main/kotlin/com/narada/connection/FilesClient.kt": {
+      "sha256": "521f1cf477e4ba649bad1082236a1f9ebbce258b8004da4dcbaa63e92ff0ad5f",
+      "bytes": 9344,
+      "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/FilesClient.kt"
+    },
+    "apps/android/core/connection/src/main/kotlin/com/narada/connection/FilesProtocol.kt": {
+      "sha256": "72b0996b09e2d8c6adaf18cf3f06cc34a125e8c22881f2c43e8b1f0434e70c82",
+      "bytes": 16430,
+      "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/FilesProtocol.kt"
+    },
+    "apps/android/core/connection/src/main/kotlin/com/narada/connection/OfflineClient.kt": {
+      "sha256": "f432ca18278facfb208cdb9822f0bfbc0df02460aaec93b55df6a57b0c052aac",
+      "bytes": 2342,
+      "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/OfflineClient.kt"
+    },
+    "apps/android/core/connection/src/main/kotlin/com/narada/connection/OfflineEngine.kt": {
+      "sha256": "0afced1807d9a9d97ae451f845d1730f3a29252cff7640decb77fbb509d344de",
+      "bytes": 11521,
+      "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/OfflineEngine.kt"
+    },
+    "apps/android/core/connection/src/main/kotlin/com/narada/connection/OfflineProtocol.kt": {
+      "sha256": "80fc0586b45454bc8dcc4f8a8877e4e8c2517fa04426ca20434c415c457790a9",
+      "bytes": 9741,
+      "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/OfflineProtocol.kt"
+    },
+    "apps/android/core/connection/src/main/kotlin/com/narada/connection/OlmCryptography.kt": {
+      "sha256": "5884311425ce1be5092afb16c6548df3bcda7a7d4da627ae53132fcd52a8023d",
+      "bytes": 6781,
+      "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/OlmCryptography.kt"
+    },
+    "apps/android/core/connection/src/main/kotlin/com/narada/connection/PacedTransfersGateway.kt": {
+      "sha256": "f750953ab24d611bb65874da346369fa988fb45938953a3cc04d599f9f5f5120",
+      "bytes": 1844,
+      "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/PacedTransfersGateway.kt"
+    },
+    "apps/android/core/connection/src/main/kotlin/com/narada/connection/Protocol.kt": {
+      "sha256": "7abb97b2222c4e5acb24a6ee61448f646f68af44f109aac57d5fd7db1e6aa20d",
+      "bytes": 11144,
+      "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/Protocol.kt"
+    },
+    "apps/android/core/connection/src/main/kotlin/com/narada/connection/TransferChunks.kt": {
+      "sha256": "b3c810f74a4ceb47e1fcf774242ff36c2666f4a88b4e23bd5e402477337814cd",
+      "bytes": 9515,
+      "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/TransferChunks.kt"
+    },
+    "apps/android/core/connection/src/main/kotlin/com/narada/connection/TransferExport.kt": {
+      "sha256": "0cd97ddca523c904aa9674115df9ef8ef17faad0ab82f0ada1656c2be012a062",
+      "bytes": 7709,
+      "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/TransferExport.kt"
+    },
+    "apps/android/core/connection/src/main/kotlin/com/narada/connection/TransfersClient.kt": {
+      "sha256": "ec6023d7ebaedcd5d1782629cddb98084becd1f812d095f2c6f1f518ec766a8a",
+      "bytes": 5797,
+      "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/TransfersClient.kt"
+    },
+    "apps/android/core/connection/src/main/kotlin/com/narada/connection/TransfersProtocol.kt": {
+      "sha256": "f4b4113d5080e815ebab792cf2ecf3438a30ecf7282de172ee9f4a2a412ce8a1",
+      "bytes": 9580,
+      "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/TransfersProtocol.kt"
+    },
+    "apps/android/core/connection/src/main/kotlin/com/narada/connection/Transport.kt": {
+      "sha256": "b53ee98c7e348ed828f141e67a87cadfe8a4a0f3cb6690a75145de7376ab1af3",
+      "bytes": 22720,
+      "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/Transport.kt"
+    },
+    "apps/android/core/connection/src/main/kotlin/com/narada/connection/Trust.kt": {
+      "sha256": "4a2094c2b9b6bab1cc934ebb1762a58a466f9235a322cef35101c9cd4c8d83cb",
+      "bytes": 16881,
+      "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/Trust.kt"
+    },
+    "apps/android/core/connection/src/main/kotlin/com/narada/connection/TrustCipher.kt": {
+      "sha256": "e3fd8aadf01236bc8e37b3c72927bdc167cefbbcb189709404ad8136b4f487b8",
+      "bytes": 1401,
+      "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/TrustCipher.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/AgeCryptographyTest.kt": {
+      "sha256": "6447930232424f10f606150b614d25818d5cf346d04a27be374caa44c825601e",
+      "bytes": 5146,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/AgeCryptographyTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/AttachmentExportTest.kt": {
+      "sha256": "4b9207bd8a1b0af5fefca0ac3a2f4a58644ade4dab6ddb9a3d58c16a5e03fc93",
+      "bytes": 6672,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/AttachmentExportTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/AttachmentFixtures.kt": {
+      "sha256": "e6061d5719eacd4baaaeebdd9fd0bbe652a7cfea95896cb183b2b93291294642",
+      "bytes": 5434,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/AttachmentFixtures.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/AttachmentsClientTest.kt": {
+      "sha256": "98fa1f66e17f009f4ac44192cc17efd238386b978e058a974e50e6534a86119a",
+      "bytes": 7049,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/AttachmentsClientTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/AttachmentsDesktopInteropTest.kt": {
+      "sha256": "4e75433a7936ca77666e8a753fb6abf3d5aadb62319ca1383a01f8161fb8fa93",
+      "bytes": 7058,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/AttachmentsDesktopInteropTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/AttachmentsEngineTest.kt": {
+      "sha256": "ecf3243e29a2732113d783f5a53a420174adc05a0ecc1247419b003cd9c1745f",
+      "bytes": 10721,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/AttachmentsEngineTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/AttachmentsTlsBoundaryTest.kt": {
+      "sha256": "f99f01ff9b6a7152f72ca309ecb423eb140ed1423b872e62106c7b1105f8ed66",
+      "bytes": 5627,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/AttachmentsTlsBoundaryTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/ChatClientTest.kt": {
+      "sha256": "e3aaaaa9e4ef4330a5c5a85be44f9a019c5819d46cd9aebe92e82d79ddb0076d",
+      "bytes": 6905,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/ChatClientTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/ChatDesktopInteropTest.kt": {
+      "sha256": "65c404bc0c3880da7e1832d2578d67292526608f4f68c660b5307cf42295a959",
+      "bytes": 10186,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/ChatDesktopInteropTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/ChatEngineTest.kt": {
+      "sha256": "5679b2c26a363e8fe1792ada0f6cfaa09de67571f93848daa56ee62aca90c2ca",
+      "bytes": 11173,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/ChatEngineTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/ChatFixtures.kt": {
+      "sha256": "d031c7d803e90c017b8d491677e080464773790a3acf3f3885277793c8e634d8",
+      "bytes": 4921,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/ChatFixtures.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/ChatProtocolTest.kt": {
+      "sha256": "96a270d333b2eb135c73c499c581db369e53c1b29ff7f8c8851b7595cb800c67",
+      "bytes": 3942,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/ChatProtocolTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/ContentDesktopFixture.kt": {
+      "sha256": "c1b6eb15873b8d8a025a055184c3dc2b4619bcdbd783d13f225f945224a3a050",
+      "bytes": 9793,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/ContentDesktopFixture.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/DesktopInteropTest.kt": {
+      "sha256": "5d8b511fb033cb1c7d45c02371397cf90e7248b69b031b4d49e8840142df330e",
+      "bytes": 11432,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/DesktopInteropTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/DownloadEngineTest.kt": {
+      "sha256": "6df71ee73b41941a5c8b92839ba654bbf135240844e137191dbc96bc5b9ed780",
+      "bytes": 8934,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/DownloadEngineTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/FileBrowserTest.kt": {
+      "sha256": "e9cf6328514d060406b4ffd4d2ed49e78fba56d01b1c410353a1f6e13f777725",
+      "bytes": 11641,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/FileBrowserTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/FileFixtures.kt": {
+      "sha256": "02a0fc6d390aaed66aaeec5a2d5787c9f48fbeb88bad9a56daf81b47050b1e45",
+      "bytes": 5811,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/FileFixtures.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/FileTransportTest.kt": {
+      "sha256": "8abd51dd80b786be0ad13d32b8d4a84bec2d1d3b32ef539a74457a2f10d7316d",
+      "bytes": 2863,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/FileTransportTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/FilesClientTest.kt": {
+      "sha256": "b846a8ae3c99b46241d4590354cc6b343fbd3ce71611dc53c8a53b0de237d3b9",
+      "bytes": 10441,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/FilesClientTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/FilesDesktopInteropTest.kt": {
+      "sha256": "012a354462ac43be990c4c48c8050fc7c01db419a4dd6b26361b048a91dfa4bb",
+      "bytes": 11973,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/FilesDesktopInteropTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/FilesProtocolTest.kt": {
+      "sha256": "cefa6c0ff40203716fa5486178fb7aefb84184cc1e41eb01e21ab15983faa1a9",
+      "bytes": 11140,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/FilesProtocolTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/OfflineDesktopInteropTest.kt": {
+      "sha256": "34071931e4467d484927b762eb968d491747d58e69e498717003808e6c61576e",
+      "bytes": 6333,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/OfflineDesktopInteropTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/OfflineEngineTest.kt": {
+      "sha256": "6ce4ba7a6d0a4098bce0399bc1c53ac837f16c68bdb846d008e8855c85fff640",
+      "bytes": 15150,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/OfflineEngineTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/OfflineFixtures.kt": {
+      "sha256": "89c6da9787f928228a4813fc9f7628540d8f9d5e345036369f24fa8c364f5093",
+      "bytes": 4362,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/OfflineFixtures.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/OfflineProtocolTest.kt": {
+      "sha256": "4af630b1344f836461f2ddfe8c8818c14b05a4924525d611e464d220dceca367",
+      "bytes": 5452,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/OfflineProtocolTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/PacedTransfersGatewayTest.kt": {
+      "sha256": "c13ba40ea1000f4a257dde224993c1ec446f514e3ed61c22b7a57ed61d9bffe6",
+      "bytes": 2297,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/PacedTransfersGatewayTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/PairingEngineTest.kt": {
+      "sha256": "82a04e120248ba82ed5aa3585c39024ca6d9204b88afa2403ff1b27a315de763",
+      "bytes": 9019,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/PairingEngineTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/ProtocolTest.kt": {
+      "sha256": "20127bc7dede5e191755d336e9a03b2c521e4907b674411c55f7b02b4f55e5f5",
+      "bytes": 7002,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/ProtocolTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/SyncClientTest.kt": {
+      "sha256": "f3a9d58fc96e4fa997c722daafed0a0f3e9ec3b82226153139191452af6e1951",
+      "bytes": 6157,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/SyncClientTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/TestIdentities.kt": {
+      "sha256": "4f6a9d743dcd5c6fa4bec6888551ed63b82d2086c92185ce5662a7de77bb06c1",
+      "bytes": 3646,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/TestIdentities.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/TlsBoundaryTest.kt": {
+      "sha256": "041964db34b99aeae7b32d60b8e245d88142bd263ef092cc95d7476167b99a86",
+      "bytes": 7631,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/TlsBoundaryTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/TransferChunksTest.kt": {
+      "sha256": "a7788f69262f7e028ec59d75597de1dee9a888f4d6f76c49c4ff3b425eb2109e",
+      "bytes": 6838,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/TransferChunksTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/TransferExportTest.kt": {
+      "sha256": "f408f8879c4c55ce76c5927829486c577bc5fd6591500669288c937edc9a5ab5",
+      "bytes": 9766,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/TransferExportTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/TransferFixtures.kt": {
+      "sha256": "cd2ac00e3c4da36f0038735c1771f8168560689e875d478477baf8d677dc6027",
+      "bytes": 8940,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/TransferFixtures.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/TransferTransportTest.kt": {
+      "sha256": "728302c0b8cf2d1a5503fe25ca83baa2afe5338e75fadb0e0ab716dd425127c3",
+      "bytes": 3639,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/TransferTransportTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/TransfersClientTest.kt": {
+      "sha256": "1c1aa64d25840252eeecc574044824d432b5f7fb21bacb8ac7ec2a637ec6698a",
+      "bytes": 6867,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/TransfersClientTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/TransfersDesktopInteropTest.kt": {
+      "sha256": "8f2d482dd94fd1c3bb6abacd74fe2cac0a2df10149c935aa55cd4b12731a0750",
+      "bytes": 11409,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/TransfersDesktopInteropTest.kt"
+    },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/TransfersProtocolTest.kt": {
+      "sha256": "17d264a895af6a282a2bff7a4ff01adc88227c1219c54c539476a5290926fa11",
+      "bytes": 6574,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/TransfersProtocolTest.kt"
+    },
+    "apps/android/core/domain/build.gradle.kts": {
+      "sha256": "349ff3859fd3327885b89869a95ef126ab64ae09a7c63639ebaf8100106f59f5",
+      "bytes": 390,
+      "source": "apps/android/core/domain/build.gradle.kts"
+    },
+    "apps/android/core/domain/gradle.lockfile": {
+      "sha256": "630c1feddef7e93589cae74f79087b866ed39ebea987dd9acea8b0c84bf14c36",
+      "bytes": 6741,
+      "source": "apps/android/core/domain/gradle.lockfile"
+    },
+    "apps/android/core/domain/src/main/kotlin/com/narada/domain/Workspace.kt": {
+      "sha256": "7467ef70ab4a9e03a59e168f26a8ce7bea4ad7ce5937549930fe818688b69748",
+      "bytes": 5046,
+      "source": "apps/android/core/domain/src/main/kotlin/com/narada/domain/Workspace.kt"
+    },
+    "apps/android/core/domain/src/test/kotlin/com/narada/domain/FoundationPolicyTest.kt": {
+      "sha256": "06fa1d84c464faa0fe077cd3a1ddd0fb1bff1f05419071de4f917dd6d607e986",
+      "bytes": 4210,
+      "source": "apps/android/core/domain/src/test/kotlin/com/narada/domain/FoundationPolicyTest.kt"
+    },
+    "apps/android/dev-env.sh": {
+      "sha256": "9ed6b5f6e08c65be51966033e7111b9d6e25f3de6d55d303584937f128a88ba8",
+      "bytes": 570,
+      "source": "apps/android/dev-env.sh"
+    },
+    "apps/android/gradle.properties": {
+      "sha256": "7dffc583ba236cd48b70111c1fcbd590266f51b68f6960299ffecbb7becca768",
+      "bytes": 431,
+      "source": "apps/android/gradle.properties"
+    },
+    "apps/android/gradle/libs.versions.toml": {
+      "sha256": "812bf0262d008abb9d29c7006f2cf3d622c375fd450d3c65f618d0506c0756a8",
+      "bytes": 4732,
+      "source": "apps/android/gradle/libs.versions.toml"
+    },
+    "apps/android/gradle/verification-metadata.xml": {
+      "sha256": "d24f788a57115649bb74d13c2cd6a7de148f94938da6e5f7e5d2d553eb433099",
+      "bytes": 328481,
+      "source": "apps/android/gradle/verification-metadata.xml"
+    },
+    "apps/android/gradle/wrapper/gradle-wrapper.jar": {
+      "sha256": "81a82aaea5abcc8ff68b3dfcb58b3c3c429378efd98e7433460610fecd7ae45f",
+      "bytes": 43705,
+      "source": "apps/android/gradle/wrapper/gradle-wrapper.jar"
+    },
+    "apps/android/gradle/wrapper/gradle-wrapper.properties": {
+      "sha256": "c040b6ef2fb893ff5beea5a281614f2848f1c3996a7886f650b713f8240656a2",
+      "bytes": 338,
+      "source": "apps/android/gradle/wrapper/gradle-wrapper.properties"
+    },
+    "apps/android/gradlew": {
+      "sha256": "734b3879d3501dce471cf0522d3bcbafe76873d9fc5129345b67fb43bd15e933",
+      "bytes": 8752,
+      "source": "apps/android/gradlew"
+    },
+    "apps/android/gradlew.bat": {
+      "sha256": "57931b17dd228e5c24dac90e815d0bf82477e831a4618dfab4136f5446b42a9f",
+      "bytes": 2966,
+      "source": "apps/android/gradlew.bat"
+    },
+    "apps/android/native-age/Cargo.lock": {
+      "sha256": "6257bda597d6276448fda337ce18dcfdd7d278d33c3aee089c6396874c61d507",
+      "bytes": 39945,
+      "source": "apps/android/native-age/Cargo.lock"
+    },
+    "apps/android/native-age/Cargo.toml": {
+      "sha256": "0182ca215d0131258ec680705b272f8c5fe11812a36c9bc7805de11da244f985",
+      "bytes": 482,
+      "source": "apps/android/native-age/Cargo.toml"
+    },
+    "apps/android/native-age/notices/age-0.12.1-LICENSE-APACHE.txt": {
+      "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026",
+      "bytes": 10848,
+      "source": "apps/android/native-age/notices/age-0.12.1-LICENSE-APACHE.txt"
+    },
+    "apps/android/native-age/notices/age-0.12.1-LICENSE-MIT.txt": {
+      "sha256": "fe56c030c2d8c3404a37fe711cebb27ebea13d0aacf7e3524db4198335ad8cd1",
+      "bytes": 1077,
+      "source": "apps/android/native-age/notices/age-0.12.1-LICENSE-MIT.txt"
+    },
+    "apps/android/native-age/notices/age-core-0.12.0-LICENSE-APACHE.txt": {
+      "sha256": "3708458dee7f359ac6c9c5558023ed481be87e5372c43ebd7f2ca7ad23c12026",
+      "bytes": 10848,
+      "source": "apps/android/native-age/notices/age-core-0.12.0-LICENSE-APACHE.txt"
+    },
+    "apps/android/native-age/notices/age-core-0.12.0-LICENSE-MIT.txt": {
+      "sha256": "fe56c030c2d8c3404a37fe711cebb27ebea13d0aacf7e3524db4198335ad8cd1",
+      "bytes": 1077,
+      "source": "apps/android/native-age/notices/age-core-0.12.0-LICENSE-MIT.txt"
+    },
+    "apps/android/native-age/src/lib.rs": {
+      "sha256": "e3a9af7f56aa627226d6e638c6328f23a09beca6a321ceb6bc0205e4f30c79e4",
+      "bytes": 6929,
+      "source": "apps/android/native-age/src/lib.rs"
+    },
+    "apps/android/native-olm/Cargo.lock": {
+      "sha256": "d539318cc7b19277ac6feed024a34fb72b3df08b89d68856415a84e52dff7128",
+      "bytes": 24214,
+      "source": "apps/android/native-olm/Cargo.lock"
+    },
+    "apps/android/native-olm/Cargo.toml": {
+      "sha256": "8891c020e7df5415f1e1bd08ebcf17767a9a5beeb81cef1d0d33216bc0728159",
+      "bytes": 667,
+      "source": "apps/android/native-olm/Cargo.toml"
+    },
+    "apps/android/native-olm/src/lib.rs": {
+      "sha256": "98c8a4f53fc6c9a78cc945d32d6ce5aeb1423eafcba164adda862e2aa66d1b95",
+      "bytes": 23316,
+      "source": "apps/android/native-olm/src/lib.rs"
+    },
+    "apps/android/settings-gradle.lockfile": {
+      "sha256": "e58bb2ed80db9f829601a658d7c33b9802eb7d2191c31e79c28e01f14c225926",
+      "bytes": 198,
+      "source": "apps/android/settings-gradle.lockfile"
+    },
+    "apps/android/settings.gradle.kts": {
+      "sha256": "ade14997a75cc02bdc690031328e04d22a2b1852f3a76af50684b874eb4038e3",
+      "bytes": 323,
+      "source": "apps/android/settings.gradle.kts"
+    },
+    "apps/desktop-shell/src-tauri/Cargo.toml": {
+      "sha256": "4252a6beb474ab0206459683057ca762b328853d993dabd00173ff59ad43ea72",
+      "bytes": 531,
+      "source": "apps/desktop-shell/src-tauri/Cargo.toml"
+    },
+    "apps/desktop-shell/src-tauri/build.rs": {
+      "sha256": "42357b24d9cead507c163de4331d60fd3777cc6972d774ef8576065453cade2f",
+      "bytes": 1728,
+      "source": "apps/desktop-shell/src-tauri/build.rs"
+    },
+    "apps/desktop-shell/src-tauri/capabilities/main.json": {
+      "sha256": "ad29f58600efe0951b451d53adbff473c24e5b25116fa4d3f175cb4f92318e21",
+      "bytes": 1759,
+      "source": "apps/desktop-shell/src-tauri/capabilities/main.json"
+    },
+    "apps/desktop-shell/src-tauri/icons/128x128.png": {
+      "sha256": "75c7be43130a483aac710b424af1d0b1f9467490c4bba90b0e694ec75112ae77",
+      "bytes": 841,
+      "source": "apps/desktop-shell/src-tauri/icons/128x128.png"
+    },
+    "apps/desktop-shell/src-tauri/icons/256x256.png": {
+      "sha256": "56c488129d569e1a770da027c5e94e0f8320a6c948a94d3866d28b7a10c3a39c",
+      "bytes": 1715,
+      "source": "apps/desktop-shell/src-tauri/icons/256x256.png"
+    },
+    "apps/desktop-shell/src-tauri/icons/32x32.png": {
+      "sha256": "b8ed3036f4edd517d4df840ad6b8c6c69dab09ec4cc673e255e692e901bfc866",
+      "bytes": 232,
+      "source": "apps/desktop-shell/src-tauri/icons/32x32.png"
+    },
+    "apps/desktop-shell/src-tauri/icons/icon.ico": {
+      "sha256": "38207b81fa0f0936e290808272fdc6fc1ab2bf95960ddee156ac6772a6b98d2a",
+      "bytes": 10195,
+      "source": "apps/desktop-shell/src-tauri/icons/icon.ico"
+    },
+    "apps/desktop-shell/src-tauri/src/main.rs": {
+      "sha256": "b2f99c1ce03266c6997eb510bd828fec1189e3003b3d5795eb1647ca436486b7",
+      "bytes": 17717,
+      "source": "apps/desktop-shell/src-tauri/src/main.rs"
+    },
+    "apps/desktop-shell/src-tauri/tauri.conf.json": {
+      "sha256": "d0c2ee75b4242e76d2ec83ae4f34268b43eb1ae7098f5c49b3b8987ce48b080d",
+      "bytes": 1656,
+      "source": "apps/desktop-shell/src-tauri/tauri.conf.json"
+    },
+    "apps/windows-agent/Cargo.toml": {
+      "sha256": "5a950039dd94244488a6ca0c337874c578ddcfeb347c7cfd4ac78dcfb3cab3ba",
+      "bytes": 713,
+      "source": "apps/windows-agent/Cargo.toml"
+    },
+    "apps/windows-agent/src/main.rs": {
+      "sha256": "256302a2f71c326634cb5a86f6738e69cb672cd2648a72eceaf1dbb33caa70f1",
+      "bytes": 8787,
+      "source": "apps/windows-agent/src/main.rs"
+    },
+    "config/narada.example.toml": {
+      "sha256": "50dcdaed731d0a6f42b134932400b496c32212db7e3ed7b2e8b972ee2e3059c7",
+      "bytes": 290,
+      "source": "config/narada.example.toml"
+    },
+    "crates/narada-connection/Cargo.toml": {
+      "sha256": "e798b4bf499828012fb0de25db141f3c610bb6b19a50717cd926d40d4e5598c5",
+      "bytes": 1450,
+      "source": "crates/narada-connection/Cargo.toml"
+    },
+    "crates/narada-connection/src/content/attachments.rs": {
+      "sha256": "9d4239884b28985fae2552ab3db190f89099bacbbc6c32cc7f855835b6e21fa5",
+      "bytes": 35685,
+      "source": "crates/narada-connection/src/content/attachments.rs"
+    },
+    "crates/narada-connection/src/content/chat.rs": {
+      "sha256": "7b5eed72ad93f74884cbfbc0e87a369db4c12b233c5b5c07acd8bddd20fd5a92",
+      "bytes": 17907,
+      "source": "crates/narada-connection/src/content/chat.rs"
+    },
+    "crates/narada-connection/src/content/mod.rs": {
+      "sha256": "a50b8e1d26fc92a8e6f409f36e6860db582fb684e36083f528b1c950435a971f",
+      "bytes": 16626,
+      "source": "crates/narada-connection/src/content/mod.rs"
+    },
+    "crates/narada-connection/src/content/tests.rs": {
+      "sha256": "91578a630c2bec139ea187eb5244f58e061a6c3cf5af88541be2e503895a2722",
+      "bytes": 27126,
+      "source": "crates/narada-connection/src/content/tests.rs"
+    },
+    "crates/narada-connection/src/content/vault.rs": {
+      "sha256": "a011743eb528085452cd0ec70f0c284225f29dd1c00537ad40923f5716fde7a2",
+      "bytes": 13607,
+      "source": "crates/narada-connection/src/content/vault.rs"
+    },
+    "crates/narada-connection/src/discovery.rs": {
+      "sha256": "7ea70223e3aa3b117d3932c15c46a99acfc48508d20d71b9fb38d25accb80b49",
+      "bytes": 6644,
+      "source": "crates/narada-connection/src/discovery.rs"
+    },
+    "crates/narada-connection/src/endpoint.rs": {
+      "sha256": "3a205fe7b9799c409d7b5fa8b8e7d9ae1b24ac0edde8c72bf785ef44b8abe2da",
+      "bytes": 6867,
+      "source": "crates/narada-connection/src/endpoint.rs"
+    },
+    "crates/narada-connection/src/identity.rs": {
+      "sha256": "aba45ebabb40897c4fd3326e5a1455d3989567a4798d176ac2fc6f338dd8d059",
+      "bytes": 17278,
+      "source": "crates/narada-connection/src/identity.rs"
+    },
+    "crates/narada-connection/src/lib.rs": {
+      "sha256": "a8ae5dec72134c19e71bfc2a9a962a2f91062573eae01c7da5b9099f9977065e",
+      "bytes": 286,
+      "source": "crates/narada-connection/src/lib.rs"
+    },
+    "crates/narada-connection/src/service.rs": {
+      "sha256": "75a41f40145a61d4e958eed3f6ff7903482d4f3c3a96ee58a792cca249947063",
+      "bytes": 77430,
+      "source": "crates/narada-connection/src/service.rs"
+    },
+    "crates/narada-connection/src/service/attachment_upload.rs": {
+      "sha256": "864b137c0e3184efdc98eaa6cfaf42b3edce6b9466ecaeff23091bc33f12b20d",
+      "bytes": 5187,
+      "source": "crates/narada-connection/src/service/attachment_upload.rs"
+    },
+    "crates/narada-connection/src/service/content.rs": {
+      "sha256": "4e27a34103861a440fb4f4244c26249549eeed14e4903fefae937921b659fa4c",
+      "bytes": 29164,
+      "source": "crates/narada-connection/src/service/content.rs"
+    },
+    "crates/narada-connection/src/service/transfers.rs": {
+      "sha256": "ac3d708d8d88ad3e1141378d7210a36df5efa926d9b856b7b05bd32b1220a357",
+      "bytes": 21588,
+      "source": "crates/narada-connection/src/service/transfers.rs"
+    },
+    "crates/narada-connection/src/store.rs": {
+      "sha256": "862e2afe2358df3d9f02fb800b86e07fa5bcbcc7b0a6a799d6a9aaabc3903312",
+      "bytes": 29076,
+      "source": "crates/narada-connection/src/store.rs"
+    },
+    "crates/narada-connection/src/tls.rs": {
+      "sha256": "be5224d867e497142c267ceb21ff1de0c3966e1f59a643dff94385030bc62bd1",
+      "bytes": 6530,
+      "source": "crates/narada-connection/src/tls.rs"
+    },
+    "crates/narada-connection/src/transport.rs": {
+      "sha256": "6703ed19fadfdbd00b8423322e3be66f3f3fc188c132068b929d5cb38aa9c48b",
+      "bytes": 25197,
+      "source": "crates/narada-connection/src/transport.rs"
+    },
+    "crates/narada-connection/src/wire.rs": {
+      "sha256": "af2cd55bb22bb875e67125cb3b54b6be7f0d392816953df312069351bbbb7033",
+      "bytes": 10816,
+      "source": "crates/narada-connection/src/wire.rs"
+    },
+    "crates/narada-core/Cargo.toml": {
+      "sha256": "35e5fa5bb087cfd5e50bc8174de09a3137144e145ab69acbe1694536ef529de4",
+      "bytes": 414,
+      "source": "crates/narada-core/Cargo.toml"
+    },
+    "crates/narada-core/migrations/0001_foundation.sql": {
+      "sha256": "074129e311ee6881f710f22662a0042681741e8dd54268c7bae565f470f486bf",
+      "bytes": 380,
+      "source": "crates/narada-core/migrations/0001_foundation.sql"
+    },
+    "crates/narada-core/migrations/0002_diagnostics.sql": {
+      "sha256": "016ebc95447517ff9c7e95de201c7540fb281cff5b97c997c99c2fce41d587cc",
+      "bytes": 159,
+      "source": "crates/narada-core/migrations/0002_diagnostics.sql"
+    },
+    "crates/narada-core/migrations/0003_connections.sql": {
+      "sha256": "a84ea70219d6c136147c16da9bcb4fe082873ff19b30bfa40eb96e4b5bde4c15",
+      "bytes": 1674,
+      "source": "crates/narada-core/migrations/0003_connections.sql"
+    },
+    "crates/narada-core/migrations/0004_files.sql": {
+      "sha256": "5843ea5d7451ec83f7eedda8417d0d6d19eb87f4c9cbfb49f3fe67c580e0def4",
+      "bytes": 2148,
+      "source": "crates/narada-core/migrations/0004_files.sql"
+    },
+    "crates/narada-core/migrations/0005_transfers.sql": {
+      "sha256": "32634ff4caf52db693f83734d35d7ea459167579abf39ca035f70c5a6f6c55a8",
+      "bytes": 2290,
+      "source": "crates/narada-core/migrations/0005_transfers.sql"
+    },
+    "crates/narada-core/migrations/0006_offline_and_readiness.sql": {
+      "sha256": "3264a1d99a8c00d44438d08372f4542b0d813f5a0e5e304c82c8e5d86d9b21e3",
+      "bytes": 1539,
+      "source": "crates/narada-core/migrations/0006_offline_and_readiness.sql"
+    },
+    "crates/narada-core/src/lib.rs": {
+      "sha256": "ab56c35aab5bb86a1bf1d49fd69aeb2259f2f575bd0ae236821a2cf9f6b04d24",
+      "bytes": 18474,
+      "source": "crates/narada-core/src/lib.rs"
+    },
+    "crates/narada-files/Cargo.toml": {
+      "sha256": "7abbe68881c38b59235e433d8daf5f7e7e8dac437b33c26758661f7ff127ef40",
+      "bytes": 960,
+      "source": "crates/narada-files/Cargo.toml"
+    },
+    "crates/narada-files/src/catalog.rs": {
+      "sha256": "66576a6ac322da7bc9cbc7236bb8551b9ac139fdba614f5b648cc6b6406297bc",
+      "bytes": 9191,
+      "source": "crates/narada-files/src/catalog.rs"
+    },
+    "crates/narada-files/src/content.rs": {
+      "sha256": "b4f2f19944a3be4e3a42ce3c2c3e67f0973a8243ca569de1a023208779fb9c2c",
+      "bytes": 7279,
+      "source": "crates/narada-files/src/content.rs"
+    },
+    "crates/narada-files/src/lib.rs": {
+      "sha256": "8e27f82ae475bcda521c5ef41b1225700c98a662e7d346e6029d2ba24920db8a",
+      "bytes": 32063,
+      "source": "crates/narada-files/src/lib.rs"
+    },
+    "crates/narada-files/src/operations.rs": {
+      "sha256": "530625e17fff44c5ef9529cc39715ba475365c650924e01bdbe71d5c4338d21b",
+      "bytes": 19183,
+      "source": "crates/narada-files/src/operations.rs"
+    },
+    "crates/narada-files/src/pins.rs": {
+      "sha256": "a651a9ea13edde63aa24d8d6b2203854145775a624d41dd6858b95c699683686",
+      "bytes": 29328,
+      "source": "crates/narada-files/src/pins.rs"
+    },
+    "crates/narada-files/src/policy.rs": {
+      "sha256": "90b3051c283a5858d57fafe59427d473fbc09f3bf84cb6e00f246200b854c988",
+      "bytes": 7503,
+      "source": "crates/narada-files/src/policy.rs"
+    },
+    "crates/narada-files/src/safe_fs.rs": {
+      "sha256": "3e5e30a6ba4187cd06fd624329df442abadd60521f905a697355f50b379364b0",
+      "bytes": 8549,
+      "source": "crates/narada-files/src/safe_fs.rs"
+    },
+    "crates/narada-files/src/safe_fs/platform_linux.rs": {
+      "sha256": "a609f9f9b6b94077da7d31ff5e4f33c12f8261dc2bca9d81dcf352b8baa5acd4",
+      "bytes": 6976,
+      "source": "crates/narada-files/src/safe_fs/platform_linux.rs"
+    },
+    "crates/narada-files/src/safe_fs/platform_windows.rs": {
+      "sha256": "2973c6bcf198ba4ca50df41ab2c7684f2e642c610e982929051582bf1f7502d5",
+      "bytes": 13977,
+      "source": "crates/narada-files/src/safe_fs/platform_windows.rs"
+    },
+    "crates/narada-files/src/sync.rs": {
+      "sha256": "cf196496ab45c73d17859cae06a39a760ab8445f391895bfb88ad931eb17cc04",
+      "bytes": 11484,
+      "source": "crates/narada-files/src/sync.rs"
+    },
+    "crates/narada-files/src/tests.rs": {
+      "sha256": "11b573c50dee97fc702f0fbcb9e96a4ee220b80a5ec6187dc8d14ec670ce7499",
+      "bytes": 31660,
+      "source": "crates/narada-files/src/tests.rs"
+    },
+    "crates/narada-files/src/transfers/jobs.rs": {
+      "sha256": "82723bf0c55ca42d06abe8f25484f919b450fadb274ff5e7eba5effd571df8c1",
+      "bytes": 31388,
+      "source": "crates/narada-files/src/transfers/jobs.rs"
+    },
+    "crates/narada-files/src/transfers/mod.rs": {
+      "sha256": "8f60e8aebbc4e9ed43e10df6bfb74f8aa9518927fa5d3e84433530659ec0fcac",
+      "bytes": 19784,
+      "source": "crates/narada-files/src/transfers/mod.rs"
+    },
+    "crates/narada-files/src/transfers/receive.rs": {
+      "sha256": "a3c3b7a1e3699568ba506546665d0ced3d8e153c2bf2452f0ef04df1cba4d6a5",
+      "bytes": 23343,
+      "source": "crates/narada-files/src/transfers/receive.rs"
+    },
+    "crates/narada-files/src/transfers/source.rs": {
+      "sha256": "c4a075e4a2296540c7a5d7a8c25f05a1f384d4ebaa40ee1a20095de2f14d6f43",
+      "bytes": 12639,
+      "source": "crates/narada-files/src/transfers/source.rs"
+    },
+    "crates/narada-files/src/transfers/tests.rs": {
+      "sha256": "081b2bc8c157e944eaf63e76716ac7553a1023b807435d46ce2515d08b568818",
+      "bytes": 18690,
+      "source": "crates/narada-files/src/transfers/tests.rs"
+    },
+    "crates/narada-ipc/Cargo.toml": {
+      "sha256": "67e7708b82fd674e640f10da9dc0093b7c17338f3842829bf946eb507f14b761",
+      "bytes": 393,
+      "source": "crates/narada-ipc/Cargo.toml"
+    },
+    "crates/narada-ipc/src/lib.rs": {
+      "sha256": "e9c176578e5e03c9a7500dfe226fff398ddb1f98d9dbef097a9870ca230e0bfb",
+      "bytes": 12375,
+      "source": "crates/narada-ipc/src/lib.rs"
+    },
+    "crates/narada-ipc/src/windows.rs": {
+      "sha256": "b7cddb5d07138efb168661b7cb1021467175df94e66641920d554066b37a54de",
+      "bytes": 5862,
+      "source": "crates/narada-ipc/src/windows.rs"
+    },
+    "crates/narada-protocol/Cargo.toml": {
+      "sha256": "eaa205b229b0ef1a76b565c1928d33386d44a83df54aab0ace61d135efe66354",
+      "bytes": 249,
+      "source": "crates/narada-protocol/Cargo.toml"
+    },
+    "crates/narada-protocol/src/connections.rs": {
+      "sha256": "3887eb657962bbe8d19a0de5262c1f686929ae73c94048c55992adf42c6d7dcc",
+      "bytes": 7881,
+      "source": "crates/narada-protocol/src/connections.rs"
+    },
+    "crates/narada-protocol/src/content.rs": {
+      "sha256": "e959dcd831667a43a330718a25b17a90771c46159521e273da974f89a1ed6511",
+      "bytes": 6508,
+      "source": "crates/narada-protocol/src/content.rs"
+    },
+    "crates/narada-protocol/src/files.rs": {
+      "sha256": "2748fb2d0232de59dde820f90425c7e32adf68f91c98c8f6a64e75c815be2156",
+      "bytes": 6801,
+      "source": "crates/narada-protocol/src/files.rs"
+    },
+    "crates/narada-protocol/src/lib.rs": {
+      "sha256": "b15066b05dc5aadbbb428c454801ec965a4ab1f6ab614337897b08a1e097745c",
+      "bytes": 8640,
+      "source": "crates/narada-protocol/src/lib.rs"
+    },
+    "crates/narada-protocol/src/transfers.rs": {
+      "sha256": "d20844a7c2f351498412c77c14f8ff221a31e03261014734d108753afe64c784",
+      "bytes": 10680,
+      "source": "crates/narada-protocol/src/transfers.rs"
+    },
+    "desktop-ui/index.html": {
+      "sha256": "d19a9fb17a2d7746dff7a215285bf028fc9cbd38bec66caf51a30fc97ff12f93",
+      "bytes": 613,
+      "source": "desktop-ui/index.html"
+    },
+    "desktop-ui/package.json": {
+      "sha256": "92773fe03756077c6dac1d90dfd133f4df699dc83167aef79b251ad572d62470",
+      "bytes": 382,
+      "source": "desktop-ui/package.json"
+    },
+    "desktop-ui/public/favicon.svg": {
+      "sha256": "1fa0fd63d7b85296a84294bd07afdb3f46180b9c38170783c48585bf5733ed33",
+      "bytes": 237,
+      "source": "desktop-ui/public/favicon.svg"
+    },
+    "desktop-ui/src/components/content-dialog.js": {
+      "sha256": "16bef189fede19e991bfdc8a2788b7fcbd9dce3bf96e07bbc009250601ee1eeb",
+      "bytes": 4297,
+      "source": "desktop-ui/src/components/content-dialog.js"
+    },
+    "desktop-ui/src/components/icons.js": {
+      "sha256": "0ddbb4b61532e062b92c3c2da297545fa135732da3896690413bb4a565421863",
+      "bytes": 5034,
+      "source": "desktop-ui/src/components/icons.js"
+    },
+    "desktop-ui/src/components/transfer-dialog.js": {
+      "sha256": "73c07e2911461628b56aafd6b098d015ad153c6de3f1c3d95d6eba8e505162b1",
+      "bytes": 7645,
+      "source": "desktop-ui/src/components/transfer-dialog.js"
+    },
+    "desktop-ui/src/components/ui.js": {
+      "sha256": "bc59db12af360618324369025200d9793931d6878293d8efd886518d148c98b7",
+      "bytes": 6284,
+      "source": "desktop-ui/src/components/ui.js"
+    },
+    "desktop-ui/src/lib/content.js": {
+      "sha256": "09f4c76a81a984e0db0fccdb0c9321651ce099a44e20c0c3fbd1805b476b173d",
+      "bytes": 4538,
+      "source": "desktop-ui/src/lib/content.js"
+    },
+    "desktop-ui/src/lib/dom.js": {
+      "sha256": "5cc88a1155cd56eaa8d8fe25f04e04f72984561a9c4efb5e6a40330e8528daf0",
+      "bytes": 1248,
+      "source": "desktop-ui/src/lib/dom.js"
+    },
+    "desktop-ui/src/lib/files.js": {
+      "sha256": "9dfa9eb8c300c543e89440c18fe1c0ebd75e339cb7b18e2a194f03ed8f5b3fee",
+      "bytes": 4057,
+      "source": "desktop-ui/src/lib/files.js"
+    },
+    "desktop-ui/src/lib/format.js": {
+      "sha256": "9169538c56814ced3c0f36362a6adb46282df1df3ad7ff1e0b39dab4a9d3a9a2",
+      "bytes": 1763,
+      "source": "desktop-ui/src/lib/format.js"
+    },
+    "desktop-ui/src/lib/pairing.js": {
+      "sha256": "60e64e030c34fd4f1fd261a0128ba72d44c7aed95b821ea6fc33da8bddc140c3",
+      "bytes": 5037,
+      "source": "desktop-ui/src/lib/pairing.js"
+    },
+    "desktop-ui/src/lib/transfers.js": {
+      "sha256": "142f3e9728c26a693d30972d0848a8472db5e3f047a888d184798bb62d425af3",
+      "bytes": 5217,
+      "source": "desktop-ui/src/lib/transfers.js"
+    },
+    "desktop-ui/src/main.js": {
+      "sha256": "d77ac20479d9e9654367eea3f7e1cdb4a9ea22b1c781af53be98a935d91ab7cb",
+      "bytes": 25821,
+      "source": "desktop-ui/src/main.js"
+    },
+    "desktop-ui/src/pages/chat.js": {
+      "sha256": "32ce509cb1b3dbfd557ab1b325a775b6a186374569b000aff9edf5b0832305e3",
+      "bytes": 22518,
+      "source": "desktop-ui/src/pages/chat.js"
+    },
+    "desktop-ui/src/pages/devices.js": {
+      "sha256": "0967ec40bf8e5a48f840b2f08c424a5658ca7c83a8ff891c7d959c67fcd0cb9a",
+      "bytes": 39548,
+      "source": "desktop-ui/src/pages/devices.js"
+    },
+    "desktop-ui/src/pages/files.js": {
+      "sha256": "1cacd12b674e1f6e6eca66c40cc878f17fc41786f33bc125673e8d1f033cfeae",
+      "bytes": 46560,
+      "source": "desktop-ui/src/pages/files.js"
+    },
+    "desktop-ui/src/pages/foundation.js": {
+      "sha256": "41f5c6770aca4bc8416b3b3de78d7fb85f1a7fc72d08a00bbaa6859d02ddc142",
+      "bytes": 9129,
+      "source": "desktop-ui/src/pages/foundation.js"
+    },
+    "desktop-ui/src/pages/home.js": {
+      "sha256": "efc6200c8c7a3611e571c655b823aa9d715698315aca0f3e027fca05c520da2e",
+      "bytes": 10034,
+      "source": "desktop-ui/src/pages/home.js"
+    },
+    "desktop-ui/src/pages/settings.js": {
+      "sha256": "b92aa494acc44ce09affdf2bb89f52a99d3237d11445727423f0fe08d7bd080c",
+      "bytes": 7284,
+      "source": "desktop-ui/src/pages/settings.js"
+    },
+    "desktop-ui/src/pages/sync.js": {
+      "sha256": "e5da0c262afe905b56bf08a1a2d3c3e36080ceb38ba5ae1318c380a3b92d8556",
+      "bytes": 13035,
+      "source": "desktop-ui/src/pages/sync.js"
+    },
+    "desktop-ui/src/pages/transfers.js": {
+      "sha256": "31b8dc5e4e01615017ea2793a2a64a3adaa573d6a7044f3c1593b7e96be15a5a",
+      "bytes": 22855,
+      "source": "desktop-ui/src/pages/transfers.js"
+    },
+    "desktop-ui/src/services/bridge.js": {
+      "sha256": "98d163e62fa4186b0be32c96d0a14804ffb3fa52f5ec02aa9640494dc96a2fa8",
+      "bytes": 8270,
+      "source": "desktop-ui/src/services/bridge.js"
+    },
+    "desktop-ui/src/styles/app.css": {
+      "sha256": "47099f02b38a9f0d06fb74f3985862a04d7ca345159c2c17d7f3d54f869347ec",
+      "bytes": 87013,
+      "source": "desktop-ui/src/styles/app.css"
+    },
+    "desktop-ui/src/styles/content.css": {
+      "sha256": "9936358830358e43528b80cf32ac4f5568b0d41c52744fa6d668d063f8cfb47f",
+      "bytes": 18551,
+      "source": "desktop-ui/src/styles/content.css"
+    },
+    "desktop-ui/tests/content.test.js": {
+      "sha256": "6a0b5a1e41420129f1b9d90f5ba060dd91d4cbdd5080cb7c9551f9b55ad718f0",
+      "bytes": 3830,
+      "source": "desktop-ui/tests/content.test.js"
+    },
+    "desktop-ui/tests/files.test.js": {
+      "sha256": "b6eb5bdcda9de9c2f44c79edc43b4826f0ad65463fb13389a10f4f3cce509ae9",
+      "bytes": 3262,
+      "source": "desktop-ui/tests/files.test.js"
+    },
+    "desktop-ui/tests/format.test.js": {
+      "sha256": "53e21efd7b3dc436270df53a5eed4ba16a066f74e4144949bc85237991c1de4d",
+      "bytes": 1684,
+      "source": "desktop-ui/tests/format.test.js"
+    },
+    "desktop-ui/tests/pairing.test.js": {
+      "sha256": "2de327e8d365b4fcc7718837afb2c6af1c26a8a66d358251d61e3a6ee8ca41a7",
+      "bytes": 3277,
+      "source": "desktop-ui/tests/pairing.test.js"
+    },
+    "desktop-ui/tests/transfers.test.js": {
+      "sha256": "8bd456d3f20a46ba3044db2c44976c9e3e713cd869bf0cf3e49100ea72349d3e",
+      "bytes": 3447,
+      "source": "desktop-ui/tests/transfers.test.js"
+    },
+    "desktop-ui/vite.config.js": {
+      "sha256": "1298ce629de2d030af631a0c8b2b2d32041c48d90fc4954cd7fa16bf99d6a62e",
+      "bytes": 2041,
+      "source": "desktop-ui/vite.config.js"
+    },
+    "docs/00-source-review.md": {
+      "sha256": "ff8c7fea1132adf771412463afc39780624d8c37ed9399660c72b821679bc38c",
+      "bytes": 6716,
+      "source": "docs/00-source-review.md"
+    },
+    "docs/01-product-plan.md": {
+      "sha256": "88efb9055f2e5a08142e735c8e60669fea8f8b55e6de95d925958947c5853e7c",
+      "bytes": 3793,
+      "source": "docs/01-product-plan.md"
+    },
+    "docs/02-features.md": {
+      "sha256": "d91c0893abc648229a2d274bdd657796179f5e07ad6e6a233d1223ef1c0597ca",
+      "bytes": 10915,
+      "source": "docs/02-features.md"
+    },
+    "docs/03-tech-stack.md": {
+      "sha256": "8a8fb0070d77eb43c055c5971263ad16d26d152a397105dbd475cad953f48880",
+      "bytes": 8362,
+      "source": "docs/03-tech-stack.md"
+    },
+    "docs/04-architecture.md": {
+      "sha256": "bc0a2e0dd7f79c743b7276bf45468f855337fc91651e6a3ec16e27e5d43cebba",
+      "bytes": 7462,
+      "source": "docs/04-architecture.md"
+    },
+    "docs/05-security-privacy.md": {
+      "sha256": "3738eea4e5d39d9065bf789d45f1a22c816cf4cb5c2bd5d67e8140e1d3bd39a2",
+      "bytes": 10286,
+      "source": "docs/05-security-privacy.md"
+    },
+    "docs/06-communication-protocol.md": {
+      "sha256": "bf43cb133c0ca74bd75783dc92ac764936c0a77a453777a732414ecbc1bac32c",
+      "bytes": 12976,
+      "source": "docs/06-communication-protocol.md"
+    },
+    "docs/07-end-to-end-working.md": {
+      "sha256": "a064763ddde871c9d5047a37c29e00b7cbff71de2674c12613f76be7d8d08394",
+      "bytes": 7078,
+      "source": "docs/07-end-to-end-working.md"
+    },
+    "docs/08-transfer-mechanism.md": {
+      "sha256": "2c5d9511077e28b845a24c2740507107c5ea60147764584399a2217c340bef97",
+      "bytes": 8012,
+      "source": "docs/08-transfer-mechanism.md"
+    },
+    "docs/09-sync-offline.md": {
+      "sha256": "388f6a8b680cced14efc4c97422f25429dd789dd156cd77a4f994074cf2f1af8",
+      "bytes": 5234,
+      "source": "docs/09-sync-offline.md"
+    },
+    "docs/10-chat-attachments.md": {
+      "sha256": "f8c9410eead11257259b283684a7f9547fd06ca05ab238388d57760cfc04f936",
+      "bytes": 7614,
+      "source": "docs/10-chat-attachments.md"
+    },
+    "docs/11-data-model.md": {
+      "sha256": "77937090109652fe47a476495ef7da1ee607d6d61cc78620ad25cd0aac20ae37",
+      "bytes": 7726,
+      "source": "docs/11-data-model.md"
+    },
+    "docs/12-desktop-ui.md": {
+      "sha256": "2ae107ad2d1d3bcb817dc266193edcfd6bd64f5548cc920cdf6623d5332ac315",
+      "bytes": 16932,
+      "source": "docs/12-desktop-ui.md"
+    },
+    "docs/13-android-ui.md": {
+      "sha256": "7606aa5925e80f32fe26ebe2d6c4150638197ca0db0dbd0b4e4faea1ff9ee971",
+      "bytes": 14779,
+      "source": "docs/13-android-ui.md"
+    },
+    "docs/14-workflows-processes.md": {
+      "sha256": "2fd192b468f7bbad59f3aeab1607398ce62a4f9dc340698d8298294f1a729815",
+      "bytes": 8083,
+      "source": "docs/14-workflows-processes.md"
+    },
+    "docs/15-task-backlog.md": {
+      "sha256": "2fe9ceaf479c1a1263c3c9f07dbfbf96113cf892b61f610bcb7a15dbea448cce",
+      "bytes": 14028,
+      "source": "docs/15-task-backlog.md"
+    },
+    "docs/16-phase-wise-plan.md": {
+      "sha256": "3aec18db621b42712f6db0cccaed50d5943e49e9a9229660dfea814e800094df",
+      "bytes": 10982,
+      "source": "docs/16-phase-wise-plan.md"
+    },
+    "docs/17-success-metrics.md": {
+      "sha256": "dceff9f968645506c6435eb16733374d981dc7329a50b5098dc599580f98ae27",
+      "bytes": 7557,
+      "source": "docs/17-success-metrics.md"
+    },
+    "docs/18-testing-validation.md": {
+      "sha256": "3322292b67bdd0eb43d59a0e429cdd5a0768053181d140a28a328532e9b30f01",
+      "bytes": 8557,
+      "source": "docs/18-testing-validation.md"
+    },
+    "docs/19-problems-solutions.md": {
+      "sha256": "6c11fa70a74a5b412d0a8834577e28f35807259593c528999be08604a71fa62d",
+      "bytes": 8426,
+      "source": "docs/19-problems-solutions.md"
+    },
+    "docs/20-prevention-precautions.md": {
+      "sha256": "623a096ded039256b166e1941067cea71555f6bea6f2ea7096397283471ef2aa",
+      "bytes": 6126,
+      "source": "docs/20-prevention-precautions.md"
+    },
+    "docs/21-tips-tricks.md": {
+      "sha256": "71fb6c21587a260775077fa185a60706b31e600734f0c8d70888ac56c6f920f1",
+      "bytes": 5605,
+      "source": "docs/21-tips-tricks.md"
+    },
+    "docs/22-performance-capacity.md": {
+      "sha256": "dbc939bfff415b8be6513443fe51b488e2576a13cbdfc82c64a96a437d43f38c",
+      "bytes": 5715,
+      "source": "docs/22-performance-capacity.md"
+    },
+    "docs/23-development-setup.md": {
+      "sha256": "7e5c41d630aab36bd43771bf6f7c5bde3ae9d8307aedf9151bf65d6ee016060d",
+      "bytes": 6558,
+      "source": "docs/23-development-setup.md"
+    },
+    "docs/24-release-support.md": {
+      "sha256": "291f796290a853265a94632bb502e7f52a71b928ac80694025f5c61508f8a244",
+      "bytes": 7191,
+      "source": "docs/24-release-support.md"
+    },
+    "docs/25-decisions-open-questions.md": {
+      "sha256": "32709075d795ecf687b423ed53bacbb964c726b181de2eac33ddba15b3a36473",
+      "bytes": 7675,
+      "source": "docs/25-decisions-open-questions.md"
+    },
+    "docs/26-final-checklist-glossary.md": {
+      "sha256": "732b9614ce18766d052f0b5205f2717bac24cef598b736ae28db108ad372df76",
+      "bytes": 6801,
+      "source": "docs/26-final-checklist-glossary.md"
+    },
+    "docs/27-references.md": {
+      "sha256": "fb4083a026061ed8af6ef3d34740803a04b211f2e890817c250f70842c91ed3e",
+      "bytes": 8422,
+      "source": "docs/27-references.md"
+    },
+    "docs/android/README.md": {
+      "sha256": "d7e87a7eec3761b2a03ebf3cef1f0f20a3d14628acfb8cde13c4030a9a01cb18",
+      "bytes": 3740,
+      "source": "docs/android/README.md"
+    },
+    "docs/android/architecture.md": {
+      "sha256": "feef8c5d427878a46ae2adbf62be095579de0a35a5ffa19e8ccfe6444d4625fa",
+      "bytes": 5757,
+      "source": "docs/android/architecture.md"
+    },
+    "docs/android/artifact-recovery.md": {
+      "sha256": "aa6f7b982d5cef3f2ad690fb2a38edeac5c21fd6f016c72e4d88ea0b0023123a",
+      "bytes": 4067,
+      "source": "docs/android/artifact-recovery.md"
+    },
+    "docs/android/attachment-crypto.md": {
+      "sha256": "4aa8ee0c3804638787fb3d8c276b1b2c838f5425f3937d2bf5f6b5d2e2ea0db2",
+      "bytes": 4511,
+      "source": "docs/android/attachment-crypto.md"
+    },
+    "docs/android/attachments-protocol.md": {
+      "sha256": "815062b3a1e8fbb43a44b32a9bc17daece70b7686d0758aa63c5c08a4ddc174c",
+      "bytes": 4658,
+      "source": "docs/android/attachments-protocol.md"
+    },
+    "docs/android/attachments-recovery.md": {
+      "sha256": "2a291047b3834ea83853cc69b8800a224239466f2ba7bde264f1fae38e9a6991",
+      "bytes": 3880,
+      "source": "docs/android/attachments-recovery.md"
+    },
+    "docs/android/chat-crypto.md": {
+      "sha256": "bd71963385b4018518654607ddf8cf0e1f5fb2c95075600760f1fa3d92fb8186",
+      "bytes": 6152,
+      "source": "docs/android/chat-crypto.md"
+    },
+    "docs/android/chat-protocol.md": {
+      "sha256": "7e34551d6a7404b5f0270a8a9d0a35db09542f7be38d4f31a23f81141c2db9bc",
+      "bytes": 5268,
+      "source": "docs/android/chat-protocol.md"
+    },
+    "docs/android/chat-recovery.md": {
+      "sha256": "b78ff099743fc5c640b70d86db41f9e875a37abfbffc22d7d2290b12bd26e9d5",
+      "bytes": 5663,
+      "source": "docs/android/chat-recovery.md"
+    },
+    "docs/android/connection-protocol.md": {
+      "sha256": "8240d4452725ea43159891ec13b31b3ea3f0c93d77544a4bf656ccac67e10668",
+      "bytes": 5401,
+      "source": "docs/android/connection-protocol.md"
+    },
+    "docs/android/connection-security.md": {
+      "sha256": "aaf71d5747bf25bb2c830e9dbebb6e848624382c3e86a1baf9a5a3ddb4d17c4e",
+      "bytes": 6453,
+      "source": "docs/android/connection-security.md"
+    },
+    "docs/android/device-checklist.md": {
+      "sha256": "6666e928d55aa58a8a35b56e8f6efd06b398ddafbcb4180ce3d35f81ef541b53",
+      "bytes": 5763,
+      "source": "docs/android/device-checklist.md"
+    },
+    "docs/android/files-protocol.md": {
+      "sha256": "f65f0fdbbe6d31cb03ce3f98b4902dbad0b7cfc390da5777dd2d900490ef6dea",
+      "bytes": 7757,
+      "source": "docs/android/files-protocol.md"
+    },
+    "docs/android/files-recovery.md": {
+      "sha256": "cf24a57c0bba3711a0ee5dcb0892255486a4205d9f3bb500e69fa8104bea672e",
+      "bytes": 7691,
+      "source": "docs/android/files-recovery.md"
+    },
+    "docs/android/offline-protocol.md": {
+      "sha256": "f21ee8006a174209be5a7d3d63a934aae57026ec276fd5d00c480f28d6fbe9ea",
+      "bytes": 4328,
+      "source": "docs/android/offline-protocol.md"
+    },
+    "docs/android/offline-recovery.md": {
+      "sha256": "3503accb72b8d1e907f45aae63772bbb58b09ada278eceebad173dea114effd8",
+      "bytes": 3123,
+      "source": "docs/android/offline-recovery.md"
+    },
+    "docs/android/pairing-workflow.md": {
+      "sha256": "1a484e247e668adb437e04c9aa484b3b5fb71016daf9851b2ce63272b4fce7f2",
+      "bytes": 5334,
+      "source": "docs/android/pairing-workflow.md"
+    },
+    "docs/android/phase-1.md": {
+      "sha256": "dae2b6b97897828582f6ea33ce94029093814c798a86ef10f6366ca7a77ec382",
+      "bytes": 4408,
+      "source": "docs/android/phase-1.md"
+    },
+    "docs/android/phase-2-device-checklist.md": {
+      "sha256": "2cf1ac7a0c6240d92114f1ede5c9d272f4d0945b02714c5e07d9c2c987f5ec13",
+      "bytes": 5601,
+      "source": "docs/android/phase-2-device-checklist.md"
+    },
+    "docs/android/phase-2-validation.md": {
+      "sha256": "ad878c6c5c28de36dfd5cc6f1c8c452107351f8109a38639275fab1023c7b6d6",
+      "bytes": 7678,
+      "source": "docs/android/phase-2-validation.md"
+    },
+    "docs/android/phase-2.md": {
+      "sha256": "7153774bf5a11c0f488dc91a2e373c444d6e9d9bd5f00a432fededdf0c41cb9b",
+      "bytes": 3981,
+      "source": "docs/android/phase-2.md"
+    },
+    "docs/android/phase-3-device-checklist.md": {
+      "sha256": "869f6d1a357e5956591f5112a0cae78ea89f91377c99c3ea5d7a9ae43591116d",
+      "bytes": 6049,
+      "source": "docs/android/phase-3-device-checklist.md"
+    },
+    "docs/android/phase-3-validation.md": {
+      "sha256": "e95e159c86cd4b546779eb13358d6018b3c52f6bf8e0404989d89d12da134af8",
+      "bytes": 8570,
+      "source": "docs/android/phase-3-validation.md"
+    },
+    "docs/android/phase-3-workflow.md": {
+      "sha256": "9adebabf43ab0959ed76935e3cbe9ef02307c14abea072d3d3a344ef52ca47dd",
+      "bytes": 6645,
+      "source": "docs/android/phase-3-workflow.md"
+    },
+    "docs/android/phase-3.md": {
+      "sha256": "83e5cff8facfd6a4d27ffa6e769195a25fbd9bd6c579c71285a9f3417839479a",
+      "bytes": 6210,
+      "source": "docs/android/phase-3.md"
+    },
+    "docs/android/phase-4-device-checklist.md": {
+      "sha256": "b174f716db4f0d5fec3e5bfbfad1ba73f94bd11caf570b397db51e45f21baebd",
+      "bytes": 4982,
+      "source": "docs/android/phase-4-device-checklist.md"
+    },
+    "docs/android/phase-4-validation.md": {
+      "sha256": "a3789647a27c8c715b4fb12f622f05e441c859ca50254c077771d64201ab16af",
+      "bytes": 6779,
+      "source": "docs/android/phase-4-validation.md"
+    },
+    "docs/android/phase-4-workflow.md": {
+      "sha256": "417bad24bf167ff118180adcc13490405f33fa71038f1de25e22ab436a52b50d",
+      "bytes": 5495,
+      "source": "docs/android/phase-4-workflow.md"
+    },
+    "docs/android/phase-4.md": {
+      "sha256": "f8e3bb56435a5935c90dcd9210a8a902641c960da95267b8f887350e4775e191",
+      "bytes": 4649,
+      "source": "docs/android/phase-4.md"
+    },
+    "docs/android/phase-5-device-checklist.md": {
+      "sha256": "2b4fd33ba4c13821c920401d4af8dc000b02a2fe151c9fc4454153d0a6940c63",
+      "bytes": 4973,
+      "source": "docs/android/phase-5-device-checklist.md"
+    },
+    "docs/android/phase-5-problems-solutions.md": {
+      "sha256": "c47e225f447a00a727bed5bc2b073ac0733ce41a33d03c6ad6f51ec0d61731a9",
+      "bytes": 3778,
+      "source": "docs/android/phase-5-problems-solutions.md"
+    },
+    "docs/android/phase-5-validation.md": {
+      "sha256": "6d6cc752ae40969306743fc30a7fc9461ba71a94c8b1006206abef0458f69716",
+      "bytes": 6386,
+      "source": "docs/android/phase-5-validation.md"
+    },
+    "docs/android/phase-5-workflow.md": {
+      "sha256": "ceed5b613d97f59bac112a9d59e661943bfcb2bbeb5c517280acb88db4e4980a",
+      "bytes": 4794,
+      "source": "docs/android/phase-5-workflow.md"
+    },
+    "docs/android/phase-5.md": {
+      "sha256": "4027f3bd62de50bd2f12f3db069bb4b5038262cc22210a644e3c9b379e3194f6",
+      "bytes": 4912,
+      "source": "docs/android/phase-5.md"
+    },
+    "docs/android/phase-6-7-device-checklist.md": {
+      "sha256": "efa44cb6e65e2c91ccb9e23b78fbaaf0d59e3f1490852ca8e7d12e27c78032e1",
+      "bytes": 4686,
+      "source": "docs/android/phase-6-7-device-checklist.md"
+    },
+    "docs/android/phase-6-7-problems-solutions.md": {
+      "sha256": "a5c9569c7bad6db1e5b7307efb56e5f76a0d835543edac411432aae89059203d",
+      "bytes": 5293,
+      "source": "docs/android/phase-6-7-problems-solutions.md"
+    },
+    "docs/android/phase-6-7-tips.md": {
+      "sha256": "9eb79bb54cb217fb14ff531ff7b135fd59c3663d0f3b7245a3bbc924ae45c804",
+      "bytes": 2469,
+      "source": "docs/android/phase-6-7-tips.md"
+    },
+    "docs/android/phase-6-7-validation.md": {
+      "sha256": "ea18690a289da5c7e8a3708d97f53654794bf855af3903bbbdef26d31d49ede2",
+      "bytes": 5151,
+      "source": "docs/android/phase-6-7-validation.md"
+    },
+    "docs/android/phase-6-7-workflow.md": {
+      "sha256": "0b931ff54c12ae9659ce3fb782fd58d045820942e06d2c479093dc3b9cc1ee46",
+      "bytes": 5271,
+      "source": "docs/android/phase-6-7-workflow.md"
+    },
+    "docs/android/phase-6.md": {
+      "sha256": "dca3a5cf35fd0deaa63a70eca8ed80a00303e3995ad3a1f2c83751f227ed04d1",
+      "bytes": 3723,
+      "source": "docs/android/phase-6.md"
+    },
+    "docs/android/phase-7.md": {
+      "sha256": "9d8b89e4b32d6b3270f8b115b77175ec7241a5eb3b3fc4f1d425872938fdb280",
+      "bytes": 3262,
+      "source": "docs/android/phase-7.md"
+    },
+    "docs/android/saf-export.md": {
+      "sha256": "0bbae83b63490d54159f41609e3caee4a25d8e10e31254c1e208a522f121c878",
+      "bytes": 4833,
+      "source": "docs/android/saf-export.md"
+    },
+    "docs/android/security-storage.md": {
+      "sha256": "d3e16eb821c8f6d4367690ee0e58933d825b40fa1f4c4a7fe8c3acfb7b8c0376",
+      "bytes": 5179,
+      "source": "docs/android/security-storage.md"
+    },
+    "docs/android/transfers-protocol.md": {
+      "sha256": "80011c9c816a84252c412fe7ceee7b77df40c79dce22f1081f0ebbafbcd5e1f5",
+      "bytes": 4831,
+      "source": "docs/android/transfers-protocol.md"
+    },
+    "docs/android/transfers-recovery.md": {
+      "sha256": "b223ea380403be80aeaaa1d892627bbcba0c558c81191ab6987df92cf348528e",
+      "bytes": 5136,
+      "source": "docs/android/transfers-recovery.md"
+    },
+    "docs/android/validation.md": {
+      "sha256": "2022c7a50241b21e4b9fe1081f490053da45d5a4efee2406f94cbdd652c3e6b1",
+      "bytes": 9961,
+      "source": "docs/android/validation.md"
+    },
+    "docs/content-offline-protocol.md": {
+      "sha256": "68f73b722e0972fcc84ad71460edf540a4406820db136b58e7cd474eaca27ec5",
+      "bytes": 2970,
+      "source": "docs/content-offline-protocol.md"
+    },
+    "docs/content-recovery.md": {
+      "sha256": "fd12b945c76c6d8a1d5858c48112f4c43e78814512470516701a22d816afe206",
+      "bytes": 4851,
+      "source": "docs/content-recovery.md"
+    },
+    "docs/crypto-content-decision.md": {
+      "sha256": "207fd31595a4873c884a17fab8891d946f0f4440b5b3f338fb2e55a8da2a6ea6",
+      "bytes": 3533,
+      "source": "docs/crypto-content-decision.md"
+    },
+    "docs/desktop-5-9-corrections.md": {
+      "sha256": "92aa1fd722b8c907f86e1d7dcdc84d79e51d77a049a0f05bd00f198fde9f6f43",
+      "bytes": 3845,
+      "source": "docs/desktop-5-9-corrections.md"
+    },
+    "docs/desktop-5-9-resources.md": {
+      "sha256": "90bc639cbdbb036e7585bcb0f151f7377dab84cfa99b8035301e86f2a9523df0",
+      "bytes": 2459,
+      "source": "docs/desktop-5-9-resources.md"
+    },
+    "docs/desktop-5-9-status.md": {
+      "sha256": "9096c3149d0aa861dd8ff3b499a87c6d4fa8d0c4354f3d77583203c1fe9d224a",
+      "bytes": 2861,
+      "source": "docs/desktop-5-9-status.md"
+    },
+    "docs/desktop-5-9-validation.md": {
+      "sha256": "533d39c0f6256e862d94a6f5263e1acad2d659267d9c7b244563635081272d12",
+      "bytes": 6028,
+      "source": "docs/desktop-5-9-validation.md"
+    },
+    "docs/desktop-development.md": {
+      "sha256": "02b31a47bdff39596a53fb21903dc5c379729adcb3ed4dcef3d65b68e3e63d73",
+      "bytes": 9960,
+      "source": "docs/desktop-development.md"
+    },
+    "docs/desktop-release-readiness.md": {
+      "sha256": "a3a7bec5450910df3049fe0e77e6ff4bdd3cb0ce848f3a6999e8716509aa7b9d",
+      "bytes": 4962,
+      "source": "docs/desktop-release-readiness.md"
+    },
+    "docs/desktop-security-matrix.md": {
+      "sha256": "1413260c29449c1535298c375d8de64e23978c618473aa35e813fddd6e66a13f",
+      "bytes": 3749,
+      "source": "docs/desktop-security-matrix.md"
+    },
+    "docs/files-and-recovery.md": {
+      "sha256": "aa539bad2d67fa230d0e2ae0c5b8cba28a75f97d28242763b18308f4347b986e",
+      "bytes": 7439,
+      "source": "docs/files-and-recovery.md"
+    },
+    "docs/github/ci.md": {
+      "sha256": "b16091f55b0e85f480315b5256651210576cd6e319df1f457f33d50e2c3ab154",
+      "bytes": 7125,
+      "source": "docs/github/ci.md"
+    },
+    "docs/github/history.md": {
+      "sha256": "46eedca332be8b9596b5f4083d2a4dc4d5507492539f8fba328e72831bc97790",
+      "bytes": 2642,
+      "source": "docs/github/history.md"
+    },
+    "docs/github/lightweight.md": {
+      "sha256": "e3df1d076d0f226e4893410edf33207073df037809e76f597f80c4f434709462",
+      "bytes": 2871,
+      "source": "docs/github/lightweight.md"
+    },
+    "docs/github/manual-testing.md": {
+      "sha256": "1bf013ba470a7661a173139a5a9f71c1da33dd1d415a720536456f1a90fe5d12",
+      "bytes": 6212,
+      "source": "docs/github/manual-testing.md"
+    },
+    "docs/pairing-and-recovery.md": {
+      "sha256": "97ec3f487f7bff2efb040e10c5c1fbd2b4ffdc2d5c29b7689f26fcd182604dc0",
+      "bytes": 9855,
+      "source": "docs/pairing-and-recovery.md"
+    },
+    "docs/phase-1-implementation.md": {
+      "sha256": "ec87a93d056f7b794780247c533caf07a7e402d811f992445920a17746173ccc",
+      "bytes": 8336,
+      "source": "docs/phase-1-implementation.md"
+    },
+    "docs/phase-2-implementation.md": {
+      "sha256": "e356a53433bc112fb00a5ad7486b131441a57adee326c38b7877ff87914ecc12",
+      "bytes": 10471,
+      "source": "docs/phase-2-implementation.md"
+    },
+    "docs/phase-2-protocol.md": {
+      "sha256": "ba23735afb19ffb7b2b75ac9b9c089b44d8de296488857138268180c4b7d6696",
+      "bytes": 11108,
+      "source": "docs/phase-2-protocol.md"
+    },
+    "docs/phase-3-implementation.md": {
+      "sha256": "f5feb0fdfe6e815ebd977ba43ad81a0ee6d6d5e84431954aec9c96f0cdab5eae",
+      "bytes": 8812,
+      "source": "docs/phase-3-implementation.md"
+    },
+    "docs/phase-3-protocol.md": {
+      "sha256": "f548c38ba506ca3b4dbbe70631a4f345afd22525901edc222f8ee1442db2df48",
+      "bytes": 7847,
+      "source": "docs/phase-3-protocol.md"
+    },
+    "docs/phase-3-validation.md": {
+      "sha256": "a20da815d60e6335e6428306febb943e05bd402193aa61f35ccff4fed232cf41",
+      "bytes": 3751,
+      "source": "docs/phase-3-validation.md"
+    },
+    "docs/phase-4-implementation.md": {
+      "sha256": "582723e54c309bc2dc8e78fe88598fb5c5c1f72795a54d5e9e03b3716d6e1835",
+      "bytes": 4568,
+      "source": "docs/phase-4-implementation.md"
+    },
+    "docs/phase-4-protocol.md": {
+      "sha256": "90cbb84321e9e1bf6386c7c4638a0ec8d9eec488db7d26c71401411fe1b64b02",
+      "bytes": 4738,
+      "source": "docs/phase-4-protocol.md"
+    },
+    "docs/phase-4-validation.md": {
+      "sha256": "e1d96e9d8c5ba5f78679570e765447976f11382534ca63491a590c64d1f8b7b9",
+      "bytes": 4823,
+      "source": "docs/phase-4-validation.md"
+    },
+    "docs/phase-5-chat.md": {
+      "sha256": "f54f7c89fb1c9991a2a44d08b709171bceb39baee4c4cf6d95c99a5cd7f36e48",
+      "bytes": 4366,
+      "source": "docs/phase-5-chat.md"
+    },
+    "docs/phase-6-attachments.md": {
+      "sha256": "f2a8e184e6940f4fb868d418fc14198d12fb29ea701d6c8c6dc4171a22304869",
+      "bytes": 3611,
+      "source": "docs/phase-6-attachments.md"
+    },
+    "docs/phase-7-offline.md": {
+      "sha256": "079978f1e98260a6c7e9b38ef54f4c0a7bba468f2eb3ee4ecdfa409047cd030a",
+      "bytes": 3264,
+      "source": "docs/phase-7-offline.md"
+    },
+    "docs/transfers-and-recovery.md": {
+      "sha256": "14e97ae545604e373028afe240cb6ad01cd5191527358f9e6d871bba1d5a5e13",
+      "bytes": 4465,
+      "source": "docs/transfers-and-recovery.md"
+    },
+    "docs/windows-validation.md": {
+      "sha256": "61e121d33d765fa57db5686bed8d4e992a3cff11f331da07e71125e3f5bdcf8c",
+      "bytes": 10162,
+      "source": "docs/windows-validation.md"
+    },
+    "fuzz/Cargo.toml": {
+      "sha256": "01398c1a0186d19084de01772fa7963bbba1e2f2894cdd7ac535ced84dc95b69",
+      "bytes": 365,
+      "source": "fuzz/Cargo.toml"
+    },
+    "fuzz/fuzz_targets/owner_parser.rs": {
+      "sha256": "048d8ff38da87adff44c2701167d0fcb88e041ca5b08b159fe0f7bf3a8a824ad",
+      "bytes": 551,
+      "source": "fuzz/fuzz_targets/owner_parser.rs"
+    },
+    "package-lock.json": {
+      "sha256": "411b3a5a9683c2abdc68bce1d8cbb679abe29ab4277cef0cc534a33691cbf46f",
+      "bytes": 58215,
+      "source": "package-lock.json"
+    },
+    "package.json": {
+      "sha256": "ef61d35db37cf3a6570ea6190c738339b63ffbb70f687c1b2d098633f47875e4",
+      "bytes": 1535,
+      "source": "package.json"
+    },
+    "plan.md": {
+      "sha256": "5cc784956f1d54de90017326099d6cae70a818ba7e11983082b635ec10a96225",
+      "bytes": 14500,
+      "source": "plan.md"
+    },
+    "playwright.config.js": {
+      "sha256": "c74d5451cb78aebb2191508d7f85551e71ccba3a701dd793f4016a5de60bc427",
+      "bytes": 857,
+      "source": "playwright.config.js"
+    },
+    "playwright.desktop-5-9.config.js": {
+      "sha256": "22fe69af1be42c8df77779e2a43b5aaa56924e7257fd07a54754c83c8ae8e20a",
+      "bytes": 890,
+      "source": "playwright.desktop-5-9.config.js"
+    },
+    "references/README.md": {
+      "sha256": "f7cc794a46a835880b0fc5e45bd1ab133c4cdc86b6161ac62f99cc25fdcebe7f",
+      "bytes": 1432,
+      "source": "references/README.md"
+    },
+    "references/android-screens-reference.png": {
+      "sha256": "039d1e8d2ec5e3f354e09c09d7cc4bd431d29146b39b86e0e92f905648aa6dd3",
+      "bytes": 1752348,
+      "source": "references/android-screens-reference.png"
+    },
+    "references/desktop-files-reference.png": {
+      "sha256": "b7bf5004b84b1fd9413b0a44a4f8e85d472f73118b86e2faba9f5867ee2a8702",
+      "bytes": 1619212,
+      "source": "references/desktop-files-reference.png"
+    },
+    "references/desktop-screens-reference.png": {
+      "sha256": "26b45093ebd9e8072704316ed5d32b1f7a64002a0b0a4073a414411e05169e1f",
+      "bytes": 1385930,
+      "source": "references/desktop-screens-reference.png"
+    },
+    "references/original-android-prototype.html": {
+      "sha256": "3628c3e06ca718af58ffa7cb98a215fae9e00595091b0571fcbcadfeab43af52",
+      "bytes": 41354,
+      "source": "references/original-android-prototype.html"
+    },
+    "references/original-desktop-prototype.html": {
+      "sha256": "740961a2461cd7cd80d03083b3bbf0391cde68395fffcfcd70bff3901ead1648",
+      "bytes": 48972,
+      "source": "references/original-desktop-prototype.html"
+    },
+    "release/ci-policy.json": {
+      "sha256": "451a6d9ea221324f8c00b29e749fbcc1cad4419ec14ee4df772905765ffd514b",
+      "bytes": 854,
+      "source": "release/ci-policy.json"
+    },
+    "release/github-readme.md.in": {
+      "sha256": "6a710602bb943b7d03e6e46baedf969deff653b890622f4d42ee021449dc4092",
+      "bytes": 4082,
+      "source": "release/github-readme.md.in"
+    },
+    "release/qualification.json": {
+      "sha256": "06610072bc193d4c28a44600731eb171930e222143d1fa11133e0bb251cde92e",
+      "bytes": 1092,
+      "source": "release/qualification.json"
+    },
+    "rust-toolchain.toml": {
+      "sha256": "d13306be0ecda81ce779baa290ffb417380d525928477f16200884b5169cca33",
+      "bytes": 86,
+      "source": "rust-toolchain.toml"
+    },
+    "scripts/android_memory_guard.py": {
+      "sha256": "24ae34a619c59e0a11a9f9eadcbf99fa50bab429d77e4d989ea022823883baa6",
+      "bytes": 1538,
+      "source": "scripts/android_memory_guard.py"
+    },
+    "scripts/android_phase4_history.py": {
+      "sha256": "dddf6876aaf96b0f3b82bb5832405f237743b2487bbfccb2d0a25a13ff50701e",
+      "bytes": 1730,
+      "source": "scripts/android_phase4_history.py"
+    },
+    "scripts/android_phase5_history.py": {
+      "sha256": "dc6b54b319e6e8af0619f37a466c5a8bf25b4438efdd4817f571b0b8d1484588",
+      "bytes": 4392,
+      "source": "scripts/android_phase5_history.py"
+    },
+    "scripts/android_phase67_history.py": {
+      "sha256": "73654c949acac6eed7d92861ecbdc3971f94376f07e313f8fd6f9b1572675222",
+      "bytes": 4141,
+      "source": "scripts/android_phase67_history.py"
+    },
+    "scripts/android_phase67_inputs.py": {
+      "sha256": "970128d2d3e8b74c2fbe46b643d8f2ad6aa646a085fc5e7988c2a305f428a9f5",
+      "bytes": 1236,
+      "source": "scripts/android_phase67_inputs.py"
+    },
+    "scripts/apk_bundle_delta.py": {
+      "sha256": "dee5da745dece897a130c6ff1280f3bfa85ec9a84d5c61de59a2ab9b5a2a2b15",
+      "bytes": 6269,
+      "source": "scripts/apk_bundle_delta.py"
+    },
+    "scripts/audit_android_phase1.py": {
+      "sha256": "ed20e86a19af6a459191d751da2b194bd9322fb4a693a53e4d1372ea43542877",
+      "bytes": 8258,
+      "source": "scripts/audit_android_phase1.py"
+    },
+    "scripts/audit_android_phase2.py": {
+      "sha256": "5cde079a3bf5f11ee7aad7c69d1133c04465c1be43a0d27dcfea79dd98cfa161",
+      "bytes": 11371,
+      "source": "scripts/audit_android_phase2.py"
+    },
+    "scripts/audit_android_phase3.py": {
+      "sha256": "05c9cb2efadd3d26e5d19157c7ff08210e20ef6d1398fd74139cdfa5af9b5ca5",
+      "bytes": 12853,
+      "source": "scripts/audit_android_phase3.py"
+    },
+    "scripts/audit_android_phase4.py": {
+      "sha256": "e78f2968e9ae2bbe2dfff3846059aa91bee3a8c022491171d84a14008e9af326",
+      "bytes": 14190,
+      "source": "scripts/audit_android_phase4.py"
+    },
+    "scripts/audit_android_phase5.py": {
+      "sha256": "a3c97213c3bef18129731b7a6504f915a9d75482133115521ae3347234be44cb",
+      "bytes": 20056,
+      "source": "scripts/audit_android_phase5.py"
+    },
+    "scripts/audit_android_phase67.py": {
+      "sha256": "7f6981a2cb125b3b7a39e5b469953f0708293c6408c383ad89226734644d27bc",
+      "bytes": 20996,
+      "source": "scripts/audit_android_phase67.py"
+    },
+    "scripts/build_android_age.py": {
+      "sha256": "4b2e610ef00ab2c79b6c3eed3be3d5af48a8eb1f6ee68a2ce8568b0f54f41f07",
+      "bytes": 3050,
+      "source": "scripts/build_android_age.py"
+    },
+    "scripts/build_android_olm.py": {
+      "sha256": "4b59a0145acaea6dd8049948e8f2eafe2be553220208cd97488ebb557e26e1ad",
+      "bytes": 3047,
+      "source": "scripts/build_android_olm.py"
+    },
+    "scripts/build_android_olm67.py": {
+      "sha256": "7d00502da7206f90866d38751c945659edbe1cb642a8e54521fa07b9706636ac",
+      "bytes": 3047,
+      "source": "scripts/build_android_olm67.py"
+    },
+    "scripts/build_android_phase67_peer.py": {
+      "sha256": "008c657ee4672c677aaeec892890faeef8e2660a2917e514617fc44419d184ea",
+      "bytes": 2205,
+      "source": "scripts/build_android_phase67_peer.py"
+    },
+    "scripts/check-command-surface.mjs": {
+      "sha256": "9c5c4ffb2ac2b648a1f5666d1aa7f7451fa2d7d84fd99f32a78b3678a78e811c",
+      "bytes": 3510,
+      "source": "scripts/check-command-surface.mjs"
+    },
+    "scripts/check_default_boundary.py": {
+      "sha256": "dbcf93a6ebb08e24c48d193736e371998118e3ed0234b604ab3d2f5e0040760b",
+      "bytes": 1362,
+      "source": "scripts/check_default_boundary.py"
+    },
+    "scripts/ci/artifacts.py": {
+      "sha256": "71285a9c66d37e3b702991645d4ccb7ba6e6df39d4a6f68815dee1e834542a6d",
+      "bytes": 16805,
+      "source": "scripts/ci/artifacts.py"
+    },
+    "scripts/ci/emulator.py": {
+      "sha256": "9c4841a7ce771e3713aaa5c75a53c5466f05d5b3576b85380e934225cb5f0fd9",
+      "bytes": 3868,
+      "source": "scripts/ci/emulator.py"
+    },
+    "scripts/ci/evidence.py": {
+      "sha256": "a39aa541d625c0ab1d3134232fdd437c76bf4216e6722676284ccc3063777b59",
+      "bytes": 8409,
+      "source": "scripts/ci/evidence.py"
+    },
+    "scripts/ci/playwright.config.mjs": {
+      "sha256": "06faf2f9b28661deff296eb5794bdfd60151f6aefc779bf74c225ea04a2c55a2",
+      "bytes": 1386,
+      "source": "scripts/ci/playwright.config.mjs"
+    },
+    "scripts/ci/publish.py": {
+      "sha256": "051a8d13ccc792e7d54232a1e06fcc655b47a9fbe78e580a9c0400e779060625",
+      "bytes": 14437,
+      "source": "scripts/ci/publish.py"
+    },
+    "scripts/ci/windows-smoke.ps1": {
+      "sha256": "7991029c98e2cbf63b25f418d25b278606aaf27fb8bb1b53154ca0cf0069ee1f",
+      "bytes": 3197,
+      "source": "scripts/ci/windows-smoke.ps1"
+    },
+    "scripts/dev.mjs": {
+      "sha256": "d1fa2d3392586480f9fc585bca08692cdb25c92fd7564e1af354d11a6ec571ae",
+      "bytes": 3380,
+      "source": "scripts/dev.mjs"
+    },
+    "scripts/export_inventory.py": {
+      "sha256": "164fee839c5263bdbf5018750163f33923a302df16b0a87d0952a0b9a79f876c",
+      "bytes": 6093,
+      "source": "scripts/export_inventory.py"
+    },
+    "scripts/inventory_android_native67.py": {
+      "sha256": "7e881536d0c71a77bdd1839c1cff404a75f593bbb56291d9f1779c921576f8f0",
+      "bytes": 4845,
+      "source": "scripts/inventory_android_native67.py"
+    },
+    "scripts/measure_desktop.py": {
+      "sha256": "236cf921b318f48dfec0bd78aefb75679f0c5d8d42b8e63d79744d316ac12e11",
+      "bytes": 2769,
+      "source": "scripts/measure_desktop.py"
+    },
+    "scripts/native-build.mjs": {
+      "sha256": "b95872a84112ebe1b60cac60437837055da145f8e9d114589e689a207b5945c2",
+      "bytes": 673,
+      "source": "scripts/native-build.mjs"
+    },
+    "scripts/native-dev.mjs": {
+      "sha256": "725430c62de4c8cbe04bad5bccbdd96ccbc4d6ebcbff9aaa00a584c70906cda1",
+      "bytes": 751,
+      "source": "scripts/native-dev.mjs"
+    },
+    "scripts/package_android_phase1.py": {
+      "sha256": "de90f2494955a61c243bb929197af88770da9f7cadd6f98b4eb32b9a0ede8101",
+      "bytes": 7416,
+      "source": "scripts/package_android_phase1.py"
+    },
+    "scripts/package_android_phase2.py": {
+      "sha256": "4492a0a3c4fe7b507ee5b8d0c1271caacaeaaeb5cd40ccb915f1045dd5f9fa3a",
+      "bytes": 9540,
+      "source": "scripts/package_android_phase2.py"
+    },
+    "scripts/package_android_phase3.py": {
+      "sha256": "c53dad2ac6c584c9eec58b0ffbb3d7cb90c87fd9dd836bf035c752ac19e58d4e",
+      "bytes": 12683,
+      "source": "scripts/package_android_phase3.py"
+    },
+    "scripts/package_android_phase4.py": {
+      "sha256": "a7589e11816815457e1d91e4aae04a3f5d25f6594f8be780ad89b598b79d7464",
+      "bytes": 13397,
+      "source": "scripts/package_android_phase4.py"
+    },
+    "scripts/package_android_phase5.py": {
+      "sha256": "88960beca9d49f07e5738f7727bc1a32e10b24840e3fb227e2572333e7d34624",
+      "bytes": 17201,
+      "source": "scripts/package_android_phase5.py"
+    },
+    "scripts/package_android_phase67.py": {
+      "sha256": "e3ffaf53ed7dcd6a73a229de8fa2f6334b5f100e1430abc358b8e68c9b0a0148",
+      "bytes": 15239,
+      "source": "scripts/package_android_phase67.py"
+    },
+    "scripts/package_desktop_source.py": {
+      "sha256": "cfc78229740e74f01d190e55787628b3d876a075773661acf265600319fbfa76",
+      "bytes": 6964,
+      "source": "scripts/package_desktop_source.py"
+    },
+    "scripts/prepare-sidecar.mjs": {
+      "sha256": "28ce1284022e6e362af8a1f415cbdda2ce0c9d593cb25a839f9c7f231cc69c80",
+      "bytes": 1286,
+      "source": "scripts/prepare-sidecar.mjs"
+    },
+    "scripts/prepare_github.py": {
+      "sha256": "7fb3a705e6f0cc631af076dd2b66600f0e7d8b456ec8069e965764bc6638a60b",
+      "bytes": 5472,
+      "source": "scripts/prepare_github.py"
+    },
+    "scripts/provision_android_phase4.py": {
+      "sha256": "0e021478dcdc42d6b2030fb57137300c644386ba6e221a79386c068d241aa180",
+      "bytes": 2455,
+      "source": "scripts/provision_android_phase4.py"
+    },
+    "scripts/provision_android_phase5.py": {
+      "sha256": "450173e41eca3a8e8e26d9ce56c3f150fed65723f282c22503f442912054dab3",
+      "bytes": 2455,
+      "source": "scripts/provision_android_phase5.py"
+    },
+    "scripts/provision_android_phase5_native.py": {
+      "sha256": "317972ba35490331d5051ac01893f7a6b5c81a50ebe6ae33a8cb56520a9d3e54",
+      "bytes": 3092,
+      "source": "scripts/provision_android_phase5_native.py"
+    },
+    "scripts/provision_android_phase67.py": {
+      "sha256": "05e15c9b6abce58c533af92fb538cc9bb61e2f94b9d77ade867072e5549ee86c",
+      "bytes": 2614,
+      "source": "scripts/provision_android_phase67.py"
+    },
+    "scripts/provision_android_phase67_native.py": {
+      "sha256": "d2d449008b9ceafe456f64a25ac0459ab5c1f6302d15c3e511c4215a6128eeae",
+      "bytes": 3255,
+      "source": "scripts/provision_android_phase67_native.py"
+    },
+    "scripts/reference.mjs": {
+      "sha256": "220856999e27763e8a46db832d4cb6f4187d8a599ec3a1e71bc7be7c22e554cb",
+      "bytes": 508,
+      "source": "scripts/reference.mjs"
+    },
+    "scripts/release/build-signed-windows.ps1": {
+      "sha256": "4501901fa6d39d7275fe4672b229b524115e14e857e40fe26982b52afe59bca0",
+      "bytes": 3003,
+      "source": "scripts/release/build-signed-windows.ps1"
+    },
+    "scripts/release/check_release.py": {
+      "sha256": "e1536ffea90e093b94a7cbacedfdc7458ecf6ed835c458387af3aa34d012f154",
+      "bytes": 3609,
+      "source": "scripts/release/check_release.py"
+    },
+    "scripts/release/verify_update.py": {
+      "sha256": "ece560dcd97884089572123d33f2e1624d0b59d550f798acc284c494efe6328c",
+      "bytes": 3938,
+      "source": "scripts/release/verify_update.py"
+    },
+    "scripts/source_hashes.py": {
+      "sha256": "ede7ce71523481be3ab9ced7912e715c5aee70f464222d1607b105b3733c40df",
+      "bytes": 1412,
+      "source": "scripts/source_hashes.py"
+    },
+    "scripts/test_apk_bundle_delta.py": {
+      "sha256": "11983ce03834a3331ad6f483aec9a5f5abb7d468814ef358b783d79c4a61b242",
+      "bytes": 2384,
+      "source": "scripts/test_apk_bundle_delta.py"
+    },
+    "scripts/validate_android_native67.py": {
+      "sha256": "b25280295c270397c9ca1025fe9f1455aad0265be2219b2cdf1f5667209c8cea",
+      "bytes": 2362,
+      "source": "scripts/validate_android_native67.py"
+    },
+    "scripts/validate_android_phase1.py": {
+      "sha256": "f6279d4392ce80107b792dbe3df78f74b4454bdef5acea629bf2709227c325a6",
+      "bytes": 4496,
+      "source": "scripts/validate_android_phase1.py"
+    },
+    "scripts/validate_android_phase2.py": {
+      "sha256": "5839cf2dcc6859af77645601b08486533e3e54a6c857924c95f814f9c83e8497",
+      "bytes": 5313,
+      "source": "scripts/validate_android_phase2.py"
+    },
+    "scripts/validate_android_phase3.py": {
+      "sha256": "2593e0ee40f10054ce16e83eab185b5b8eb60e929eac14069dd1ad3f0d4488a8",
+      "bytes": 5621,
+      "source": "scripts/validate_android_phase3.py"
+    },
+    "scripts/validate_android_phase4.py": {
+      "sha256": "db00280a0b0db45ca5ee28d3ddfb8d4d94fd43191561d21a4f5d0d85b3eed0d3",
+      "bytes": 5894,
+      "source": "scripts/validate_android_phase4.py"
+    },
+    "scripts/validate_android_phase5.py": {
+      "sha256": "831ce3840cce26ac65e97c3ce89044a107707b4a0f849ecb8402ef4d4046bcb7",
+      "bytes": 6322,
+      "source": "scripts/validate_android_phase5.py"
+    },
+    "scripts/validate_android_phase67.py": {
+      "sha256": "c83cf89d06d66c13fe2a10c1a72f5b2de07284480f4cb8fe6da806caf738c364",
+      "bytes": 8553,
+      "source": "scripts/validate_android_phase67.py"
+    },
+    "scripts/validate_desktop_5_9.py": {
+      "sha256": "63b21e8277378597536b462888c186b1ab5671846cd713c87146c903d08c5f57",
+      "bytes": 8404,
+      "source": "scripts/validate_desktop_5_9.py"
+    },
+    "scripts/validate_phase4.py": {
+      "sha256": "fd0fba01c2e017707b1f19d33ed2d76b1d8b1a5022ea0c94aaeed3669cfb48ea",
+      "bytes": 7551,
+      "source": "scripts/validate_phase4.py"
+    },
+    "tests/ci/test_ci_tools.py": {
+      "sha256": "8f0bc3a103c26785e9c187ffe8c30a5fa753dd914a53f88c9bd458bd6f9a8ba5",
+      "bytes": 3912,
+      "source": "tests/ci/test_ci_tools.py"
+    },
+    "tests/ci/test_release_gates.py": {
+      "sha256": "686108d6301afd17324ca2d51c04c2d62c22de68815801378b22f7a85065570b",
+      "bytes": 6450,
+      "source": "tests/ci/test_release_gates.py"
+    },
+    "tests/corpus/owner/oversized-cipher-manifest.json": {
+      "sha256": "f61dbfb70277ef8660505b3ce86e458fb1b1308e894d2ee033a54174a46daeeb",
+      "bytes": 180,
+      "source": "tests/corpus/owner/oversized-cipher-manifest.json"
+    },
+    "tests/corpus/owner/unknown-command.json": {
+      "sha256": "9959e07eab6182359035551b4308e76d25b47458b248ba9a941de8d49258c82b",
+      "bytes": 88,
+      "source": "tests/corpus/owner/unknown-command.json"
+    },
+    "tests/corpus/owner/unknown-field.json": {
+      "sha256": "b9e175841dae57bcf554a9d77048bb195382f58feda31b90f8e5c45f96ff5022",
+      "bytes": 266,
+      "source": "tests/corpus/owner/unknown-field.json"
+    },
+    "tests/corpus/paths/windows-hostile.json": {
+      "sha256": "78302acf6bbffd6efd672718e6dc3fddd3b54a754f642786a29c14abf6ccdcda",
+      "bytes": 142,
+      "source": "tests/corpus/paths/windows-hostile.json"
+    },
+    "tests/e2e/connections.spec.js": {
+      "sha256": "6d46dfa24baa0f6cc34d76ded100727f674d35641af9c4331ce023c4e774f49a",
+      "bytes": 12405,
+      "source": "tests/e2e/connections.spec.js"
+    },
+    "tests/e2e/content-fixture.js": {
+      "sha256": "7d418f1330bc10bf9a4f9f942d7406fff3acb63c1c1da2c4fa78f634145729ce",
+      "bytes": 7157,
+      "source": "tests/e2e/content-fixture.js"
+    },
+    "tests/e2e/content.spec.js": {
+      "sha256": "695cc8dab7ee7ccfaaf100c5fa3793f4ac4f9a373998f8f697179ee0992e1423",
+      "bytes": 10325,
+      "source": "tests/e2e/content.spec.js"
+    },
+    "tests/e2e/desktop.spec.js": {
+      "sha256": "77baef4809d058ff3fda142899968681eed36e47754c88829d6bb1142316ba91",
+      "bytes": 13732,
+      "source": "tests/e2e/desktop.spec.js"
+    },
+    "tests/e2e/files.spec.js": {
+      "sha256": "5382c2dd1a088ff9779ae9fddf5cf1c45cc8b990cb13106c135023cb57a9dd97",
+      "bytes": 21145,
+      "source": "tests/e2e/files.spec.js"
+    },
+    "tests/e2e/transfers.spec.js": {
+      "sha256": "acbfb4a89fd9a9080554cd0d26b1ce54577efe6b3c63851611a02cbba96dce96",
+      "bytes": 12469,
+      "source": "tests/e2e/transfers.spec.js"
+    },
+    "tests/fixtures/file-preview.jpg": {
+      "sha256": "0cc924552fd006ab452b75ad0eb1462661dde9578012d939a0f6891a201d6aac",
+      "bytes": 648,
+      "source": "tests/fixtures/file-preview.jpg"
+    },
+    "tests/fixtures/file-preview.png": {
+      "sha256": "eea97e31c5011dc9b2c2635ca2fdf3414a5bcd86ffa0dfd900e6c198e77b7b34",
+      "bytes": 133,
+      "source": "tests/fixtures/file-preview.png"
+    },
+    "tests/process/agent_lifecycle.py": {
+      "sha256": "dab2cddbf771697c3aeb3cc69330031d6a7789aff2a77ae07bac2a5422fc2c75",
+      "bytes": 7922,
+      "source": "tests/process/agent_lifecycle.py"
+    },
+    "tests/process/content_offline.py": {
+      "sha256": "1f0f35eff547129e2c8a8855f4cdba48a9b34f491d7b941d31dd2ead2fbdb56f",
+      "bytes": 18714,
+      "source": "tests/process/content_offline.py"
+    },
+    "tests/process/files_security.py": {
+      "sha256": "51566778cdb98994cbd8de7ad8c0064667167e1c30664336279f9c7b0606ec93",
+      "bytes": 22060,
+      "source": "tests/process/files_security.py"
+    },
+    "tests/process/pairing_security.py": {
+      "sha256": "f35ef77dac69abf7a807968196edaae1932a5fcf28b174cd495a33e633f970a8",
+      "bytes": 28107,
+      "source": "tests/process/pairing_security.py"
+    },
+    "tests/process/transfers_security.py": {
+      "sha256": "6c3064f158dcecc42d1add769935a227707c10577cb4ce95b884b6a3eeb571e5",
+      "bytes": 18438,
+      "source": "tests/process/transfers_security.py"
+    },
+    "tests/tooling/release_tools.py": {
+      "sha256": "757477d32047cb862ea56cd081dde3dff2eded1c3235ef0ef14cda41cff44c3c",
+      "bytes": 4318,
+      "source": "tests/tooling/release_tools.py"
+    }
+  }
+}

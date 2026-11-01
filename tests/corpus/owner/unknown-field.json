@@ -1,0 +1,1 @@
+{"version":1,"id":"fixture","command":{"type":"send_chat","payload":{"message_id":"606af5bd-94d1-419c-9b97-0bf9fc926be2","peer_id":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","text":"synthetic corpus","attachment":null,"path":"/etc/passwd"}}}

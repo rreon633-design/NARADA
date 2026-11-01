@@ -1,0 +1,38 @@
+{
+  "name": "narada-workspace",
+  "version": "0.7.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "desktop-ui"
+  ],
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "npm --prefix desktop-ui run build",
+    "test": "node --test desktop-ui/tests",
+    "test:e2e": "playwright test",
+    "desktop:dev": "node scripts/native-dev.mjs",
+    "desktop:build": "node scripts/native-build.mjs",
+    "format:check": "prettier --check \"desktop-ui/src/**/*.{js,css}\" \"desktop-ui/tests/*.js\" \"desktop-ui/*.js\" \"scripts/*.mjs\" \"tests/e2e/*.js\" playwright.config.js playwright.desktop-5-9.config.js",
+    "dev:reference": "node scripts/reference.mjs",
+    "test:peers": "python3 tests/process/pairing_security.py",
+    "check:commands": "node scripts/check-command-surface.mjs",
+    "test:files": "python3 tests/process/files_security.py",
+    "test:transfers": "python3 tests/process/transfers_security.py",
+    "validate:phase4": "python3 scripts/validate_phase4.py",
+    "test:content": "python3 tests/process/content_offline.py",
+    "test:e2e:desktop": "playwright test -c playwright.desktop-5-9.config.js",
+    "validate:desktop": "python3 scripts/validate_desktop_5_9.py",
+    "release:gate": "python3 scripts/release/check_release.py",
+    "inventory": "python3 scripts/export_inventory.py"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
+    "@playwright/test": "^1.51.1",
+    "@tauri-apps/cli": "^2.0.0",
+    "prettier": "^3.9.10"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}

@@ -1,0 +1,6 @@
+references/
+docs/
+artifacts/
+package-lock.json
+**/gen/
+**/binaries/

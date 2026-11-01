@@ -1,0 +1,42 @@
+/target/
+/node_modules/
+/desktop-ui/node_modules/
+/desktop-ui/dist/
+/.narada-data/
+/.env*
+/test-results/
+/playwright-report/
+*.log
+*.db
+*.db-shm
+*.db-wal
+apps/desktop-shell/src-tauri/binaries/narada-agent*
+apps/desktop-shell/src-tauri/gen/
+
+/.cache/
+/artifacts/*-initial.png
+
+/test-fixtures/
+
+# Android build/runtime output
+/apps/android/.gradle/
+/apps/android/.cache/
+/apps/android/local.properties
+/apps/android/**/build/
+*.jks
+*.keystore
+
+# Private, losslessly preserved synthetic development runtime; never a source deliverable.
+/.historical-runtime/
+
+# CI outputs and signing material never belong in source control.
+/ci-results/
+/release-assets/
+/.ssh/
+**/native-age/target/
+**/native-olm/target/
+*.p12
+*.pfx
+*.key
+*.apk
+*.aab

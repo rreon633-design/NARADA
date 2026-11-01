@@ -1,0 +1,17 @@
+[package]
+name = "narada-desktop"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+[dependencies]
+tauri = { version = "2", features = ["tray-icon"] }
+narada-protocol = { path = "../../../crates/narada-protocol" }
+narada-ipc = { path = "../../../crates/narada-ipc" }
+serde_json.workspace = true
+directories.workspace = true
+tokio.workspace = true
+
+[target.'cfg(windows)'.dependencies]
+rfd = { version = "0.15", default-features = false }
