@@ -1088,3 +1088,36 @@ async fn offline_pin_intents_are_idempotent_and_quota_bounded() {
     );
     f.close().await;
 }
+
+#[tokio::test]
+async fn shutdown_waits_for_inflight_blocking_index_handles() {
+    let f = Fixture::new().await;
+    // Drain the ordinary worker, then install a deterministic in-flight scan.
+    f.files.shutdown().await;
+    f.files.0.stopped.store(false, Ordering::Release);
+    let (started_tx, started_rx) = tokio::sync::oneshot::channel();
+    let (release_tx, release_rx) = std::sync::mpsc::channel();
+    let path = f.path.clone();
+    let finished = Arc::new(AtomicBool::new(false));
+    let done = finished.clone();
+    let worker = tokio::spawn(async move {
+        tokio::task::spawn_blocking(move || {
+            let pinned = safe_fs::SafeRoot::open(&path, None).unwrap();
+            started_tx.send(()).unwrap();
+            release_rx.recv_timeout(Duration::from_secs(10)).unwrap();
+            drop(pinned);
+            done.store(true, Ordering::Release);
+        }).await.unwrap();
+    });
+    *f.files.0.task.lock().await = Some(worker);
+    tokio::time::timeout(Duration::from_secs(10), started_rx).await.unwrap().unwrap();
+    let files = f.files.clone();
+    let mut shutdown = tokio::spawn(async move { files.shutdown().await });
+    assert!(tokio::time::timeout(Duration::from_millis(100), &mut shutdown).await.is_err(),
+        "Shutdown must not abandon the blocking operation and its pinned handles");
+    assert!(!finished.load(Ordering::Acquire));
+    release_tx.send(()).unwrap();
+    tokio::time::timeout(Duration::from_secs(10), shutdown).await.unwrap().unwrap();
+    assert!(finished.load(Ordering::Acquire));
+    f.close().await;
+}

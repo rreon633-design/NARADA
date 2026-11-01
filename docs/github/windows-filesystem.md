@@ -12,3 +12,5 @@ References:
 - https://docs.rs/windows-sys/0.59.0/windows_sys/Wdk/Storage/FileSystem/fn.NtSetInformationFile.html
 
 This is development native-regression work, not an independent filesystem/security/power-loss qualification.
+
+The next native run (`41281460193`) advanced past the rename failures, including the direct collision regression. It then failed one fixture teardown with Windows sharing error 32. Inspection found that `Files::shutdown` aborted an async indexing waiter, which cannot cancel an already-running `spawn_blocking` filesystem scan. Shutdown now wakes the idle worker and joins an active scan cooperatively before closing storage. A deterministic pinned-handle regression asserts that shutdown cannot return before that blocking work finishes. No cleanup failure is ignored and file-sharing protections remain unchanged. This additional correction still requires a fresh successful native campaign.

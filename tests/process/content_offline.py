@@ -114,8 +114,19 @@ class ContentOfflineTests(unittest.TestCase):
         self.b.stop(); key.write_bytes(original); os.chmod(key, 0o600); self.b.start(); self.assertTrue(self.b.call('content_status')['ready'])
     def test_independent_mtls_peer_has_no_content_without_scoped_consent(self):
         raw = self.active_raw()
-        for path, body in [('/api/v1/chat', {'hello': p2.HELLO, 'version': 1, 'action': {'kind': 'bundle'}}), ('/api/v1/sync', {'hello': p2.HELLO, 'version': 1, 'request': {'kind': 'snapshot', 'root_id': self.root, 'cursor': None}})]:
-            time.sleep(.15); response = raw.post(path, body); self.assertFalse(response['ok']); self.assertEqual(response['error']['code'], 'PERMISSION_DENIED')
+        # Chat uses the peer-capability guard; sync uses the root-grant guard.
+        # Both MUST deny consent-free access, with their exact documented codes.
+        cases = [
+            ('/api/v1/chat', {'hello': p2.HELLO, 'version': 1, 'action': {'kind': 'bundle'}}, 'PERMISSION_DENIED'),
+            ('/api/v1/sync', {'hello': p2.HELLO, 'version': 1, 'request': {'kind': 'snapshot', 'root_id': self.root, 'cursor': None}}, 'ACCESS_DENIED'),
+        ]
+        for path, body, expected_code in cases:
+            with self.subTest(path=path):
+                time.sleep(.15)
+                response = raw.post(path, body)
+                self.assertFalse(response['ok'])
+                self.assertEqual(response['error']['code'], expected_code)
+                self.assertIsNone(response.get('data'), 'Denied requests must not return content')
         raw.connect(self.a.snapshot()['endpoint'], raw.code['fingerprint'], True)
         response = raw.post('/api/v1/content_status', {'hello': p2.HELLO}); self.assertEqual(response['error']['code'], 'NO_PEER_ROUTE')
     def test_attachment_delivery_precedes_explicit_ciphertext_download_and_export(self):

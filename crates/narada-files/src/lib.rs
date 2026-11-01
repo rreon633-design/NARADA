@@ -41,6 +41,7 @@ struct Inner {
     watcher: SyncMutex<Option<notify::RecommendedWatcher>>,
     dirty: Arc<AtomicBool>,
     stopped: AtomicBool,
+    stop_wake: Arc<tokio::sync::Notify>,
     task: Mutex<Option<tokio::task::JoinHandle<()>>>,
 }
 #[derive(Clone)]
@@ -141,6 +142,7 @@ impl Files {
         } else {
             watcher
         };
+        let stop_wake = Arc::new(tokio::sync::Notify::new());
         let me = Self(Arc::new(Inner {
             pool: core.metadata_pool().clone(),
             core,
@@ -154,6 +156,7 @@ impl Files {
             watcher: SyncMutex::new(watcher),
             dirty,
             stopped: AtomicBool::new(false),
+            stop_wake: stop_wake.clone(),
             task: Mutex::new(None),
         }));
         {
@@ -168,7 +171,10 @@ impl Files {
         let task = tokio::spawn(async move {
             let mut last = Instant::now() - Duration::from_secs(31);
             loop {
-                tokio::time::sleep(Duration::from_secs(2)).await;
+                tokio::select! {
+                    _ = tokio::time::sleep(Duration::from_secs(2)) => {},
+                    _ = stop_wake.notified() => break,
+                }
                 let Some(inner) = weak.upgrade() else { break };
                 if inner.stopped.load(Ordering::Relaxed) {
                     break;
@@ -184,6 +190,9 @@ impl Files {
                                 break;
                             }
                             let _io = me.0.io.lock().await;
+                            if me.0.stopped.load(Ordering::Acquire) {
+                                break;
+                            }
                             let _ = me.reindex_locked(&r.id).await;
                         }
                     }
@@ -197,9 +206,12 @@ impl Files {
         self.0.gate.clone()
     }
     pub async fn shutdown(&self) {
-        self.0.stopped.store(true, Ordering::Relaxed);
+        self.0.stopped.store(true, Ordering::Release);
+        self.0.stop_wake.notify_one();
         if let Some(t) = self.0.task.lock().await.take() {
-            t.abort();
+            // Aborting an async waiter cannot stop an already-running blocking
+            // filesystem scan. Join cooperatively so pinned handles/leases are
+            // released before shutdown reports completion or storage is closed.
             let _ = t.await;
         }
         let _guard = self.0.gate.clone().write_owned().await;

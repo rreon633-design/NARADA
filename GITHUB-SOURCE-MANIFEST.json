@@ -1,8 +1,8 @@
 {
   "repository": "https://github.com/rreon633-design/NARADA",
   "intended_initial_tag": "v0.0.1",
-  "files": 540,
-  "bytes": 9475902,
+  "files": 541,
+  "bytes": 9481581,
   "history": "Historical source/evidence remains preserved separately; these are new CI revisions.",
   "export_push_performed": false,
   "inputs": {
@@ -1422,8 +1422,8 @@
       "source": "crates/narada-files/src/content.rs"
     },
     "crates/narada-files/src/lib.rs": {
-      "sha256": "8e27f82ae475bcda521c5ef41b1225700c98a662e7d346e6029d2ba24920db8a",
-      "bytes": 32063,
+      "sha256": "606bc3526b138e91e9ebf5a4f64abe85b14bb8a9dbb4d494272a1af6308b5e5a",
+      "bytes": 32718,
       "source": "crates/narada-files/src/lib.rs"
     },
     "crates/narada-files/src/operations.rs": {
@@ -1462,8 +1462,8 @@
       "source": "crates/narada-files/src/sync.rs"
     },
     "crates/narada-files/src/tests.rs": {
-      "sha256": "11b573c50dee97fc702f0fbcb9e96a4ee220b80a5ec6187dc8d14ec670ce7499",
-      "bytes": 31660,
+      "sha256": "4a97b4b75ddac5792e13f4651e30c4ea45ce969f88e9d8181fc3d2817092f9ba",
+      "bytes": 33228,
       "source": "crates/narada-files/src/tests.rs"
     },
     "crates/narada-files/src/transfers/jobs.rs": {
@@ -2122,8 +2122,8 @@
       "source": "docs/github/ci.md"
     },
     "docs/github/history.md": {
-      "sha256": "36ee1cf76e59afbd6cf1754ba60811c5d6a89a9168a158429953b45c3531d03f",
-      "bytes": 3799,
+      "sha256": "054f4c01598d20634a0ef4182c08a2833ed41ff6b68d46ee5cfe60e3fa50e0ee",
+      "bytes": 4241,
       "source": "docs/github/history.md"
     },
     "docs/github/lightweight.md": {
@@ -2137,8 +2137,8 @@
       "source": "docs/github/manual-testing.md"
     },
     "docs/github/windows-filesystem.md": {
-      "sha256": "55cd5fb7cf4cb1b0a03a1347b2a0afe25e1ca682c77970213cb4eb4df06caf28",
-      "bytes": 1648,
+      "sha256": "5dc50329b4e9969a0bb573bc831cb0ed4824f3f85812d57cba58edd4ed1bccfa",
+      "bytes": 2343,
       "source": "docs/github/windows-filesystem.md"
     },
     "docs/pairing-and-recovery.md": {
@@ -2606,6 +2606,11 @@
       "bytes": 3912,
       "source": "tests/ci/test_ci_tools.py"
     },
+    "tests/ci/test_content_contract_fixture.py": {
+      "sha256": "d0e11a25b6ab65a17d3b182cec5c71512dd25251b600c9073a260e73826391be",
+      "bytes": 1865,
+      "source": "tests/ci/test_content_contract_fixture.py"
+    },
     "tests/ci/test_diagnostics.py": {
       "sha256": "aa80d8d6ee521ed51025c013ac0532a0304129d73e7c3a5e5ff16a7213a46974",
       "bytes": 3176,
@@ -2682,8 +2687,8 @@
       "source": "tests/process/agent_lifecycle.py"
     },
     "tests/process/content_offline.py": {
-      "sha256": "1f0f35eff547129e2c8a8855f4cdba48a9b34f491d7b941d31dd2ead2fbdb56f",
-      "bytes": 18714,
+      "sha256": "07191fb0ffd9bf8313dd8c7d51130c54e131343521b050e78cb5428cd286491c",
+      "bytes": 19168,
       "source": "tests/process/content_offline.py"
     },
     "tests/process/files_security.py": {
