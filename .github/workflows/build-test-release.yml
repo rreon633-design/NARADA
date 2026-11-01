@@ -19,6 +19,8 @@ env:
   RUSTUP_TOOLCHAIN: '1.99.1'
   CARGO_BUILD_JOBS: '2'
   CARGO_INCREMENTAL: '0'
+  CARGO_TERM_COLOR: never
+  PYTHONUTF8: '1'
 
 jobs:
   tooling:
@@ -177,6 +179,9 @@ jobs:
             apps/android/gradle/libs.versions.toml
             apps/android/gradle/verification-metadata.xml
       - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+        with:
+          cmdline-tools-version: '16111833'
+          packages: 'platform-tools'
       - name: Pinned SDK and Rust toolchains
         run: |
           sdkmanager 'platforms;android-36' 'build-tools;35.0.0' 'ndk;30.0.16248370'

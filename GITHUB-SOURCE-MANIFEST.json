@@ -1,10 +1,10 @@
 {
   "repository": "https://github.com/rreon633-design/NARADA",
   "intended_initial_tag": "v0.0.1",
-  "files": 536,
-  "bytes": 9456936,
-  "history": "Original archives and campaigns remain in the handoff workspace, not relabeled as new CI.",
-  "push_performed": false,
+  "files": 539,
+  "bytes": 9465875,
+  "history": "Historical source/evidence remains preserved separately; these are new CI revisions.",
+  "export_push_performed": false,
   "inputs": {
     ".editorconfig": {
       "sha256": "85733a3ec5f0f58bf696f991761788deecd116cc4250a1f6ae2fbb4406190381",
@@ -17,9 +17,14 @@
       "source": ".gitattributes"
     },
     ".github/workflows/build-test-release.yml": {
-      "sha256": "bb01da34e62998bcab6317dc991121e0d1ab3a279ab13b03bf4285de0fd51afd",
-      "bytes": 16756,
+      "sha256": "725c7b86cfc3391b4028a585eae37861c60b7840fa2a1d55c61016ced75da750",
+      "bytes": 16895,
       "source": ".github/workflows/build-test-release.yml"
+    },
+    ".github/workflows/ci-diagnostics.yml": {
+      "sha256": "bea3cde9313a9b499c90e8b4ef83868f7ebd494294e66321a1ef4949f6f01c18",
+      "bytes": 951,
+      "source": ".github/workflows/ci-diagnostics.yml"
     },
     ".gitignore": {
       "sha256": "8f15d9c7566f439e51ca90abf87fb706fe5b6e9dee967064082b24c911c00ff8",
@@ -2112,8 +2117,8 @@
       "source": "docs/files-and-recovery.md"
     },
     "docs/github/ci.md": {
-      "sha256": "b16091f55b0e85f480315b5256651210576cd6e319df1f457f33d50e2c3ab154",
-      "bytes": 7125,
+      "sha256": "86d0140fe33045d4c9c5b4bb8bbdb98a8988c650e7a95147fafdc1cd4d904d1a",
+      "bytes": 7910,
       "source": "docs/github/ci.md"
     },
     "docs/github/history.md": {
@@ -2386,14 +2391,19 @@
       "bytes": 16805,
       "source": "scripts/ci/artifacts.py"
     },
+    "scripts/ci/diagnostics.py": {
+      "sha256": "46ec1d075454b393ce54dd7c624566cf2f9b7c351f4f69dbefe28bafb451717e",
+      "bytes": 4141,
+      "source": "scripts/ci/diagnostics.py"
+    },
     "scripts/ci/emulator.py": {
       "sha256": "9c4841a7ce771e3713aaa5c75a53c5466f05d5b3576b85380e934225cb5f0fd9",
       "bytes": 3868,
       "source": "scripts/ci/emulator.py"
     },
     "scripts/ci/evidence.py": {
-      "sha256": "a39aa541d625c0ab1d3134232fdd437c76bf4216e6722676284ccc3063777b59",
-      "bytes": 8409,
+      "sha256": "f3c8a7fb8836116500943568f24b0b008c704b3f1db1f0a01c8d34a2210419ed",
+      "bytes": 8708,
       "source": "scripts/ci/evidence.py"
     },
     "scripts/ci/playwright.config.mjs": {
@@ -2482,8 +2492,8 @@
       "source": "scripts/prepare-sidecar.mjs"
     },
     "scripts/prepare_github.py": {
-      "sha256": "7fb3a705e6f0cc631af076dd2b66600f0e7d8b456ec8069e965764bc6638a60b",
-      "bytes": 5472,
+      "sha256": "4b3cea65def4dabac09722d011867a6d4c95475eee6a9d79e72ef3eba5ca1073",
+      "bytes": 5518,
       "source": "scripts/prepare_github.py"
     },
     "scripts/provision_android_phase4.py": {
@@ -2590,6 +2600,11 @@
       "sha256": "8f0bc3a103c26785e9c187ffe8c30a5fa753dd914a53f88c9bd458bd6f9a8ba5",
       "bytes": 3912,
       "source": "tests/ci/test_ci_tools.py"
+    },
+    "tests/ci/test_diagnostics.py": {
+      "sha256": "5001c49a428aede215ca96aa3787efa36d8273bd4776b196c55c349629b21b91",
+      "bytes": 2578,
+      "source": "tests/ci/test_diagnostics.py"
     },
     "tests/ci/test_release_gates.py": {
       "sha256": "686108d6301afd17324ca2d51c04c2d62c22de68815801378b22f7a85065570b",

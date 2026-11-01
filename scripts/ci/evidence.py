@@ -100,6 +100,10 @@ def run(label, command, cwd="."):
             write_json(receipt, {"label": label, "command": command, "cwd": cwd,
                                 "exit_code": code, "duration_seconds": round(time.monotonic() - start, 3),
                                 "log_sha256": digest(log)})
+    if code != 0 and os.environ.get("GITHUB_ACTIONS") == "true":
+        from diagnostics import excerpt, escaped
+        message = "Command exited " + str(code) + ": " + label + "\n" + excerpt(log.read_bytes())
+        print("::error title=NARADA command failure::" + escaped(message), flush=True)
     return code
 
 

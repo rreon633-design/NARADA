@@ -4,7 +4,7 @@ Target repository: **https://github.com/rreon633-design/NARADA**. Initial reques
 
 ## Fresh campaigns, not rewritten history
 
-The active workflow is `.github/workflows/build-test-release.yml`. It runs on main/master pushes, pull requests, version-tag pushes and manual dispatch. The clean export activates only this workflow; historical workflows, results and archives remain unchanged in the handoff workspace.
+The active workflow is `.github/workflows/build-test-release.yml`. It runs on main/master pushes, pull requests, version-tag pushes and manual dispatch. The clean export activates this workflow and a read-only failure-diagnostics workflow; historical workflows, results and archives remain unchanged in the handoff workspace.
 
 Every job starts new evidence under `.cache/ci-evidence/<job>`, fingerprints the Git-tracked checkout, records command exits, and rejects source changes during validation. Missing XML, zero test cases, failed cases and skipped cases cannot be counted as a successful JUnit campaign. Gradle test-output cache reuse is disabled. Compiler/dependency caches do not substitute for test execution.
 
@@ -60,3 +60,9 @@ The SSH deploy key grants Git access only. It cannot enable disabled Actions, mo
 The CI workflow is the canonical portable recipe. It does not depend on `/home/user`, a local SDK archive, the phase-handoff tarballs or fixed historical validation directories. Use the commands in that file with the pinned toolchains. Do not run old `validate_phase*.py` campaign writers against preserved artifacts.
 
 See [manual testing](manual-testing.md), [lightweight policy](lightweight.md), and [historical baseline](history.md).
+
+## Failure diagnostics without sharing API credentials
+
+The separate `ci-diagnostics.yml` workflow uses GitHub's short-lived token with `actions: read` and `contents: read` to retrieve failed job logs in this repository. It publishes bounded, escaped diagnostic excerpts as check annotations so failures can be investigated using the SSH-only delivery setup. It never prints its token, never forwards it to signed log-storage URLs, and cannot write tags, commits or releases. Diagnostics of an older failed run are labeled as such; they do not change that run's outcome. Command failures also emit bounded annotations directly.
+
+Android command-line tools are explicitly pinned to `16111833`; the obsolete SDK `tools` package is not requested.

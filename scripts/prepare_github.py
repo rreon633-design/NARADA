@@ -33,7 +33,7 @@ def allowed(name):
     if name.startswith('apps/desktop-shell/src-tauri/gen/'): return False
     # Old workflows remain byte-for-byte in the handoff; only the fresh campaign
     # is activated in this first Git repository.
-    if name.startswith('.github/workflows/') and name != WORKFLOW: return False
+    if name.startswith('.github/workflows/') and name not in {WORKFLOW, '.github/workflows/ci-diagnostics.yml'}: return False
     return True
 
 
