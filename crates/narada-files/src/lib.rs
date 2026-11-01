@@ -26,6 +26,17 @@ use std::{
     time::{Duration, Instant},
 };
 use tokio::sync::{Mutex, OwnedRwLockReadGuard, RwLock};
+// The Windows notify backend queues Stop in Drop rather than joining its
+// worker. Its final event-handler owner is released only after watch handles
+// and pending reads have been closed. Keep a cancellation-safe acknowledgement.
+struct WatcherStopped(Option<tokio::sync::oneshot::Sender<()>>);
+impl Drop for WatcherStopped {
+    fn drop(&mut self) {
+        if let Some(tx) = self.0.take() {
+            let _ = tx.send(());
+        }
+    }
+}
 #[derive(Clone)]
 pub struct Files(Arc<Inner>);
 struct Inner {
@@ -39,6 +50,7 @@ struct Inner {
     cursors: SyncMutex<HashMap<String, Cursor>>,
     sync_views: SyncMutex<HashMap<String, sync::SyncView>>,
     watcher: SyncMutex<Option<notify::RecommendedWatcher>>,
+    watcher_stopped: Mutex<Option<tokio::sync::oneshot::Receiver<()>>>,
     dirty: Arc<AtomicBool>,
     stopped: AtomicBool,
     stop_wake: Arc<tokio::sync::Notify>,
@@ -121,27 +133,34 @@ impl Access {
 impl Files {
     pub async fn open(core: Core, dir: &Path) -> Result<Self, RpcError> {
         let dirty = Arc::new(AtomicBool::new(true));
-        let flag = dirty.clone();
-        let watcher = notify::RecommendedWatcher::new(
-            move |event: notify::Result<notify::Event>| {
-                if !matches!(
-                    event,
-                    Ok(notify::Event {
-                        kind: notify::EventKind::Access(_),
-                        ..
-                    })
-                ) {
-                    flag.store(true, Ordering::Relaxed);
+        let (watcher, watcher_stopped) =
+            if std::env::var("NARADA_FILE_WATCHER").as_deref() == Ok("poll") {
+                (None, None)
+            } else {
+                let flag = dirty.clone();
+                let (stopped_tx, stopped_rx) = tokio::sync::oneshot::channel();
+                let stopped = WatcherStopped(Some(stopped_tx));
+                let watcher = notify::RecommendedWatcher::new(
+                    move |event: notify::Result<notify::Event>| {
+                        // Capture the complete Drop guard for the callback's lifetime.
+                        let _callback_lifetime = &stopped;
+                        if !matches!(
+                            event,
+                            Ok(notify::Event {
+                                kind: notify::EventKind::Access(_),
+                                ..
+                            })
+                        ) {
+                            flag.store(true, Ordering::Relaxed);
+                        }
+                    },
+                    notify::Config::default().with_follow_symlinks(false),
+                );
+                match watcher {
+                    Ok(watcher) => (Some(watcher), Some(stopped_rx)),
+                    Err(_) => (None, None),
                 }
-            },
-            notify::Config::default().with_follow_symlinks(false),
-        )
-        .ok();
-        let watcher = if std::env::var("NARADA_FILE_WATCHER").as_deref() == Ok("poll") {
-            None
-        } else {
-            watcher
-        };
+            };
         let stop_wake = Arc::new(tokio::sync::Notify::new());
         let me = Self(Arc::new(Inner {
             pool: core.metadata_pool().clone(),
@@ -154,6 +173,7 @@ impl Files {
             cursors: SyncMutex::new(HashMap::new()),
             sync_views: SyncMutex::new(HashMap::new()),
             watcher: SyncMutex::new(watcher),
+            watcher_stopped: Mutex::new(watcher_stopped),
             dirty,
             stopped: AtomicBool::new(false),
             stop_wake: stop_wake.clone(),
@@ -208,15 +228,25 @@ impl Files {
     pub async fn shutdown(&self) {
         self.0.stopped.store(true, Ordering::Release);
         self.0.stop_wake.notify_one();
-        if let Some(t) = self.0.task.lock().await.take() {
+        let mut task = self.0.task.lock().await;
+        if let Some(t) = task.as_mut() {
             // Aborting an async waiter cannot stop an already-running blocking
-            // filesystem scan. Join cooperatively so pinned handles/leases are
-            // released before shutdown reports completion or storage is closed.
+            // filesystem scan. Retain the join handle if this caller is cancelled.
             let _ = t.await;
+            *task = None;
         }
+        drop(task);
         let _guard = self.0.gate.clone().write_owned().await;
         if let Ok(mut w) = self.0.watcher.lock() {
             *w = None;
+        }
+        // Await the notification worker as well as the indexing worker. Keep
+        // the receiver in its mutex while awaiting: cancellation of one caller
+        // must not let another shutdown caller report completion prematurely.
+        let mut stopped = self.0.watcher_stopped.lock().await;
+        if let Some(receiver) = stopped.as_mut() {
+            let _ = receiver.await;
+            *stopped = None;
         }
     }
     pub async fn count(&self) -> Result<u32, RpcError> {
@@ -712,6 +742,22 @@ async fn insert_entry(
 ) -> Result<(), RpcError> {
     sqlx::query("INSERT INTO file_entries(object_id,root_id,relative_path,parent_path,name,kind,identity,version,size,modified) VALUES (?,?,?,?,?,?,?,?,?,?)").bind(&e.object_id).bind(&e.root_id).bind(&e.relative_path).bind(&e.parent_path).bind(&e.name).bind(&e.info.kind).bind(&e.info.identity).bind(&e.info.version).bind(e.info.size as i64).bind(&e.info.modified).execute(&mut **tx).await.map_err(|_|RpcError::storage())?;
     Ok(())
+}
+
+#[cfg(test)]
+fn close_fixture_strict(dir: tempfile::TempDir) {
+    let path = dir.path().to_owned();
+    if let Err(error) = dir.close() {
+        // Test diagnostics only: bounded names, no file contents or cleanup retry.
+        let remaining: Vec<_> = std::fs::read_dir(&path)
+            .into_iter()
+            .flatten()
+            .take(16)
+            .filter_map(Result::ok)
+            .map(|entry| entry.file_name())
+            .collect();
+        panic!("Strict fixture cleanup failed: {error}; remaining root entries: {remaining:?}");
+    }
 }
 
 #[cfg(test)]

@@ -1,3 +1,5 @@
+import contextlib
+import io
 import importlib.util
 import os
 from pathlib import Path
@@ -7,6 +9,7 @@ import tempfile
 import tomllib
 import xml.etree.ElementTree as ET
 import unittest
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'scripts/ci'))
@@ -41,6 +44,31 @@ class EvidenceTests(unittest.TestCase):
         self.assertEqual(1, s['failures'])
         self.assertEqual(0, s['passed'])
 
+    def test_observed_aapt2_min_sdk_label(self):
+        self.assertEqual({"min_sdk": 29, "target_sdk": 36}, artifacts.badging_sdk_bounds("minSdkVersion:'29'\ntargetSdkVersion:'36'\n"))
+
+    def test_legacy_aapt_sdk_label_keeps_identical_bounds(self):
+        self.assertEqual({"min_sdk": 29, "target_sdk": 36}, artifacts.badging_sdk_bounds("sdkVersion:'29'\ntargetSdkVersion:'36'\n"))
+
+    def test_badging_sdk_missing_wrong_or_spoofed_values_fail(self):
+        for text in ("targetSdkVersion:'36'", "minSdkVersion:'28'\ntargetSdkVersion:'36'", "minSdkVersion:'29'\ntargetSdkVersion:'35'", "minSdkVersion:'Q'\ntargetSdkVersion:'36'", "not-minSdkVersion:'29'\ntargetSdkVersion:'36'"):
+            with self.subTest(text=text), self.assertRaises(RuntimeError): artifacts.badging_sdk_bounds(text)
+
+    def test_duplicate_or_ambiguous_badging_sdk_fields_fail(self):
+        good = "minSdkVersion:'29'\ntargetSdkVersion:'36'\n"
+        for extra in ("sdkVersion:'29'", "minSdkVersion:'29'", "targetSdkVersion:'36'", "minSdkVersion:'30'", "minSdkVersion:'Q'", "targetSdkVersion:'36oops'"):
+            with self.subTest(extra=extra), self.assertRaises(RuntimeError): artifacts.badging_sdk_bounds(good + extra)
+
+    def test_decoded_manifest_sdk_bounds_are_independently_checked(self):
+        manifest = ET.fromstring('<manifest xmlns:android="http://schemas.android.com/apk/res/android"><uses-sdk android:minSdkVersion="29" android:targetSdkVersion="36"/></manifest>')
+        self.assertEqual({"min_sdk": 29, "target_sdk": 36}, artifacts.manifest_sdk_bounds(manifest))
+
+    def test_decoded_manifest_missing_duplicate_and_changed_sdk_fail(self):
+        good = '<uses-sdk android:minSdkVersion="29" android:targetSdkVersion="36"/>'
+        for body in ('', good + good, good.replace('"29"', '"28"'), good.replace('"36"', '"35"'), '<uses-sdk/>'):
+            manifest = ET.fromstring('<manifest xmlns:android="http://schemas.android.com/apk/res/android">' + body + '</manifest>')
+            with self.subTest(body=body), self.assertRaises(RuntimeError): artifacts.manifest_sdk_bounds(manifest)
+
     def test_abi_is_per_architecture(self):
         self.assertEqual('arm64-v8a', artifacts.abi_in_zip(['lib/arm64-v8a/libnarada_age.so', 'classes.dex']))
         for names in ([], ['lib/mips/foo.so'], ['lib/arm64-v8a/a.so', 'lib/x86_64/b.so']):
@@ -65,6 +93,17 @@ class EvidenceTests(unittest.TestCase):
         progress = 'INSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS_CODE: 0\n' * 13
         self.assertEqual(13, emulator.parse_result(progress + 'OK (13 tests)\n\nINSTRUMENTATION_CODE: -1\n'))
         with self.assertRaises(RuntimeError): emulator.parse_result(progress.replace('CODE: 0', 'CODE: -3', 1) + 'OK (13 tests)\nINSTRUMENTATION_CODE: -1\n')
+
+    def test_size_notice_contains_only_public_file_measurements(self):
+        report = {"private": "DO-NOT-PRINT", "files": [{"name": "candidate.apk", "bytes": 1234, "sha256": "a" * 64, "extra": "DO-NOT-PRINT"}]}
+        out = io.StringIO()
+        with mock.patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}), contextlib.redirect_stdout(out):
+            artifacts.announce_candidate_sizes(report)
+        text = out.getvalue()
+        self.assertIn("native runtime gates still required", text)
+        self.assertIn('"bytes":1234', text)
+        self.assertIn("a" * 64, text)
+        self.assertNotIn("DO-NOT-PRINT", text)
 
     def test_size_guards_are_enabled(self):
         self.assertLessEqual(artifacts.POLICY['android_apk_max_bytes'], 20 * 1024 * 1024)

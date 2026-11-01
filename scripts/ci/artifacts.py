@@ -34,6 +34,27 @@ def command(args):
     return subprocess.check_output([str(a) for a in args], stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace")
 
 
+def badging_sdk_bounds(text):
+    # Build Tools 35 aapt2 emits minSdkVersion, unlike legacy aapt sdkVersion.
+    lines = [line for line in text.splitlines() if line.startswith(("sdkVersion:", "minSdkVersion:", "targetSdkVersion:"))]
+    fields = re.findall(r"^(sdkVersion|minSdkVersion|targetSdkVersion):'([0-9]+)'[ \t\r]*$", text, re.MULTILINE)
+    minima = [value for key, value in fields if key in ("sdkVersion", "minSdkVersion")]
+    targets = [value for key, value in fields if key == "targetSdkVersion"]
+    observed = [line[:160] for line in lines[:6]]
+    require(len(lines) == len(fields) and minima == ["29"] and targets == ["36"], f"Unexpected or ambiguous Android SDK bounds: {observed}")
+    return {"min_sdk": 29, "target_sdk": 36}
+
+
+def manifest_sdk_bounds(manifest):
+    namespace = "{http://schemas.android.com/apk/res/android}"
+    sdk = manifest.findall("uses-sdk")
+    require(len(sdk) == 1, "APK manifest must contain exactly one uses-sdk element")
+    minimum = sdk[0].get(namespace + "minSdkVersion")
+    target = sdk[0].get(namespace + "targetSdkVersion")
+    require((minimum, target) == ("29", "36"), f"APK manifest SDK bounds differ from policy: min={minimum!r}, target={target!r}")
+    return {"min_sdk": 29, "target_sdk": 36}
+
+
 def abi_in_zip(names):
     abis = {n.split("/")[1] for n in names if n.startswith("lib/") and n.endswith(".so") and len(n.split("/")) == 3}
     require(len(abis) == 1 and abis <= ABI_MACHINE.keys(), f"Expected one supported ABI, got {abis}")
@@ -81,6 +102,14 @@ def pe_machine(path):
 
 def file_row(path):
     return {"name": Path(path).name, "bytes": Path(path).stat().st_size, "sha256": digest(path)}
+
+
+def announce_candidate_sizes(report):
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        from diagnostics import escaped
+        public = [{key: row[key] for key in ("name", "bytes", "sha256")} for row in report["files"]]
+        message = "Static candidate audit only; native runtime gates still required. " + json.dumps(public, separators=(",", ":"))
+        print("::notice title=NARADA candidate byte sizes::" + escaped(message), flush=True)
 
 
 def package_dir(platform):
@@ -144,6 +173,7 @@ def windows():
     write_json(output() / "windows-build-report.json", report)
     shutil.copy2(ROOT / "docs/github/manual-testing.md", dest / "WINDOWS-MANUAL-TEST.md")
     write_checksums(dest, "WINDOWS-SHA256SUMS.txt")
+    announce_candidate_sizes(report)
     print(json.dumps(report, indent=2))
 
 
@@ -183,12 +213,15 @@ def android():
         require("Verified using v2 scheme (APK Signature Scheme v2): true" in signature, "APK v2 signature required")
         command([tools / "zipalign", "-c", "-P", "16", "4", apk])
         badging = command([tools / "aapt2", "dump", "badging", apk])
+        (output() / f"audit-{apk.stem}-badging.txt").write_text(badging, encoding="utf-8")
         require(f"package: name='{POLICY['android_application_id']}'" in badging, "Wrong manual-test package identity")
         require(f"versionCode='{POLICY['android_version_code']}'" in badging and f"versionName='{POLICY['android_version_name']}'" in badging, "Unexpected Android application version")
-        require("sdkVersion:'29'" in badging and "targetSdkVersion:'36'" in badging, "Unexpected Android SDK bounds")
+        sdk_bounds = badging_sdk_bounds(badging)
         require("application-debuggable" not in badging, "Manual-test candidate must be release-style, not debuggable")
         manifest_text = command([analyzer, "manifest", "print", apk])
+        (output() / f"audit-{apk.stem}-manifest.xml").write_text(manifest_text, encoding="utf-8")
         manifest = ET.fromstring(manifest_text)
+        require(manifest_sdk_bounds(manifest) == sdk_bounds, "Manifest and badging SDK bounds disagree")
         application = manifest.find("application")
         require(application is not None, "Missing APK application manifest")
         namespace = "{http://schemas.android.com/apk/res/android}"
@@ -246,7 +279,7 @@ def android():
                 require(included == plain, "Native notices changed or missing")
         target = dest / f"NARADA-{release_label()}-android-{abi}.apk"
         shutil.copy2(apk, target)
-        reports.append({**file_row(target), "abi": abi, "native_libraries": native, "signer_sha256": signer[0].lower()})
+        reports.append({**file_row(target), "abi": abi, "sdk_bounds": sdk_bounds, "native_libraries": native, "signer_sha256": signer[0].lower()})
         (output() / f"apk-{abi}-signature.txt").write_text(signature, encoding="utf-8")
         (output() / f"apk-{abi}-badging.txt").write_text(badging, encoding="utf-8")
         if abi == "x86_64": shutil.copy2(apk, emu / "app-x86_64.apk")
@@ -267,8 +300,10 @@ def android():
     require(mapping.is_file() and mapping.stat().st_size > 0, "Missing R8 mapping: minification not evidenced")
     report["r8_mapping_sha256"] = digest(mapping)
     write_json(dest / "android-build-report.json", report)
+    write_json(output() / "android-build-report.json", report)
     shutil.copy2(ROOT / "docs/github/manual-testing.md", dest / "ANDROID-MANUAL-TEST.md")
     write_checksums(dest, "ANDROID-SHA256SUMS.txt")
+    announce_candidate_sizes(report)
     print(json.dumps(report, indent=2))
 
 

@@ -43,7 +43,7 @@ impl Fixture {
         self.files.shutdown().await;
         self.files.0.pool.close().await;
         drop(self.files);
-        self.dir.close().unwrap();
+        crate::close_fixture_strict(self.dir);
     }
     fn id(&self) -> String {
         self.root["root_id"].as_str().unwrap().into()
@@ -1107,17 +1107,150 @@ async fn shutdown_waits_for_inflight_blocking_index_handles() {
             release_rx.recv_timeout(Duration::from_secs(10)).unwrap();
             drop(pinned);
             done.store(true, Ordering::Release);
-        }).await.unwrap();
+        })
+        .await
+        .unwrap();
     });
     *f.files.0.task.lock().await = Some(worker);
-    tokio::time::timeout(Duration::from_secs(10), started_rx).await.unwrap().unwrap();
+    tokio::time::timeout(Duration::from_secs(10), started_rx)
+        .await
+        .unwrap()
+        .unwrap();
     let files = f.files.clone();
     let mut shutdown = tokio::spawn(async move { files.shutdown().await });
-    assert!(tokio::time::timeout(Duration::from_millis(100), &mut shutdown).await.is_err(),
-        "Shutdown must not abandon the blocking operation and its pinned handles");
+    assert!(
+        tokio::time::timeout(Duration::from_millis(100), &mut shutdown)
+            .await
+            .is_err(),
+        "Shutdown must not abandon the blocking operation and its pinned handles"
+    );
     assert!(!finished.load(Ordering::Acquire));
     release_tx.send(()).unwrap();
-    tokio::time::timeout(Duration::from_secs(10), shutdown).await.unwrap().unwrap();
+    tokio::time::timeout(Duration::from_secs(10), shutdown)
+        .await
+        .unwrap()
+        .unwrap();
+    assert!(finished.load(Ordering::Acquire));
+    f.close().await;
+}
+
+#[tokio::test]
+async fn shutdown_waits_for_notification_callback_release() {
+    let f = Fixture::new().await;
+    f.files.shutdown().await;
+    let (closed_tx, closed_rx) = tokio::sync::oneshot::channel();
+    *f.files.0.watcher_stopped.lock().await = Some(closed_rx);
+    let files = f.files.clone();
+    let mut shutdown = tokio::spawn(async move { files.shutdown().await });
+    assert!(
+        tokio::time::timeout(Duration::from_millis(100), &mut shutdown)
+            .await
+            .is_err()
+    );
+    closed_tx.send(()).unwrap();
+    tokio::time::timeout(Duration::from_secs(10), shutdown)
+        .await
+        .unwrap()
+        .unwrap();
+    f.close().await;
+}
+
+#[tokio::test]
+async fn cancelled_shutdown_cannot_discard_notification_completion() {
+    let f = Fixture::new().await;
+    f.files.shutdown().await;
+    let (closed_tx, closed_rx) = tokio::sync::oneshot::channel();
+    *f.files.0.watcher_stopped.lock().await = Some(closed_rx);
+    let files = f.files.clone();
+    let mut first = tokio::spawn(async move { files.shutdown().await });
+    assert!(tokio::time::timeout(Duration::from_millis(100), &mut first)
+        .await
+        .is_err());
+    first.abort();
+    assert!(first.await.unwrap_err().is_cancelled());
+    let files = f.files.clone();
+    let mut second = tokio::spawn(async move { files.shutdown().await });
+    assert!(
+        tokio::time::timeout(Duration::from_millis(100), &mut second)
+            .await
+            .is_err()
+    );
+    closed_tx.send(()).unwrap();
+    tokio::time::timeout(Duration::from_secs(10), second)
+        .await
+        .unwrap()
+        .unwrap();
+    f.close().await;
+}
+
+#[cfg(windows)]
+#[tokio::test]
+async fn native_watcher_shutdown_releases_fixture_handles_without_cleanup_retry() {
+    for index in 0..24 {
+        let f = Fixture::new().await;
+        assert!(
+            f.files.0.watcher.lock().unwrap().is_some(),
+            "Native watcher required for this regression"
+        );
+        for write in 0..4 {
+            std::fs::write(
+                f.path.join(format!("watcher-{index}-{write}.txt")),
+                b"synthetic watcher event",
+            )
+            .unwrap();
+        }
+        // Immediate strict cleanup: no sleep, deletion retry, sharing relaxation
+        // or ignored error can turn a leaked native handle into a pass.
+        f.close().await;
+    }
+}
+
+#[tokio::test]
+async fn cancelled_shutdown_retains_the_inflight_index_join() {
+    let f = Fixture::new().await;
+    f.files.shutdown().await;
+    f.files.0.stopped.store(false, Ordering::Release);
+    let (started_tx, started_rx) = tokio::sync::oneshot::channel();
+    let (release_tx, release_rx) = std::sync::mpsc::channel();
+    let path = f.path.clone();
+    let finished = Arc::new(AtomicBool::new(false));
+    let done = finished.clone();
+    let worker = tokio::spawn(async move {
+        tokio::task::spawn_blocking(move || {
+            let pinned = safe_fs::SafeRoot::open(&path, None).unwrap();
+            started_tx.send(()).unwrap();
+            release_rx.recv_timeout(Duration::from_secs(10)).unwrap();
+            drop(pinned);
+            done.store(true, Ordering::Release);
+        })
+        .await
+        .unwrap();
+    });
+    *f.files.0.task.lock().await = Some(worker);
+    tokio::time::timeout(Duration::from_secs(10), started_rx)
+        .await
+        .unwrap()
+        .unwrap();
+    let files = f.files.clone();
+    let mut first = tokio::spawn(async move { files.shutdown().await });
+    assert!(tokio::time::timeout(Duration::from_millis(100), &mut first)
+        .await
+        .is_err());
+    first.abort();
+    assert!(first.await.unwrap_err().is_cancelled());
+    let files = f.files.clone();
+    let mut second = tokio::spawn(async move { files.shutdown().await });
+    assert!(
+        tokio::time::timeout(Duration::from_millis(100), &mut second)
+            .await
+            .is_err()
+    );
+    assert!(!finished.load(Ordering::Acquire));
+    release_tx.send(()).unwrap();
+    tokio::time::timeout(Duration::from_secs(10), second)
+        .await
+        .unwrap()
+        .unwrap();
     assert!(finished.load(Ordering::Acquire));
     f.close().await;
 }

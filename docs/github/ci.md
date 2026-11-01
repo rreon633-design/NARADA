@@ -88,3 +88,7 @@ The sixth campaign passed the Android host/JNI/real-peer/Robolectric and strict 
 The older transitive Error Prone annotation referenced Android-unavailable `javax.lang.model.element.Modifier`. Test-only error_prone_annotations 2.51.0 has Java 8 class files and its own `Modifier` enum; its inspected `IncompatibleModifiers` class has CLASS retention and no javax.lang.model reference. It is pinned for instrumentation only. No R8 warning suppression, broad keep rule, app de-minification or skipped native case was introduced. Both app and matching instrumentation still have to build; exact minified app bytes must execute all required native cases on both emulators.
 
 The repair regenerates debug/release/manual-test app and test classpath locks and adds seven checksum entries. The 1,254 existing artifact checksum entries are unchanged. Both debug and manual-test dependency graphs passed read-only, strict verification locally after regeneration; this is dependency validation, not a local APK or emulator result. The new bytes were separately fetched from Google Maven/Maven Central and matched against the new SHA-256 pins.
+
+## APK SDK-audit correction
+
+The seventh campaign built minified app/instrumentation APKs but failed the old AAPT-label SDK check. See [the reproduced tool-format mismatch and strict manifest cross-check](apk-audit.md). That run did not execute emulators or publish a release.

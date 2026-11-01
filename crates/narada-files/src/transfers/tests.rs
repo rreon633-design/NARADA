@@ -55,7 +55,7 @@ impl Fixture {
         self.files.shutdown().await;
         self.files.0.pool.close().await;
         drop(self.files);
-        self.temp.close().unwrap();
+        crate::close_fixture_strict(self.temp);
     }
     fn destination(&self) -> TransferDestination {
         TransferDestination {

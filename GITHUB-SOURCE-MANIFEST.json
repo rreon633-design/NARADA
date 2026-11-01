@@ -1,8 +1,8 @@
 {
   "repository": "https://github.com/rreon633-design/NARADA",
   "intended_initial_tag": "v0.0.1",
-  "files": 542,
-  "bytes": 9547334,
+  "files": 543,
+  "bytes": 9563447,
   "history": "Historical source/evidence remains preserved separately; these are new CI revisions.",
   "export_push_performed": false,
   "inputs": {
@@ -1422,8 +1422,8 @@
       "source": "crates/narada-files/src/content.rs"
     },
     "crates/narada-files/src/lib.rs": {
-      "sha256": "606bc3526b138e91e9ebf5a4f64abe85b14bb8a9dbb4d494272a1af6308b5e5a",
-      "bytes": 32718,
+      "sha256": "575c531454fbbd5108f47f2aa635b09c7339aa90f3323fa02dbb8bb4cca95004",
+      "bytes": 34873,
       "source": "crates/narada-files/src/lib.rs"
     },
     "crates/narada-files/src/operations.rs": {
@@ -1462,8 +1462,8 @@
       "source": "crates/narada-files/src/sync.rs"
     },
     "crates/narada-files/src/tests.rs": {
-      "sha256": "4a97b4b75ddac5792e13f4651e30c4ea45ce969f88e9d8181fc3d2817092f9ba",
-      "bytes": 33228,
+      "sha256": "bb57bf5eba8b495f46b793b7f07a5f0f99fdbdf6b35a2f80900472afb6ee5c47",
+      "bytes": 37529,
       "source": "crates/narada-files/src/tests.rs"
     },
     "crates/narada-files/src/transfers/jobs.rs": {
@@ -1487,8 +1487,8 @@
       "source": "crates/narada-files/src/transfers/source.rs"
     },
     "crates/narada-files/src/transfers/tests.rs": {
-      "sha256": "081b2bc8c157e944eaf63e76716ac7553a1023b807435d46ce2515d08b568818",
-      "bytes": 18690,
+      "sha256": "f0b784b9131db39c41be8577281942ee1491dd9bc4ff3eded89fef69f431c3b4",
+      "bytes": 18702,
       "source": "crates/narada-files/src/transfers/tests.rs"
     },
     "crates/narada-ipc/Cargo.toml": {
@@ -2116,9 +2116,14 @@
       "bytes": 7439,
       "source": "docs/files-and-recovery.md"
     },
+    "docs/github/apk-audit.md": {
+      "sha256": "3fa7bf622b6c2ceb993d733e05bbc61fc1d21f7b81d252e6336b3594de5f6405",
+      "bytes": 2431,
+      "source": "docs/github/apk-audit.md"
+    },
     "docs/github/ci.md": {
-      "sha256": "ec9fd368fda30613ccd604541aeba48a09e92276bc2fde909b1035da888b8bc2",
-      "bytes": 12201,
+      "sha256": "0c2e6575f63ca6532047f1e1e16e247b36968f9fc478e9818281d92aeaaf0523",
+      "bytes": 12479,
       "source": "docs/github/ci.md"
     },
     "docs/github/history.md": {
@@ -2137,8 +2142,8 @@
       "source": "docs/github/manual-testing.md"
     },
     "docs/github/windows-filesystem.md": {
-      "sha256": "5dc50329b4e9969a0bb573bc831cb0ed4824f3f85812d57cba58edd4ed1bccfa",
-      "bytes": 2343,
+      "sha256": "b1d80796483070f698607c922a0a238fc5374d9e9200fa2264006967b7f57916",
+      "bytes": 4404,
       "source": "docs/github/windows-filesystem.md"
     },
     "docs/pairing-and-recovery.md": {
@@ -2392,8 +2397,8 @@
       "source": "scripts/check_default_boundary.py"
     },
     "scripts/ci/artifacts.py": {
-      "sha256": "9cf1e95fa1c70970b318bc8d3df92257b4c65b54928d7ed9b2b65c444961396c",
-      "bytes": 17027,
+      "sha256": "19f91bf2147f2cc37c36d0f576d4c01921ee4fa99c3544974b5ffcf5dfb4e00e",
+      "bytes": 19128,
       "source": "scripts/ci/artifacts.py"
     },
     "scripts/ci/diagnostics.py": {
@@ -2607,8 +2612,8 @@
       "source": "scripts/validate_phase4.py"
     },
     "tests/ci/test_ci_tools.py": {
-      "sha256": "4e38abf711c20d42216c07164ac4833222b931c7257f75601f27afa73e49ef19",
-      "bytes": 7120,
+      "sha256": "89b54854c952278f8c11d4b665ccb79b3f76891a861b130b34d6c2d2366f5407",
+      "bytes": 9894,
       "source": "tests/ci/test_ci_tools.py"
     },
     "tests/ci/test_content_contract_fixture.py": {
