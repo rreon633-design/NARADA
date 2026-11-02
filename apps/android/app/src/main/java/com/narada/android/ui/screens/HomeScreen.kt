@@ -39,7 +39,7 @@ fun HomeScreen(data: WorkspaceLoad.Ready, navigate: (Destination) -> Unit, conne
                         Eyebrow(if (connections.error != null) "CONNECTIONS NEED ATTENTION" else if (connections.loading) "READING PROTECTED TRUST" else if (connections.connectedPeer != null) "AUTHENTICATED CONNECTION" else if (paired > 0) "$paired SAVED DEVICE${if (paired > 1) "S" else ""}" else "NO PAIRED DEVICES", color = NaradaColors.OnDarkMuted)
                     }
                     Text("Everything starts\nwith this phone.", style = MaterialTheme.typography.headlineMedium, color = Color.White)
-                    Text(if (connections.connectedPeer != null) "Your saved device answered an authenticated health check. Files rechecks its grants before browsing; a connection alone does not authorize content." else if (paired > 0) "Trust is saved on this phone. Open Devices to review or reconnect; no online status is inferred." else "Pair your computer with a real invitation. Your phone’s transport key stays in AndroidKeyStore.", color = NaradaColors.OnDarkMuted, style = MaterialTheme.typography.bodyMedium)
+                    Text(if (connections.connectedPeer != null) "Connected securely. Folder access still needs permission." else if (paired > 0) "Device saved, not connected. Open Devices to reconnect." else "Open Devices to scan your computer’s QR and verify its identity.", color = NaradaColors.OnDarkMuted, style = MaterialTheme.typography.bodyMedium)
                     Button({ navigate(Destination.DEVICES) }, Modifier.heightIn(min = 48.dp), colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = NaradaColors.Ink), shape = RoundedCornerShape(13.dp)) {
                         Text("View devices"); Spacer(Modifier.width(8.dp)); Glyph(R.drawable.ic_right)
                     }
@@ -48,14 +48,14 @@ fun HomeScreen(data: WorkspaceLoad.Ready, navigate: (Destination) -> Unit, conne
         }
         item {
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                SectionTitle("Your workspace")
+                SectionTitle("Quick access")
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    QuickCard(Destination.FILES, "Granted desktop roots", Modifier.weight(1f), navigate)
-                    QuickCard(Destination.CHAT, "Protected foreground text", Modifier.weight(1f), navigate)
+                    QuickCard(Destination.FILES, "Folders shared by your computer", Modifier.weight(1f), navigate)
+                    QuickCard(Destination.CHAT, "Private chat", Modifier.weight(1f), navigate)
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     QuickCard(Destination.TRANSFERS, "Verified private downloads", Modifier.weight(1f), navigate)
-                    QuickCard(Destination.SYNC, "Scoped one-way refresh", Modifier.weight(1f), navigate)
+                    QuickCard(Destination.SYNC, "Saved copies and refresh", Modifier.weight(1f), navigate)
                 }
             }
         }
@@ -66,9 +66,8 @@ fun HomeScreen(data: WorkspaceLoad.Ready, navigate: (Destination) -> Unit, conne
                 TextButton({ navigate(Destination.NOTIFICATIONS) }, Modifier.heightIn(min = 48.dp)) { Text("View all") }
             }
         }
-        if (data.metadata.events.isEmpty()) item { Panel { Caption("Nothing recorded yet. Real local activity will appear here.") } }
+        if (data.metadata.events.isEmpty()) item { Panel { Caption("New activity appears here.") } }
         items(data.metadata.events.take(3), key = { it.id }) { ActivityRow(it) }
-        item { Caption("Phases 6–7 development build · Encrypted attachments and retained offline copies") }
     }
 }
 @Composable

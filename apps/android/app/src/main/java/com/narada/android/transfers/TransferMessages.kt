@@ -3,6 +3,9 @@ package com.narada.android.transfers
 import com.narada.android.connection.connectionMessage
 
 fun transferMessage(code: String): String = when (code) {
+    "EXACT_COPY_REUSED" -> "This exact version is already in your downloads. Use its existing progress or saved copy; paused work stays paused. No extra slot was used."
+    "TRANSFER_BUSY" -> "This transfer is already running or waiting for a brief retry. Choose Pause transfer to stop it."
+    "PEER_TIMEOUT", "PEER_UNREACHABLE", "CONNECTION_INTERRUPTED", "RATE_LIMITED" -> "The connection was interrupted or busy. Saved progress is kept. While this run remains open, at most two short retries use the same transfer. If paused, check Wi-Fi and the saved device, then resume; do not pair again."
     "PIN_REFERENCED" -> "A pin still references this version or candidate. Explicitly release that reference in Offline files before removing its private bytes."
     "SYNC_ACCESS_DENIED" -> "This pinned copy requires current Read + SyncRead authority, including on resume. Previously verified copies remain available locally."
     "EXPORT_HISTORY_FULL" -> "Two export records are retained. Explicitly remove a reviewed local record before choosing another destination."

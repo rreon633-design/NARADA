@@ -55,19 +55,21 @@ class ConnectionUiTest {
     @Test fun identityPreparationIsExplicitAndDoesNotInventDevices() {
         var preparations=0
         compose.setContent { FixtureFrame(ConnectionsUiState(loading=false),ConnectionActions(available=true,initialize={preparations++})) }
+        scroll("Advanced setup & saved devices");compose.onNodeWithText("Advanced setup & saved devices").performClick()
         scroll("Prepare protected identity");compose.onNodeWithText("Prepare protected identity").performClick()
         assertEquals(1,preparations);compose.onAllNodesWithText("Connected",substring=true).assertCountEquals(0);capture("08-identity")
     }
     @Test fun invitationTextIsDroppedOnSavedStateRestoration() {
         val doc=document();val state=ConnectionsUiState(loading=false,document=doc)
         val restoration=StateRestorationTester(compose);restoration.setContent{FixtureFrame(state)}
+        scroll("Advanced setup & saved devices");compose.onNodeWithText("Advanced setup & saved devices").performClick()
         scroll("Or paste the invitation code");compose.onNodeWithText("Or paste the invitation code").performTextInput("TEST_ONLY_UNPERSISTED_INVITATION")
         restoration.emulateSavedInstanceStateRestore();scroll("Or paste the invitation code")
         compose.onNodeWithText("Review code privately").assertIsNotEnabled()
     }
     @Test fun connectionControlsRemainReachableAtTwoHundredPercentFont() {
         val doc=document();compose.setContent { FixtureFrame(ConnectionsUiState(loading=false,document=doc),scale=2f) }
-        scroll("Scan desktop QR");compose.onNodeWithText("Scan desktop QR").assertIsDisplayed();capture("09-devices-font-200")
+        scroll("Enable & scan QR");compose.onNodeWithText("Enable & scan QR").assertIsDisplayed();capture("09-devices-font-200")
         scroll("Grants stay separate");compose.onNodeWithText("Grants stay separate").assertIsDisplayed()
     }
     @Test fun unverifiedInvitationNeedsExplicitFingerprintComparison() {
@@ -75,4 +77,50 @@ class ConnectionUiTest {
         val state=ConnectionsUiState(loading=false,document=doc,networkAvailable=true,preview=InvitationPreview("Unverified desktop","a".repeat(64),"192.168.0.2:12345",System.currentTimeMillis()+120000))
         compose.setContent{FixtureFrame(state)};scroll("Request pairing");compose.onNodeWithText("Request pairing").assertIsNotEnabled();capture("10-pairing-review")
     }
+    @Test fun quickScanIsOneExplicitActionWithoutAutomaticInitializationByComposition() {
+        var scans=0;var imports=0;var preparations=0
+        compose.setContent { FixtureFrame(ConnectionsUiState(loading=false,foreground=true,networkAvailable=true),ConnectionActions(available=true,scanQr={scans++},importQr={imports++},initialize={preparations++})) }
+        assertEquals(0,scans);assertEquals(0,preparations)
+        scroll("Set up & scan QR");compose.onNodeWithText("Set up & scan QR").performClick()
+        scroll("Import QR image");compose.onNodeWithText("Import QR image").performClick()
+        assertEquals(1,scans);assertEquals(1,imports);assertEquals(0,preparations)
+    }
+    @Test fun quickScanWaitsForEligibleNetworkAndForeground() {
+        var state by mutableStateOf(ConnectionsUiState(loading=false,foreground=true,networkAvailable=false))
+        compose.setContent{FixtureFrame(state)};scroll("Set up & scan QR")
+        compose.onNodeWithText("Set up & scan QR").assertIsNotEnabled()
+        compose.runOnIdle{state=state.copy(networkAvailable=true,foreground=false)}
+        compose.onNodeWithText("Set up & scan QR").assertIsNotEnabled()
+    }
+    @Test fun approvalProgressIsAutomaticOnlyWhileTheOwnerJobIsRunning() {
+        val doc=document().copy(enabled=true)
+        val peer=TrustedPeer("a".repeat(64),"b".repeat(64),name="Test desktop",endpoint="192.168.0.2:12345",invitationId=UUID.randomUUID().toString(),attemptId=UUID.randomUUID().toString(),expiresAt=System.currentTimeMillis()+120000,status=TrustStatus.WAITING)
+        var state by mutableStateOf(ConnectionsUiState(loading=false,document=doc.copy(peers=listOf(peer)),foreground=true,networkAvailable=true,pairingInProgress=true))
+        compose.setContent{FixtureFrame(state)}
+        scroll("THIS PHONE’S FULL FINGERPRINT");compose.onNodeWithText(doc.fingerprint.chunked(4).joinToString(" ")).assertExists()
+        compose.onNodeWithTag("pairing_active_work").assertExists()
+        compose.onNodeWithText("Resume approval checks").assertDoesNotExist()
+        compose.runOnIdle{state=state.copy(pairingInProgress=false)}
+        scroll("Resume approval checks");compose.onNodeWithText("Resume approval checks").assertIsEnabled()
+        compose.onNodeWithTag("pairing_active_work").assertDoesNotExist()
+    }
+    @Test fun finalFingerprintCheckIsStillRequiredAndNotRestored() {
+        val doc=document().copy(enabled=true)
+        val peer=TrustedPeer("a".repeat(64),"b".repeat(64),name="Approved desktop",endpoint="192.168.0.2:12345",invitationId=UUID.randomUUID().toString(),attemptId=UUID.randomUUID().toString(),expiresAt=System.currentTimeMillis()+120000,status=TrustStatus.APPROVED)
+        val state=ConnectionsUiState(loading=false,document=doc.copy(peers=listOf(peer)),foreground=true,networkAvailable=true)
+        val restoration=StateRestorationTester(compose);restoration.setContent{FixtureFrame(state)}
+        scroll("Finish approved pairing");compose.onNodeWithText("Finish approved pairing").assertIsNotEnabled()
+        compose.onNodeWithContentDescription("Confirm this phone’s full fingerprint comparison").performClick()
+        compose.onNodeWithText("Finish approved pairing").assertIsEnabled()
+        restoration.emulateSavedInstanceStateRestore();scroll("Finish approved pairing")
+        compose.onNodeWithText("Finish approved pairing").assertIsNotEnabled()
+    }
+
+    @Test fun leavingDevicesDropsItsInputLaunchScope() {
+        var visible by mutableStateOf(true);val events=mutableListOf<Boolean>()
+        compose.setContent { if(visible) FixtureFrame(ConnectionsUiState(loading=false),ConnectionActions(available=true,inputVisible={events.add(it)})) }
+        compose.runOnIdle{assertEquals(listOf(true),events);visible=false}
+        compose.runOnIdle{assertEquals(listOf(true,false),events)}
+    }
+
 }

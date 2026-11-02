@@ -47,7 +47,7 @@ class ChatCoordinatorTest {
     private lateinit var repository:Repository;private lateinit var connections:ConnectionsCoordinator;private lateinit var chat:ChatCoordinator
     private lateinit var peer:TrustedPeer;private val crypto=FakeCrypto()
     private val content=AtomicInteger();private val pushes=AtomicInteger();private val closes=AtomicInteger()
-    private var blockPush=false;private val entered=CountDownLatch(1);private val release=CountDownLatch(1)
+    private var failPull=false;private var blockPush=false;private val entered=CountDownLatch(1);private val release=CountDownLatch(1)
     private suspend fun ready(predicate:(ChatUiState)->Boolean)=withTimeout(5000){chat.state.first(predicate)}
     @Before fun setup()=runBlocking<Unit>{
         foundation=TestFixture();scope=CoroutineScope(SupervisorJob()+Dispatchers.Default);repository=Repository()
@@ -64,7 +64,7 @@ class ChatCoordinatorTest {
                     val b=crypto.bundle("fixture",peer.id,repository.doc.deviceId).bundle
                     val result:JsonElement=when(w.action["kind"]!!.jsonPrimitive.content){
                         "bundle" -> Wire.json.encodeToJsonElement(b)
-                        "pull" -> Wire.json.encodeToJsonElement(ChatPullReply(b,null))
+                        "pull" -> {if(failPull)com.narada.connection.fail("PEER_TIMEOUT");Wire.json.encodeToJsonElement(ChatPullReply(b,null))}
                         "push" -> {pushes.incrementAndGet();entered.countDown();if(blockPush)assertTrue(release.await(5,TimeUnit.SECONDS));val e=Wire.json.decodeFromJsonElement<ChatEnvelope>(w.action["envelope"]!!);Wire.json.encodeToJsonElement(ChatReceipt(e.message_id,e.sender,e.recipient,e.digest(),committed_at="2026-10-31T00:00:00Z"))}
                         else -> error("Unexpected fixture action")
                     };return Wire.encode(Envelope(true,result,null))
@@ -85,4 +85,52 @@ class ChatCoordinatorTest {
     @Test fun cancellationAfterAdmissionKeepsAnUnknownOutcome()=runBlocking<Unit>{blockPush=true;val id=UUID.randomUUID().toString();chat.send(id,"cannot recall admitted work");assertTrue(entered.await(5,TimeUnit.SECONDS));chat.visible(false);withTimeout(5000){while(repository.doc.chat!!.message(id).runId!=null)delay(10)};assertEquals(ChatStatus.UNCERTAIN,repository.doc.chat!!.message(id).status);assertNotNull(repository.doc.chat!!.message(id).envelope);assertTrue(chat.state.value.rows.isEmpty())}
     @Test fun localWriteFailureLatchesAllNetworkingAndClearsThePrivateView()=runBlocking<Unit>{repository.failWrite=true;chat.send(UUID.randomUUID().toString(),"not admitted");withTimeout(5000){connections.state.first{it.error=="STORAGE_UNAVAILABLE"}};assertFalse(connections.state.value.transportAllowed);assertTrue(chat.state.value.rows.isEmpty());assertEquals(0,pushes.get());repository.failWrite=false;chat.reload();ready{!it.busy};assertFalse(connections.state.value.transportAllowed)}
     @Test fun chatCancellationCannotCloseAnUnrelatedFilesLease()=runBlocking<Unit>{val enteredFiles=CompletableDeferred<Unit>();val finishFiles=CompletableDeferred<Unit>();val worker=scope.launch{connections.withFiles{_,_,_,_->enteredFiles.complete(Unit);finishFiles.await()}};enteredFiles.await();val before=closes.get();chat.visible(false);delay(100);assertEquals(before,closes.get());finishFiles.complete(Unit);worker.join()}
+    @Test fun optedInReceivingSurvivesItsOwnContentLeaseButDoesNotSendQueuedText()=runBlocking<Unit>{
+        val message=ChatEngine(repository,crypto).queue(peer.id,UUID.randomUUID().toString(),"manual sending only")
+        chat.liveUpdates(true);ready{it.liveUpdates&&!it.busy&&content.get()>=2}
+        assertEquals(message,repository.doc.chat!!.message(message.id));assertEquals(0,pushes.get())
+        // withChat temporarily clears connectedPeer; this is not a loss of transport authority.
+        assertTrue(chat.state.value.liveUpdates)
+        chat.stop();ready{!it.liveUpdates&&!it.busy}
+        val before=content.get();delay(5250);assertEquals(before,content.get())
+    }
+    @Test fun leavingChatRevokesLiveConsentAndReturningDoesNotRestoreIt()=runBlocking<Unit>{
+        chat.liveUpdates(true);ready{it.liveUpdates&&!it.busy&&content.get()>=2}
+        chat.visible(false);assertFalse(chat.state.value.liveUpdates);ready{!it.busy}
+        val before=content.get();chat.visible(true);ready{it.enabled&&!it.busy};delay(5250)
+        assertFalse(chat.state.value.liveUpdates);assertEquals(before,content.get())
+    }
+    @Test fun disablingLiveReceivingCannotCancelAnExplicitSend()=runBlocking<Unit>{
+        chat.liveUpdates(true);ready{it.liveUpdates&&!it.busy&&content.get()>=2}
+        blockPush=true;val id=UUID.randomUUID().toString();chat.send(id,"explicit send is separate consent")
+        assertTrue(entered.await(5,TimeUnit.SECONDS));val before=closes.get()
+        chat.liveUpdates(false);ready{!it.liveUpdates}
+        assertEquals(before,closes.get());assertEquals(1L,release.count)
+        release.countDown();ready{it.rows.any{r->r.id==id&&r.status==ChatStatus.DELIVERED}&&!it.busy}
+        assertEquals(1,pushes.get())
+    }
+    @Test fun receiveFailureDisablesLiveSchedulingInsteadOfRetryingUnattended()=runBlocking<Unit>{
+        failPull=true;chat.liveUpdates(true);ready{it.error!=null&&!it.busy}
+        assertFalse(chat.state.value.liveUpdates);val before=content.get();delay(5250);assertEquals(before,content.get())
+    }
+    @Test fun backgroundRevokesLiveConsentWithoutRestoringItOnForeground()=runBlocking<Unit>{
+        chat.liveUpdates(true);ready{it.liveUpdates&&!it.busy&&content.get()>=2}
+        connections.foregroundChanged(false);ready{!it.foreground&&!it.liveUpdates&&!it.busy}
+        val before=content.get();connections.foregroundChanged(true)
+        withTimeout(5000){connections.state.first{it.connectedPeer==peer.id}};delay(5250)
+        assertFalse(chat.state.value.liveUpdates);assertEquals(before,content.get());assertEquals(0,pushes.get())
+    }
+
+    @Test fun manualReceiveDoesNotEnableLiveUpdatesOrSendQueuedText()=runBlocking<Unit>{
+        val old=ChatEngine(repository,crypto).queue(peer.id,UUID.randomUUID().toString(),"waiting for explicit send")
+        chat.receive();ready{!it.busy&&content.get()>=2}
+        assertEquals(old,repository.doc.chat!!.message(old.id));assertEquals(0,pushes.get());assertFalse(chat.state.value.liveUpdates)
+    }
+    @Test fun sendingNewTextDoesNotDrainOtherQueuedMessages()=runBlocking<Unit>{
+        val old=ChatEngine(repository,crypto).queue(peer.id,UUID.randomUUID().toString(),"older queued message")
+        val id=UUID.randomUUID().toString();chat.send(id,"explicit new message")
+        ready{!it.busy&&it.rows.any{r->r.id==id&&r.status==ChatStatus.DELIVERED}}
+        assertEquals(old,repository.doc.chat!!.message(old.id));assertEquals(1,pushes.get())
+    }
+
 }

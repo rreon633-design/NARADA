@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Publish same-run green candidates; create the initial tag once, never move refs/overwrite releases."""
+"""Publish same-run green candidates; create the configured requested tag once, never move refs/overwrite releases."""
 from __future__ import annotations
 import json
 import datetime
@@ -10,11 +10,32 @@ import shutil
 import urllib.error
 import urllib.parse
 import urllib.request
-from artifacts import POLICY, release_label
+from artifacts import POLICY
 from evidence import ROOT, digest, require, write_json
 
 EXPECTED_JOBS = {"tooling", "desktop-linux", "windows", "android", "emulator-api29", "emulator-api35"}
 REPOSITORY = "rreon633-design/NARADA"
+
+
+
+def requested_tag(ref):
+    # Retain the historical first tag in policy; a later release is an explicit,
+    # checked-in request. Neither main nor an arbitrary tag may select another version.
+    target = POLICY.get("main_release_tag", POLICY["initial_github_tag"])
+    require(isinstance(target, str) and re.fullmatch(r"v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?", target), "Invalid configured release tag")
+    require(ref in ("refs/heads/main", "refs/tags/" + target), "Tag is not the configured release request")
+    return target
+
+
+def release_changes(tag):
+    require(re.fullmatch(r"v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?", tag), "Invalid notes tag")
+    path = ROOT / "release" / (tag + "-notes.md")
+    require(path.is_file() and not path.is_symlink(), "Missing reviewed release notes")
+    raw = path.read_bytes()
+    require(0 < len(raw) <= 20_000, "Release notes are empty or exceed the bounded review size")
+    text = raw.decode("utf-8").strip()
+    require(bool(text), "Release notes contain no reviewed text")
+    return text
 
 
 def api(path, method="GET", data=None, *, missing=False):
@@ -102,11 +123,11 @@ def main():
     require(os.environ.get("GITHUB_REPOSITORY") == REPOSITORY and os.environ.get("GITHUB_EVENT_NAME") == "push" and (os.environ.get("GITHUB_REF", "").startswith("refs/tags/v") or os.environ.get("GITHUB_REF") == "refs/heads/main"), "Release is restricted to an owner-repository tag/main push")
     sha, run, attempt = os.environ["GITHUB_SHA"], os.environ["GITHUB_RUN_ID"], os.environ["GITHUB_RUN_ATTEMPT"]
     initial = os.environ["GITHUB_REF"] == "refs/heads/main"
-    tag = POLICY["initial_github_tag"] if initial else release_label()
+    tag = requested_tag(os.environ["GITHUB_REF"])
     require(re.fullmatch(r"v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?", tag), "Invalid version tag")
     existing_ref = api("git/ref/tags/" + tag, missing=True)
     if initial and existing_ref is not None:
-        # Later commits must never replace v0.0.1. A rerun of the exact tagged
+        # Later commits must never replace the configured published version. A rerun of the exact tagged
         # commit may retry publication only when no release/draft already exists.
         existing = existing_ref["object"]
         for _ in range(4):
@@ -115,7 +136,7 @@ def main():
             existing = api("git/tags/" + existing["sha"])["object"]
         old_release = existing_release(tag)
         if existing.get("sha") != sha or (old_release is not None and not old_release["draft"]):
-            print(f"Initial tag/release {tag} already exists. Leaving it untouched; this push still has fresh CI artifacts.")
+            print(f"Configured tag/release {tag} already exists. Leaving it untouched; this push still has fresh CI artifacts.")
             return
     base = ROOT / ".cache/release-inputs"
     statuses = verify_evidence(base / "evidence", sha, run, attempt)
@@ -147,7 +168,9 @@ def main():
     smoke = json.loads(smoke_files[0].read_text(encoding="utf-8-sig"))
     verify_windows_bootstrap(windows, smoke, sha)
 
-    # An initial main-branch campaign creates the requested tag only after ALL
+    changes = release_changes(tag)  # Validate reviewed notes before creating any tag or release.
+
+    # A main-branch campaign creates the requested tag only after ALL
     # checks above succeed. No API call can move or force-update an existing ref.
     require(existing_release(tag) is None, "Release already exists; refusing to overwrite it (including a previous draft)")
     if initial and existing_ref is None:
@@ -170,11 +193,11 @@ def main():
                "required_jobs": {k: {"outcome": v["outcome"], "command_records": v["command_records"], "source_inputs_sha256": v["source_inputs_sha256"]} for k, v in statuses.items()},
                "native_emulator_execution": native, "windows_native_bootstrap": smoke,
                "qualification": "Development manual testing only; not production/security approval",
-               "unqualified": POLICY["not_qualified"]}
+               "unqualified": POLICY["not_qualified"], "release_notes_sha256": digest(ROOT / "release" / (tag + "-notes.md")), "android_version_name": POLICY["android_version_name"], "android_version_code": POLICY["android_version_code"], "desktop_version_name": POLICY["desktop_version_name"]}
     publish_dir = ROOT / ".cache/ci-publish"
     publish_dir.mkdir(parents=True, exist_ok=False)
     write_json(publish_dir / "CI-RELEASE-EVIDENCE.json", summary)
-    # Branch-run candidates are named dev-<commit>; rename COPIES for the first
+    # Branch-run candidates are named dev-<commit>; rename COPIES for the requested
     # tagged release. Binary bytes, signatures and tested hashes never change.
     for platform, folder, report in (("android", android_dir, android), ("windows", windows_dir, windows)):
         for row in report["files"]:
@@ -191,10 +214,10 @@ def main():
     checksums = publish_dir / "SHA256SUMS.txt"
     checksums.write_text("".join(f"{digest(p)}  {p.name}\n" for p in files), encoding="utf-8")
     files.append(checksums)
-    notes = [f"# NARADA {tag} — development manual-test prerelease", "", f"Source commit: `{sha}`. Fresh GitHub run: https://github.com/{REPOSITORY}/actions/runs/{run}", "", "## Downloads", "", "- **Windows x64:** download the `windows-x64-setup.exe` asset. Unsigned; requires the system WebView2 runtime. No Electron/Chromium bundle.", "- **Android:** download only the APK matching your device ABI (`arm64-v8a` for most modern phones; do not install all four). Android 10/API 29 or newer.", "", "### Measured download sizes", ""]
+    notes = [f"# NARADA {tag} — development manual-test prerelease", "", f"Source commit: `{sha}`. Fresh GitHub run: https://github.com/{REPOSITORY}/actions/runs/{run}", "", "## Changes", "", changes, "", "## Downloads", "", "- **Windows x64:** download the `windows-x64-setup.exe` asset. Unsigned; requires the system WebView2 runtime. No Electron/Chromium bundle.", "- **Android:** download only the APK matching your device ABI (`arm64-v8a` for most modern phones; do not install all four). Android 10/API 29 or newer.", "", "### Measured download sizes", ""]
     for row in windows["files"] + android["files"]:
         notes.append(f"- `{row['name']}`: {row['bytes']:,} bytes ({row['bytes'] / 1048576:.2f} MiB).")
-    notes += ["", "## Important boundaries", "", "- Android is a **non-debuggable, minified test build**, signed with a temporary CI debug certificate. Package: `com.narada.mobile.dev.ci`, launcher: **NARADA (Test)**. It does not replace the earlier `.dev` app. Use disposable test data; subsequent runs can use a different signer.", "- This first GitHub tag is `v0.0.1`; existing Android/desktop shell application version `0.7.0`, Android versionCode `7`, and Rust workspace `0.7.1` are intentionally retained. No data/schema downgrade or production upgrade is claimed.", "- Native instrumentation ran against the **same minified x86_64 APK** on API 29 and 35 hosted emulators. Windows checks include native unit tests and a silent installer/bootstrap smoke. Neither replaces physical-device/LAN/security qualification.", "- Checksums and build reports are attached. Reports list remaining gates. There is no production signing, independent security/legal approval, validated in-place upgrade, or measured performance guarantee on your hardware.", "- Read `ANDROID-MANUAL-TEST.md` / `WINDOWS-MANUAL-TEST.md` before installing. Never remove valued data to resolve signer or storage continuity errors."]
+    notes += ["", "## Important boundaries", "", "- Android is a **non-debuggable, minified test build**, signed with a temporary CI debug certificate. Package: `com.narada.mobile.dev.ci`, launcher: **NARADA (Test)**. It does not replace the earlier `.dev` app. Use disposable test data; subsequent runs can use a different signer.", f"- GitHub release tag: `{tag}`. Android app `{POLICY['android_version_name']}` / versionCode `{POLICY['android_version_code']}`; desktop shell `{POLICY['desktop_version_name']}`. The existing `v0.0.1` release is unchanged. Protocol/database/trust formats were not reset; higher version numbers do not establish signer or upgrade continuity.", "- Native instrumentation ran against the **same minified x86_64 APK** on API 29 and 35 hosted emulators. Windows checks include native unit tests and a silent installer/bootstrap smoke. Neither replaces physical-device/LAN/security qualification.", "- Checksums and build reports are attached. Reports list remaining gates. There is no production signing, independent security/legal approval, validated in-place upgrade, or measured performance guarantee on your hardware.", "- Read `ANDROID-MANUAL-TEST.md` / `WINDOWS-MANUAL-TEST.md` before installing. Never remove valued data to resolve signer or storage continuity errors."]
     body = "\n".join(notes) + "\n"
     # Create as DRAFT, upload/verify everything, and only then make it visible.
     created = api("releases", "POST", {"tag_name": tag, "target_commitish": sha,

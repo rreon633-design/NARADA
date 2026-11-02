@@ -19,7 +19,7 @@ data class ConnectionsUiState(
     val loading: Boolean = true, val document: TrustDocument? = null, val protection: String? = null,
     val preview: InvitationPreview? = null, val busy: Boolean = false, val foreground: Boolean = false,
     val networkAvailable: Boolean = false, val connectedPeer: String? = null, val accessEpoch: Long = 0, val transportAllowed: Boolean = false,
-    val status: String = "Offline", val error: String? = null,
+    val status: String = "Offline", val error: String? = null, val pairingInProgress: Boolean = false,
 )
 @Singleton
 class ConnectionsCoordinator @Inject constructor(
@@ -55,16 +55,47 @@ class ConnectionsCoordinator @Inject constructor(
     }
     private fun invalidate(status: String) {
         generation.incrementAndGet(); connector.closeAll(); networkJob?.cancel()
-        mutable.update { it.copy(connectedPeer = null, foreground = network.foreground, networkAvailable = network.available(), accessEpoch = generation.get(), transportAllowed = network.allowed, status = status) }
+        mutable.update { it.copy(connectedPeer = null, foreground = network.foreground, networkAvailable = network.available(), accessEpoch = generation.get(), transportAllowed = network.allowed, status = status, pairingInProgress = false) }
     }
-    private fun command(action: suspend () -> Unit) {
-        scope.launch { commands.withLock {
-            mutable.update { it.copy(busy = true, error = null) }
-            try { action(); refresh() } catch (cancelled: CancellationException) { throw cancelled } catch (failure: Exception) { showFailure(failure) }
-            finally { mutable.update { it.copy(busy = false) } }
-        } }
+    private fun command(action: suspend () -> Unit) { scope.launch { executeCommand(action) } }
+    private suspend fun executeCommand(action: suspend () -> Unit) = commands.withLock {
+        mutable.update { it.copy(busy = true, error = null) }
+        try { action(); refresh() } catch (cancelled: CancellationException) { throw cancelled } catch (failure: Exception) { showFailure(failure) }
+        finally { mutable.update { it.copy(busy = false) } }
     }
     fun initialize() = command { repository.initialize() }
+    /** One explicit user action prepares local QR input; never starts a claim or replaces keys.
+     * Losing the foreground/route while storage is opening drops the launch, not the identity. */
+    suspend fun preparePairingInput(): Boolean {
+        val turn = generation.get() // Capture before waiting for another command.
+        return commands.withLock {
+            if (turn != generation.get()) return@withLock false
+            mutable.update { it.copy(busy = true, error = null) }
+            fun current() = turn == generation.get() && network.foreground && network.available() && !storageBlocked
+            try {
+                demand(!storageBlocked, "STORAGE_UNAVAILABLE")
+                demand(network.foreground, "NETWORK_DISABLED")
+                demand(network.available(), "LOCAL_NETWORK_UNAVAILABLE")
+                val doc = repository.read()
+                if (!current()) return@withLock false
+                if (mutable.value.pairingInProgress || ticket != null || doc?.peers.orEmpty().any { it.status !in setOf(TrustStatus.ACTIVE, TrustStatus.REVOKED) }) {
+                    mutable.update { it.copy(error = "PAIRING_IN_PROGRESS") }
+                    return@withLock false
+                }
+                if (doc == null) repository.initialize()
+                repository.identity() // Validate the existing transport key too; never recreate it.
+                if (!current()) return@withLock false
+                if (doc?.enabled != true) repository.mutate { it.copy(enabled = true) }
+                if (!current()) return@withLock false
+                refresh()
+                if (!current()) return@withLock false
+                mutable.update { it.copy(status = "Ready to scan a computer QR") }
+                true
+            } catch (cancelled: CancellationException) { throw cancelled }
+            catch (failure: Exception) { showFailure(failure); false }
+            finally { mutable.update { it.copy(busy = false) } }
+        }
+    }
     fun reload() = command { repository.read(); storageBlocked = false; mutable.update { it.copy(status = "Protected state reopened · not connected") }; refresh(); resumeIfEligible() }
     fun enable(enabled: Boolean) = command {
         if (!enabled) network.allowed = false
@@ -73,7 +104,9 @@ class ConnectionsCoordinator @Inject constructor(
         repository.mutate { it.copy(enabled = enabled) }
         storageBlocked = false; network.allowed = enabled; refresh(); resumeIfEligible()
     }
-    fun acceptCode(raw: String) = command {
+    fun acceptCode(raw: String) = command { reviewCode(raw) }
+    suspend fun acceptPairingInput(raw: String) = executeCommand { reviewCode(raw) }
+    private suspend fun reviewCode(raw: String) {
         val parsed = PairCode.parse(raw)
         demand(!Endpoint.parse(parsed.endpoint).address().isLoopbackAddress, "ENDPOINT_NOT_LOCAL")
         demand(repository.read() != null, "IDENTITY_NOT_READY")
@@ -93,11 +126,13 @@ class ConnectionsCoordinator @Inject constructor(
         ticket = null; expiryJob?.cancel(); mutable.update { it.copy(preview = null) }
         invalidate("Requesting pairing"); networkJob?.cancelAndJoin()
         val turn = generation.get()
+        updateFor(turn) { it.copy(pairingInProgress = true) }
         networkJob = scope.launch {
             try {
                 val peer = engine.begin(code, settings.current().deviceName)
                 if (turn == generation.get()) { refresh(); awaitOwner(peer.id, turn) }
             } catch (cancelled: CancellationException) { throw cancelled } catch (failure: Exception) { if (turn == generation.get()) { refreshSafely(); showFailure(failure) } }
+            finally { updateFor(turn) { it.copy(pairingInProgress = false) } }
         }
     }
     private suspend fun awaitOwner(id: String, turn: Long) {
@@ -108,8 +143,8 @@ class ConnectionsCoordinator @Inject constructor(
                 while (isCurrent(turn)) {
                     val result = engine.prove(id); refresh()
                     if (!isCurrent(turn)) return@withTimeout
-                    if (result.status == TrustStatus.APPROVED) { mutable.update { it.copy(status = "Desktop approved. Compare fingerprints and finish on this phone.") }; return@withTimeout }
-                    mutable.update { it.copy(status = "Waiting for explicit approval on the desktop") }; delay(2000)
+                    if (result.status == TrustStatus.APPROVED) { mutable.update { it.copy(status = "Approved. Review permissions and finish on this phone.") }; return@withTimeout }
+                    mutable.update { it.copy(status = "Checking automatically · approve on your computer") }; delay(2000)
                 }
             }
         } catch (_: TimeoutCancellationException) { if (isCurrent(turn)) { mutable.update { it.copy(error = "INVITATION_EXPIRED", status = "Pairing expired; cancel this attempt before scanning a new code") } } }
@@ -117,21 +152,25 @@ class ConnectionsCoordinator @Inject constructor(
     fun finish(id: String, compared: Boolean) = command {
         requireNetwork(); invalidate("Confirming durable pairing"); networkJob?.cancelAndJoin()
         val turn = generation.get()
+        updateFor(turn) { it.copy(pairingInProgress = true) }
         networkJob = scope.launch {
-            try { engine.finish(id, compared); if (isCurrent(turn)) { refresh(); maintain(id, turn) } }
+            try { engine.finish(id, compared); if (isCurrent(turn)) { refresh(); updateFor(turn) { it.copy(pairingInProgress = false) }; maintain(id, turn) } }
             catch (cancelled: CancellationException) { throw cancelled } catch (failure: Exception) { if (turn == generation.get()) { refreshSafely(); showFailure(failure) } }
+            finally { updateFor(turn) { it.copy(pairingInProgress = false) } }
         }
     }
     fun recover(id: String) = command {
         requireNetwork(); invalidate("Recovering acknowledgement"); networkJob?.cancelAndJoin()
         val turn = generation.get()
+        updateFor(turn) { it.copy(pairingInProgress = true) }
         networkJob = scope.launch {
             try {
                 val peer = repository.read()?.peer(id) ?: fail("PEER_NOT_FOUND")
-                if (peer.status == TrustStatus.ACK_PENDING) { engine.recoverAcknowledgement(id); if (isCurrent(turn)) { refresh(); maintain(id, turn) } }
+                if (peer.status == TrustStatus.ACK_PENDING) { engine.recoverAcknowledgement(id); if (isCurrent(turn)) { refresh(); updateFor(turn) { it.copy(pairingInProgress = false) }; maintain(id, turn) } }
                 else if (peer.status in setOf(TrustStatus.WAITING, TrustStatus.APPROVED)) awaitOwner(id, turn)
                 else fail("PAIRING_STATE_CHANGED")
             } catch (cancelled: CancellationException) { throw cancelled } catch (failure: Exception) { if (turn == generation.get()) { refreshSafely(); showFailure(failure) } }
+            finally { updateFor(turn) { it.copy(pairingInProgress = false) } }
         }
     }
     fun reconnect(id: String, endpoint: String) = command {
@@ -254,7 +293,7 @@ class ConnectionsCoordinator @Inject constructor(
         if (failure is CancellationException) return
         if (errorCode(failure) in setOf("IDENTITY_KEY_MISSING", "IDENTITY_CHANGED", "IDENTITY_ANCHOR_MISSING", "TRUST_STORE_MISSING", "TRUST_STORE_INVALID", "KEYSTORE_UNAVAILABLE", "STORAGE_UNAVAILABLE", "CRYPTO_STATE_INVALID", "CHAT_STATE_INVALID", "ATTACHMENT_STATE_INVALID", "PIN_STATE_INVALID")) { storageBlocked = true; network.allowed = false; discovery.stop(); generation.incrementAndGet(); networkJob?.cancel() }
         connector.closeAll()
-        mutable.update { it.copy(loading = false, connectedPeer = null, error = errorCode(failure), accessEpoch = generation.get(), transportAllowed = network.allowed, status = "Needs attention. No identity reset or insecure fallback was attempted.") }
+        mutable.update { it.copy(loading = false, connectedPeer = null, error = errorCode(failure), accessEpoch = generation.get(), transportAllowed = network.allowed, status = "Needs attention. No identity reset or insecure fallback was attempted.", pairingInProgress = false) }
     }
     private fun errorCode(failure: Exception) = (failure as? ConnectionFailure)?.code ?: "STORAGE_UNAVAILABLE"
 }

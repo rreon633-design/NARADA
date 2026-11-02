@@ -65,7 +65,7 @@ class ComposeShellTest {
         compose.onNodeWithText("Get started").performClick()
         compose.onNodeWithText("Device name").performTextReplacement("My test phone")
         compose.onNodeWithText("Continue").performClick()
-        compose.onNodeWithText("Open my workspace").performScrollTo().performClick()
+        compose.onNodeWithText("Open NARADA").performScrollTo().performClick()
         assertEquals("My test phone",completed)
         compose.onNodeWithTag("tab_home").assertDoesNotExist()
     }
@@ -128,4 +128,21 @@ class ComposeShellTest {
         compose.onNodeWithText("Retry without resetting").performClick();assertEquals(1,retries)
         compose.onNodeWithTag("tab_home").assertDoesNotExist();compose.onAllNodesWithText("Reset app").assertCountEquals(0)
     }
+    @Test fun conciseHelpKeepsSafeRecoveryAndShowsActualVersionAtLargeText() {
+        render(scale=2f)
+        compose.onAllNodesWithText("PHASE 5").assertCountEquals(0)
+        compose.onNodeWithTag("tab_more").performClick()
+        val version = "NARADA ${BuildConfig.VERSION_NAME} · Development build"
+        compose.onNode(hasScrollToIndexAction()).performScrollToNode(hasText(version))
+        compose.onNodeWithText(version).assertIsDisplayed()
+        compose.onNode(hasScrollToIndexAction()).performScrollToNode(hasText("Help"))
+        compose.onNodeWithText("Help",useUnmergedTree=true).performClick()
+        compose.onNodeWithTag("screen_help").performScrollToNode(hasText("If storage cannot be opened, retry without resetting. Do not uninstall or clear app data to fix it."))
+        compose.onNodeWithText("If storage cannot be opened, retry without resetting. Do not uninstall or clear app data to fix it.").assertIsDisplayed()
+        compose.onNodeWithTag("screen_help").performScrollToNode(hasText("Physical-device testing, independent security review and safe-upgrade checks remain open."))
+        compose.onNodeWithText("Physical-device testing, independent security review and safe-upgrade checks remain open.").assertIsDisplayed()
+        compose.onAllNodesWithText("Reset app").assertCountEquals(0)
+        compose.onAllNodesWithText("The development roadmap").assertCountEquals(0)
+    }
+
 }

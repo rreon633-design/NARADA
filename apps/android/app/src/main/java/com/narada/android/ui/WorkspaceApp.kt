@@ -122,7 +122,6 @@ private fun NativeShell(data: WorkspaceLoad.Ready, state: WorkspaceUiState, snac
                 navigationIcon = { if (current !in Destination.primary) IconButton({ request(BACK) }, Modifier.size(48.dp)) { Glyph(R.drawable.ic_back, description = "Back") } },
                 actions = {
                     if (current == Destination.HOME) {
-                        if (LocalDensity.current.fontScale < 1.4f) Eyebrow("PHASE 5", Modifier.padding(end = 12.dp))
                         IconButton({ navigate(Destination.SETTINGS) }, Modifier.size(48.dp)) { Glyph(R.drawable.ic_settings, description = "Open settings") }
                     }
                 },

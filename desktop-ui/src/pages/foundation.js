@@ -283,7 +283,7 @@ export function future(ctx, route) {
       c.eyebrow,
       c.title,
       "Part of your NARADA workspace.",
-      badge(`Planned · Phase ${c.phase}`),
+      badge("Unavailable in this build"),
     ),
     h(
       "section",
@@ -297,7 +297,7 @@ export function future(ctx, route) {
       h("span", { class: "eyebrow" }, "GOOD THINGS NEED A SOLID FOUNDATION"),
       h("h2", {}, c.heading),
       h("p", {}, c.body),
-      button("View the roadmap", ctx.openRoadmap, {
+      button("Build limitations", ctx.openRoadmap, {
         kind: "primary",
         trailing: "arrow",
       }),

@@ -131,3 +131,21 @@ function boundedJpegDimensions(b) {
   }
   fail();
 }
+
+// A missing selection must never quietly become another device's/folder's contents.
+export function resolveRootSelection(roots, selectedId) {
+  const root = selectedId
+    ? roots.find((r) => r.root_id === selectedId) || null
+    : roots[0] || null;
+  return { root, missing: Boolean(selectedId && !root) };
+}
+
+// Never round a custom existing grant up to a more powerful preset.
+export function roleForGrant(capabilities) {
+  const actual = [...capabilities].sort().join("/");
+  return (
+    ["none", "browse", "preview", "offline", "manage"].find(
+      (role) => grantForRole("", role).capabilities.sort().join("/") === actual,
+    ) || "custom"
+  );
+}

@@ -26,37 +26,37 @@ const routes = [
     id: "home",
     label: "Home",
     icon: "home",
-    hint: "Overview of your local workspace",
+    hint: "Your devices and local activity",
   },
   {
     id: "files",
     label: "Files",
     icon: "folder",
-    hint: "Approved folders · Phase 3",
+    hint: "Browse approved folders",
   },
   {
     id: "chat",
     label: "Chat",
     icon: "chat",
-    hint: "Protected history and real delivery receipts",
+    hint: "Private messages and delivery status",
   },
   {
     id: "transfers",
     label: "Transfers",
     icon: "transfer",
-    hint: "Resumable file transfers · Phase 4",
+    hint: "Pause and resume transfers",
   },
   {
     id: "sync",
     label: "Sync & offline",
     icon: "sync",
-    hint: "Version-preserving pins and metadata freshness",
+    hint: "Saved copies and refresh status",
   },
   {
     id: "devices",
     label: "Devices",
     icon: "devices",
-    hint: "Trusted-device pairing · Phase 2",
+    hint: "Pair and manage devices",
   },
   {
     id: "settings",
@@ -68,7 +68,7 @@ const routes = [
     id: "diagnostics",
     label: "Diagnostics",
     icon: "activity",
-    hint: "Actual database and workspace health",
+    hint: "Local service and storage health",
   },
 ];
 const validRoute = (id) => (routes.some((r) => r.id === id) ? id : "home");
@@ -137,7 +137,7 @@ const topbar = h(
       "button",
       {
         class: "workspace-avatar",
-        "aria-label": "Open workspace settings",
+        "aria-label": "Open computer settings",
         onclick: () => navigate("settings"),
       },
       "N",
@@ -158,17 +158,11 @@ const sidebar = h(
       "span",
       { class: "phase-card-top" },
       h("span", { class: "phase-indicator" }),
-      "VERIFIED FILE MOVEMENT",
+      "DEVELOPMENT BUILD",
       icon("arrowUp", 13),
     ),
-    h("span", { class: "phase-card-title" }, "One good step at a time."),
-    h(
-      "span",
-      { class: "phase-card-sub" },
-      "Desktop preview",
-      h("span", {}, "In progress"),
-    ),
-    h("span", { class: "phase-progress" }, h("i")),
+    h("span", { class: "phase-card-title" }, "Build limitations"),
+    h("span", { class: "phase-card-sub" }, "Review before installing"),
   ),
   agentCard,
 );
@@ -507,16 +501,16 @@ function openSetup() {
         "div",
         {},
         h("span", { class: "wizard-icon" }, icon("laptop", 27)),
-        h("h3", {}, "Give this space a familiar name."),
+        h("h3", {}, "Name this computer."),
         h(
           "p",
           { class: "muted" },
-          "Something that feels like yours. You can change it any time.",
+          "This name identifies your computer when pairing. It is not a folder or storage location.",
         ),
         h(
           "label",
           { class: "field-label", for: "setup-name" },
-          "Workspace name",
+          "Computer name",
         ),
         nameInput,
         error,
@@ -530,11 +524,11 @@ function openSetup() {
         h(
           "p",
           { class: "muted" },
-          "These preferences stay in your local metadata. Messaging and notifications arrive in later phases.",
+          "These preferences stay on this computer. Chat and folder access require separate, explicit consent.",
         ),
         toggle(
           "Private notification previews",
-          "Keep future message bodies and filenames out of notifications.",
+          "Keep message bodies and filenames out of notifications.",
           draft.hide_notification_previews,
           (v) => (draft.hide_notification_previews = v),
         ),
@@ -550,11 +544,11 @@ function openSetup() {
         "div",
         {},
         h("span", { class: "wizard-icon complete" }, icon("check", 27)),
-        h("h3", {}, "A good foundation for what’s next."),
+        h("h3", {}, "Your computer is ready to set up."),
         h(
           "p",
           { class: "muted" },
-          "Save your workspace preferences to the running local agent.",
+          "Save these preferences, then open Devices to connect your phone. No folder is required for chat.",
         ),
         h(
           "div",
@@ -562,7 +556,7 @@ function openSetup() {
           h(
             "div",
             {},
-            h("span", {}, "Workspace"),
+            h("span", {}, "Computer name"),
             h("strong", {}, draft.device_name.trim()),
           ),
           h(
@@ -581,14 +575,14 @@ function openSetup() {
             "div",
             {},
             h("span", {}, "Available now"),
-            h("strong", {}, "Trusted desktop pairing"),
+            h("strong", {}, "Phone pairing and private chat"),
           ),
         ),
         error,
       );
     }
     const next = button(
-      step === 2 ? "Make yourself at home" : "Continue",
+      step === 2 ? "Save & open Devices" : "Continue",
       async () => {
         if (step === 0) {
           const invalid = validateName(draft.device_name);
@@ -608,6 +602,7 @@ function openSetup() {
           await saveSettings({ ...draft, setup_completed: true });
           instance.close();
           await refresh(true);
+          navigate("devices");
         } catch (e) {
           error.textContent = e.message;
           next.disabled = false;
@@ -650,93 +645,65 @@ function openSetup() {
   draw();
 }
 function openRoadmap() {
-  const phases = [
+  const checks = [
     [
       "01",
-      "Desktop foundation",
-      "Local agent, durable preferences, app shell and diagnostics.",
-      "Implemented",
+      "On-device testing",
+      "Verify the complete Windows-to-phone journey on the installed builds.",
     ],
     [
       "02",
-      "Trusted connections",
-      "Protected identities, real QR, mutual TLS and revocation. Desktop only.",
-      "Implemented",
+      "Security review",
+      "Independent review of encryption, storage and permissions.",
     ],
     [
       "03",
-      "Your approved files",
-      "Safe folder access, browsing, previews and recoverable mutations.",
-      "Implemented",
-    ],
-    [
-      "04",
-      "Reliable transfers",
-      "Bounded snapshots, verified chunks, explicit receive approval and resumable publication.",
-      "Source implemented",
-    ],
-    [
-      "05–06",
-      "Private conversations",
-      "Olm messages, protected history/outbox and authenticated age attachments. Review gates remain open.",
-      "Source implemented",
-    ],
-    [
-      "07",
-      "Ready to go offline",
-      "Stable metadata snapshots, scoped journals and version-preserving desktop pins.",
-      "Source implemented",
-    ],
-    [
-      "08–09",
-      "A release you can trust",
-      "Host checks and release tooling are provided. Native execution, independent review and signing remain external gates.",
-      "Qualification pending",
+      "Safe upgrades",
+      "Confirm signing and install continuity before updating an existing installation.",
     ],
   ];
-  const content = h(
-    "div",
-    {},
-    h(
-      "p",
-      { class: "muted" },
-      "One reliable layer at a time. The interface never pretends a future capability is already connected.",
-    ),
-    h(
+  modal({
+    title: "Build limitations",
+    eyebrow: "DEVELOPMENT BUILD",
+    content: h(
       "div",
-      { class: "roadmap-list" },
-      phases.map(([num, title, desc, status], i) =>
-        h(
-          "div",
-          { class: `roadmap-row ${i === 1 ? "current" : ""}` },
-          h("span", { class: "roadmap-number" }, num),
+      {},
+      h(
+        "p",
+        { class: "muted" },
+        "Local tests alone do not qualify this build for release.",
+      ),
+      h(
+        "div",
+        { class: "roadmap-list" },
+        checks.map(([number, title, description]) =>
           h(
             "div",
-            { class: "roadmap-copy" },
-            h("h3", {}, title),
-            h("p", {}, desc),
+            { class: "roadmap-row" },
+            h("span", { class: "roadmap-number" }, number),
+            h(
+              "div",
+              { class: "roadmap-copy" },
+              h("h3", {}, title),
+              h("p", {}, description),
+            ),
+            badge("Pending"),
           ),
-          badge(status, i === 1 ? "success" : "neutral"),
         ),
       ),
+      h(
+        "div",
+        { class: "inline-note" },
+        icon("info", 16),
+        "Do not clear app data or uninstall over an installation with valued history.",
+      ),
     ),
-    h(
-      "div",
-      { class: "inline-note" },
-      icon("info", 16),
-      "Desktop phases 1–2 still need native Windows and security qualification. Android is not implemented in this slice.",
-    ),
-  );
-  modal({
-    title: "Good things, built carefully.",
-    eyebrow: "THE NARADA ROADMAP",
-    content,
     className: "roadmap-modal",
   });
 }
 function openHelp() {
   modal({
-    title: "Closer together. Still yours.",
+    title: "Connect, chat, share",
     eyebrow: "THE LOCAL-FIRST WAY",
     content: h(
       "div",
@@ -744,7 +711,7 @@ function openHelp() {
       h(
         "p",
         { class: "help-lead" },
-        "NARADA is being built to connect a Windows laptop and Android phone without a mandatory account or cloud.",
+        "Connect your computer and phone without a cloud account.",
       ),
       h(
         "div",
@@ -753,11 +720,11 @@ function openHelp() {
         h(
           "div",
           {},
-          h("h3", {}, "It begins on your desktop."),
+          h("h3", {}, "1. Connect your phone"),
           h(
             "p",
             {},
-            "This phase runs a real Rust agent, stores preferences in SQLite, and gives your workspace a home.",
+            "Use the same trusted network. In Devices, choose Connect your phone and scan the QR.",
           ),
         ),
       ),
@@ -768,11 +735,11 @@ function openHelp() {
         h(
           "div",
           {},
-          h("h3", {}, "You choose the connection."),
+          h("h3", {}, "2. Verify and approve"),
           h(
             "p",
             {},
-            "Desktop pairing is now real: opt-in networking, a one-time QR, private-key proof and your approval. No folders or chat endpoints are exposed. Android comes later.",
+            "Compare full fingerprints, approve on the computer, then finish pairing on the phone.",
           ),
         ),
       ),
@@ -783,11 +750,11 @@ function openHelp() {
         h(
           "div",
           {},
-          h("h3", {}, "No pretend privacy promises."),
+          h("h3", {}, "3. Chat or share a folder"),
           h(
             "p",
             {},
-            "The current database holds non-sensitive metadata. Chat encryption, safe file access, and Windows release qualification remain explicit gates.",
+            "Allow chat separately. In Files, add a folder and choose who can access it. Chat does not require a folder.",
           ),
         ),
       ),
@@ -799,14 +766,14 @@ function openHelp() {
           "p",
           {},
           isNative
-            ? "This window communicates with the user agent through local OS-protected IPC."
-            : "This browser talks to the development agent through a same-origin proxy. The preview is not the native Windows application.",
+            ? "Native app · local service connection."
+            : "Browser development preview—not the installed Windows app.",
         ),
       ),
     ),
     actions: [
       button(
-        "Explore the roadmap",
+        "Build limitations",
         () => {
           document.querySelector("dialog[open]")?.close();
           openRoadmap();

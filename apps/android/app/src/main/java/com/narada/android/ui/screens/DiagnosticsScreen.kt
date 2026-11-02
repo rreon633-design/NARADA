@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.narada.android.R
 import com.narada.android.ui.*
@@ -16,7 +17,7 @@ fun DiagnosticsScreen(data: WorkspaceLoad.Ready, busy: Boolean, actions: Workspa
     val job = data.metadata.job
     LazyColumn(Modifier.fillMaxSize(), state = rememberLazyListState(), contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(22.dp)) {
         item { Text("A small check.\nA clearer picture.", style = MaterialTheme.typography.headlineLarge) }
-        item { Caption("Check the local metadata, preferences, a small app-private file and retained permission records. No network access and no folder-content scan.") }
+        item { Caption("Check local storage, preferences and saved permissions. No network access or folder-content scan.") }
         item {
             Panel {
                 TileIcon(R.drawable.ic_diagnostics)
@@ -29,16 +30,16 @@ fun DiagnosticsScreen(data: WorkspaceLoad.Ready, busy: Boolean, actions: Workspa
                     LocalJobState.FAILED -> "Last local check needs attention"
                 })
                 Caption(when (job?.state) {
-                    LocalJobState.COMPLETED -> "The local checks completed at the recorded time. This is not a connection, transfer or security certification."
+                    LocalJobState.COMPLETED -> "Local checks completed. This does not certify connections, transfers or security."
                     LocalJobState.FAILED -> "A check or scheduling step failed. No data reset was attempted."
-                    LocalJobState.QUEUED, LocalJobState.RUNNING -> "This is the durable operation status. Android controls scheduling; it is not a live percentage or a promise of continuous execution."
-                    else -> "One durable request at a time. Leaving this screen does not create a second job."
+                    LocalJobState.QUEUED, LocalJobState.RUNNING -> "Android controls scheduling and may pause this check."
+                    else -> "One check at a time. Leaving this screen does not start another."
                 })
                 if (job?.state?.active == true) OutlinedButton(actions.cancelCheck, Modifier.fillMaxWidth().heightIn(min = 48.dp), enabled = !busy) { Text("Cancel local check") }
                 else PrimaryAction("Run local check", actions.requestCheck, Modifier.fillMaxWidth(), enabled = !busy)
             }
         }
-        item { InfoPanel("No always-on service", "Checks use bounded WorkManager work. Android can defer or stop it. Force-stop pauses work until the app is explicitly opened again.") }
+        item { InfoPanel("No always-on service", "Android may defer or stop checks. After force-stop, open NARADA to resume.") }
         item { MenuRow("Review support report", "Inspect a small, allowlisted JSON report before sharing", R.drawable.ic_share, actions.inspectReport) }
         item { Caption("Reports exclude names, URIs, paths, endpoints, account IDs, message content, keys and database dumps. Sharing grants read access to one report URI only.") }
     }
@@ -46,19 +47,18 @@ fun DiagnosticsScreen(data: WorkspaceLoad.Ready, busy: Boolean, actions: Workspa
 
 @Composable
 fun HelpScreen(navigate: (Destination) -> Unit) {
-    val phases = listOf(
-        "01" to "Native foundations · This build", "02" to "Identity and real device pairing",
-        "03" to "Authorized remote files", "04" to "Verified, resumable transfers", "05" to "Durable encrypted messaging",
-        "06" to "Encrypted attachments", "07" to "Offline pins and one-way refresh", "08" to "Native qualification and review", "09" to "Signing, pilot and release",
+    val steps = listOf(
+        "01" to "Connect" to "Use the same trusted network. In Devices, scan your computer’s QR.",
+        "02" to "Verify and approve" to "Compare full fingerprints, approve on the computer, then finish on this phone.",
+        "03" to "Chat or share" to "Allow chat separately. Folder sharing is optional and managed on the computer.",
     )
-    LazyColumn(Modifier.fillMaxSize(), state = rememberLazyListState(), contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(22.dp)) {
-        item { Eyebrow("NARADA FOR ANDROID"); Spacer(Modifier.height(12.dp)); Text("Built in the open.\nOne phase at a time.", style = MaterialTheme.typography.headlineLarge) }
-        item { Caption("Phase 1 is a native development foundation, not a replacement for the working desktop protocol or a production-qualified mobile client.") }
-        item { MenuRow("Diagnostics", "Local checks and a reviewable support report", R.drawable.ic_diagnostics, { navigate(Destination.DIAGNOSTICS) }) }
-        item { SectionTitle("The development roadmap") }
-        phases.forEach { (number, title) -> item { Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) { Eyebrow(number); Text(title, style = MaterialTheme.typography.bodyLarge) } } }
-        item { InfoPanel("If storage cannot be opened", "NARADA does not silently replace corrupt settings, delete a damaged database or recreate a database whose enrollment marker remains. Retry reads only. Do not uninstall or clear app data if you need to preserve it.") }
-        item { InfoPanel("What this build cannot prove", "A host test is not a physical Android test. Provider grants, system notifications, TalkBack, background limits and actual device restart behavior need native qualification before release.", R.drawable.ic_phone) }
-        item { Caption("No account or network permission in Phase 1. Light theme only. Android 10+ development baseline. Detailed phase and test records are included with the source handoff.") }
+    LazyColumn(Modifier.fillMaxSize().testTag("screen_help"), state = rememberLazyListState(), contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(22.dp)) {
+        item { Eyebrow("NARADA FOR ANDROID"); Spacer(Modifier.height(12.dp)); Text("Connect. Chat. Share.", style = MaterialTheme.typography.headlineLarge) }
+        steps.forEach { (heading, description) -> item {
+            Panel { Eyebrow(heading.first); Text(heading.second, style = MaterialTheme.typography.titleMedium); Caption(description) }
+        } }
+        item { MenuRow("Diagnostics", "Local checks and a support report", R.drawable.ic_diagnostics, { navigate(Destination.DIAGNOSTICS) }) }
+        item { InfoPanel("Keep your data", "If storage cannot be opened, retry without resetting. Do not uninstall or clear app data to fix it.") }
+        item { InfoPanel("Development build", "Physical-device testing, independent security review and safe-upgrade checks remain open.", R.drawable.ic_phone) }
     }
 }

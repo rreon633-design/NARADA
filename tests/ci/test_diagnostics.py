@@ -38,7 +38,8 @@ class DiagnosticsTests(unittest.TestCase):
         import node_tests
         cmd = node_tests.command(Path('synthetic-report.xml'))
         files = [v for v in cmd if v.endswith('.test.js')]
-        self.assertEqual(5, len(files))
+        self.assertEqual(6, len(files))
+        self.assertTrue(any(name.endswith("pairing.test.js") for name in files))
         self.assertNotIn('desktop-ui/tests', cmd)
         self.assertIn('--test-reporter=tap', cmd)
         self.assertIn('--test-reporter=junit', cmd)

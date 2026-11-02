@@ -117,7 +117,7 @@ export function chat(ctx) {
     pageHeader(
       "WORDS, JUST BETWEEN YOU",
       "Chat",
-      "Private conversations with your paired devices. No cloud mailbox. No assumed delivery.",
+      "Private conversations with approved devices.",
       h(
         "div",
         { class: "button-group" },
@@ -151,7 +151,7 @@ export function chat(ctx) {
           h(
             "span",
             {},
-            "History and drafts are protected on this agent. Message previews never enter diagnostics.",
+            "Protected history and drafts. No message previews in diagnostics.",
           ),
         ),
       ),
@@ -170,7 +170,7 @@ export function chat(ctx) {
       h(
         "span",
         {},
-        "Delivered means the recipient committed the message. An attachment is available only after its own authentication checks.",
+        "Delivered means saved on the other device, not read. Attachments are verified separately.",
       ),
     ),
   );
@@ -313,8 +313,10 @@ export function chat(ctx) {
           : !p
             ? "Choose a paired device"
             : !p.permissions.chat
-              ? "Enable chat consent in Devices"
-              : "Enter to send · Shift Enter for a new line",
+              ? "Allow private chat for this device in Devices → Permissions"
+              : p.direction === "inbound"
+                ? "To receive on your phone, open Chat and enable live updates or check messages."
+                : "Enter to send · Shift Enter for a new line",
       ),
       h(
         "span",

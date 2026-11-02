@@ -203,14 +203,29 @@ class ChatEngine(private val repository: TrustRepository, private val crypto: Ol
             }
         } catch (e: Exception) { interrupted(delivery, if (e is CancellationException) "CHAT_INTERRUPTED" else (e as? ConnectionFailure)?.code ?: "CHAT_UNAVAILABLE"); throw e }
     }
-    /** Explicit foreground batch: at most 3 old ACKs, 3 outgoing messages and 3 pulls.
-     * No timer/service/restart replay; another batch or retry needs an explicit user action. */
-    suspend fun sync(peerId: String, gateway: ChatGateway, guard: () -> Unit = {}) {
+    /** Explicit foreground send/sync: at most 3 old ACKs, 3 outgoing messages and 3 pulls. */
+    suspend fun sync(peerId: String, gateway: ChatGateway, guard: () -> Unit = {}) = exchange(peerId, gateway, true, guard)
+
+    /** Receive-only foreground check. Never encrypts/submits/retries an outgoing message,
+     * including previously queued or uncertain work. Retained inbox receipts may be re-ACKed. */
+    suspend fun receiveOnly(peerId: String, gateway: ChatGateway, guard: () -> Unit = {}) = exchange(peerId, gateway, false, guard)
+
+    /** Explicit new-message intent; do not drain unrelated pending/uncertain outgoing work. */
+    suspend fun sendOne(peerId: String, id: String, gateway: ChatGateway, guard: () -> Unit = {}) {
+        canonicalUuid(id)
+        exchange(peerId, gateway, true, guard, id)
+    }
+
+    private suspend fun exchange(peerId: String, gateway: ChatGateway, sendOutgoing: Boolean, guard: () -> Unit, outgoingId: String? = null) {
         currentCoroutineContext().ensureActive(); guard()
         val doc = repository.read() ?: fail("IDENTITY_NOT_READY"); val t = ticket(doc, peerId)
+        if (outgoingId != null) {
+            val m = state(doc).message(outgoingId)
+            demand(m.peerId == peerId && m.pairingAttempt == t.pairingAttempt && m.direction == ChatDirection.OUTGOING, "CHAT_PAIRING_CHANGED")
+        }
         val remote = gateway.bundle(t); acceptBundle(t, remote, guard)
         state(repository.read() ?: fail("IDENTITY_NOT_READY")).messages.filter { it.peerId == peerId && it.pairingAttempt == t.pairingAttempt && it.direction == ChatDirection.INCOMING && !it.acknowledged }.take(3).forEach { acknowledge(t, it.id, gateway, guard) }
-        state(repository.read() ?: fail("IDENTITY_NOT_READY")).messages.filter { it.peerId == peerId && it.pairingAttempt == t.pairingAttempt && it.direction == ChatDirection.OUTGOING && it.status in setOf(ChatStatus.QUEUED, ChatStatus.READY, ChatStatus.UNCERTAIN) && it.attempts < 3 && it.retryAfter <= now() }.take(3).forEach { send(t, it.id, remote.scope, gateway, guard) }
+        if (sendOutgoing) state(repository.read() ?: fail("IDENTITY_NOT_READY")).messages.filter { (outgoingId == null || it.id == outgoingId) && it.peerId == peerId && it.pairingAttempt == t.pairingAttempt && it.direction == ChatDirection.OUTGOING && it.status in setOf(ChatStatus.QUEUED, ChatStatus.READY, ChatStatus.UNCERTAIN) && it.attempts < 3 && it.retryAfter <= now() }.take(3).forEach { send(t, it.id, remote.scope, gateway, guard) }
         repeat(3) {
             currentCoroutineContext().ensureActive(); guard()
             val reply = gateway.pull(t); val id = receive(t, reply, guard) ?: return

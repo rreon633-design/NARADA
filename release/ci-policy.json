@@ -3,9 +3,14 @@
   "channel": "development-manual-test",
   "initial_github_tag": "v0.0.1",
   "android_application_id": "com.narada.mobile.dev.ci",
-  "android_version_name": "0.7.0",
-  "android_version_code": 7,
-  "android_abis": ["arm64-v8a", "armeabi-v7a", "x86_64", "x86"],
+  "android_version_name": "0.7.1",
+  "android_version_code": 8,
+  "android_abis": [
+    "arm64-v8a",
+    "armeabi-v7a",
+    "x86_64",
+    "x86"
+  ],
   "android_apk_max_bytes": 20971520,
   "windows_installer_max_bytes": 31457280,
   "frontend_max_bytes": 1572864,
@@ -13,5 +18,16 @@
     "android": "ephemeral runner debug certificate; release-style non-debuggable build; no upgrade qualification",
     "windows": "unsigned development installer"
   },
-  "not_qualified": ["physical Android devices", "16 KiB-page runtime", "Windows LAN/firewall/tray lifecycle", "whole-state rollback", "power-loss and hostile providers", "independent security and license review", "production signing and upgrades", "performance on user hardware"]
+  "not_qualified": [
+    "physical Android devices",
+    "16 KiB-page runtime",
+    "Windows LAN/firewall/tray lifecycle",
+    "whole-state rollback",
+    "power-loss and hostile providers",
+    "independent security and license review",
+    "production signing and upgrades",
+    "performance on user hardware"
+  ],
+  "main_release_tag": "v0.0.2",
+  "desktop_version_name": "0.7.1"
 }

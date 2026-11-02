@@ -171,7 +171,7 @@ private fun FilesContent(state: FileBrowserState, connections: ConnectionsUiStat
                 }
             }
         }
-        item { HorizontalDivider(); Spacer(Modifier.height(12.dp)); Caption("Phase 4 · bounded browsing, managed actions and explicit verified downloads. Upload/send and automatic offline pins are not enabled. SAF export is separate, under Transfers.") }
+        item { HorizontalDivider(); Spacer(Modifier.height(12.dp)); Caption("Only granted folders are available. Export downloaded copies from Transfers.") }
     }
     state.selection?.let { selected -> SelectedFileDialog(state, selected, actions, unknown.any { it.peerId == peer?.id }) }
     recovery?.let { (operation, retry) ->

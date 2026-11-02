@@ -82,11 +82,11 @@ class ReleaseGateTests(unittest.TestCase):
     def release_environment(self):
         return {'GITHUB_REPOSITORY': publish.REPOSITORY, 'GITHUB_EVENT_NAME': 'push', 'GITHUB_REF': 'refs/heads/main', 'GITHUB_SHA': self.sha, 'GITHUB_RUN_ID': '10', 'GITHUB_RUN_ATTEMPT': '2'}
 
-    def test_failed_evidence_cannot_create_an_initial_tag(self):
+    def test_failed_evidence_cannot_create_the_requested_new_tag(self):
         with mock.patch.dict('os.environ', self.release_environment(), clear=True), mock.patch.object(publish, 'ROOT', self.base), mock.patch.object(publish, 'api', return_value=None) as api:
             with self.assertRaises(RuntimeError): publish.main()
             self.assertEqual(1, api.call_count)
-            self.assertEqual(('git/ref/tags/v0.0.1',), api.call_args.args)
+            self.assertEqual(('git/ref/tags/v0.0.2',), api.call_args.args)
 
     def test_an_existing_tag_at_another_commit_is_never_moved(self):
         ref = {'object': {'type': 'commit', 'sha': 'b' * 40}}
@@ -119,6 +119,56 @@ class ReleaseGateTests(unittest.TestCase):
         with mock.patch.dict('os.environ', env, clear=True), mock.patch.object(publish, 'api') as api:
             with self.assertRaises(RuntimeError): publish.main()
             api.assert_not_called()
+
+    def test_new_main_request_does_not_target_the_original_release(self):
+        self.assertEqual('v0.0.1', publish.POLICY['initial_github_tag'])
+        self.assertEqual('v0.0.2', publish.requested_tag('refs/heads/main'))
+        self.assertEqual('v0.0.2', publish.requested_tag('refs/tags/v0.0.2'))
+
+    def test_unconfigured_or_old_tag_is_rejected_before_any_api_call(self):
+        for ref in ('refs/tags/v0.0.1', 'refs/tags/v0.0.3', 'refs/tags/v../../unsafe', 'refs/heads/master'):
+            env = {**self.release_environment(), 'GITHUB_REF': ref}
+            with self.subTest(ref=ref), mock.patch.dict('os.environ', env, clear=True), mock.patch.object(publish, 'api') as api:
+                with self.assertRaises(RuntimeError): publish.main()
+                api.assert_not_called()
+
+    def test_malformed_configured_tag_fails_closed(self):
+        for value in ('../v0.0.2', '', 'v0.0.2/extra', None):
+            with self.subTest(value=value), mock.patch.dict(publish.POLICY, {'main_release_tag': value}):
+                with self.assertRaises(RuntimeError): publish.requested_tag('refs/heads/main')
+
+    def test_release_notes_are_reviewed_bounded_and_required(self):
+        with mock.patch.object(publish, 'ROOT', self.base):
+            with self.assertRaises(RuntimeError): publish.release_changes('v0.0.2')
+            (self.base / 'release').mkdir()
+            notes = self.base / 'release/v0.0.2-notes.md'
+            notes.write_text('Reviewed fixture notes.\n')
+            self.assertEqual('Reviewed fixture notes.', publish.release_changes('v0.0.2'))
+            for raw in ('', ' \n ', 'x' * 20001):
+                notes.write_text(raw)
+                with self.assertRaises(RuntimeError): publish.release_changes('v0.0.2')
+            with self.assertRaises(RuntimeError): publish.release_changes('../outside')
+
+    def test_version_metadata_is_consistent_and_does_not_downgrade(self):
+        policy = publish.POLICY
+        self.assertEqual('0.7.1', policy['android_version_name'])
+        self.assertGreaterEqual(policy['android_version_code'], 8)
+        build = (ROOT / 'apps/android/app/build.gradle.kts').read_text()
+        self.assertIn('versionCode = ' + str(policy['android_version_code']), build)
+        self.assertIn('versionName = "' + policy['android_version_name'] + '"', build)
+        for name in ('package.json', 'desktop-ui/package.json', 'apps/desktop-shell/src-tauri/tauri.conf.json'):
+            self.assertEqual(policy['desktop_version_name'], json.loads((ROOT / name).read_text())['version'])
+        lock = json.loads((ROOT / 'package-lock.json').read_text())
+        for name in ('', 'desktop-ui'):
+            self.assertEqual(policy['desktop_version_name'], lock['packages'][name]['version'])
+
+    def test_current_release_notes_keep_sync_and_upgrade_limits_visible(self):
+        notes = publish.release_changes('v0.0.2')
+        self.assertIn('Automatic two-way folder sync is not enabled', notes)
+        self.assertIn('64 MiB', notes)
+        self.assertIn('8 MiB', notes)
+        self.assertIn('temporary', notes)
+        self.assertIn('Never uninstall', notes)
 
     def windows_records(self):
         patch = {"cli_version": "2.12.4", "changed_bytes": 3, "marker_offset": 32, "input_sha256": "a" * 64, "packaged_sha256": "b" * 64}

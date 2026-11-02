@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   progressOf,
+  progressMotion,
   transferBytes,
   transferLabel,
   filterTransfers,
@@ -13,6 +14,27 @@ const root = {
   root_id: "4ed9d57f-46bf-4bdb-a481-abde3c0ad104",
   capabilities: ["browse", "create"],
 };
+function completedJob() {
+  const transfer_id = "a0a0a0a0-1234-4234-8234-123456789abc";
+  const sha256 = "a".repeat(64);
+  return {
+    transfer_id,
+    sha256,
+    state: "completed",
+    size: "0",
+    verified_bytes: "0",
+    result: {
+      transfer_id,
+      state: "completed",
+      size: "0",
+      sha256,
+      manifest_id: "b".repeat(64),
+      root_id: root.root_id,
+      name: "empty.txt",
+      published_at: "2026-11-02T00:00:00Z",
+    },
+  };
+}
 test("transfer counts are bounded canonical decimals", () => {
   for (const n of [
     "01",
@@ -49,10 +71,7 @@ test("empty files complete only after publication", () => {
     progressOf({ state: "queued", size: "0", verified_bytes: "0" }).percent,
     0,
   );
-  assert.equal(
-    progressOf({ state: "completed", size: "0", verified_bytes: "0" }).percent,
-    100,
-  );
+  assert.equal(progressOf(completedJob()).percent, 100);
   assert.throws(() =>
     progressOf({ state: "completed", size: "5", verified_bytes: "4" }),
   );
@@ -119,5 +138,55 @@ test("error guidance does not infer delivery or expose peer text", () => {
   assert.doesNotMatch(
     transferHint("<script>secret-path</script>"),
     /<|script|secret-path/,
+  );
+});
+
+test("completed state without matching receipt is rejected", () => {
+  const done = completedJob();
+  assert.equal(progressOf(done).percent, 100);
+  for (const result of [
+    null,
+    {},
+    { ...done.result, transfer_id: root.root_id },
+    { ...done.result, sha256: "b".repeat(64) },
+    { ...done.result, size: "1" },
+    { ...done.result, state: "committing" },
+    { ...done.result, root_id: "../root" },
+    { ...done.result, root_id: [root.root_id] },
+    { ...done.result, manifest_id: ["b".repeat(64)] },
+    { ...done.result, name: "../overwrite" },
+    { ...done.result, manifest_id: "bad" },
+    { ...done.result, published_at: "not a receipt timestamp" },
+  ]) {
+    assert.throws(() => progressOf({ ...done, result }), /receipt/);
+  }
+});
+test("pending source acknowledgement does not erase a valid receiver receipt", () => {
+  const done = completedJob();
+  assert.equal(progressOf({ ...done, ack_pending: true }).percent, 100);
+});
+test("motion interpolates only finite increases between checked percentages", () => {
+  assert.deepEqual(progressMotion(20, 40), {
+    from: 0.2,
+    to: 0.4,
+    duration: 180,
+  });
+  assert.equal(progressMotion(20, 40, true), null);
+  for (const [from, to] of [
+    [undefined, 40],
+    [40, 40],
+    [60, 20],
+    [-1, 10],
+    [0, 101],
+    [NaN, 20],
+    [10, Infinity],
+  ])
+    assert.equal(progressMotion(from, to), null);
+});
+test("network guidance retains the original transfer without re-pairing", () => {
+  assert.match(transferHint("PEER_UNREACHABLE"), /Re-pairing is not needed/);
+  assert.match(
+    transferHint("CONNECTION_INTERRUPTED"),
+    /do not create another copy/,
   );
 });

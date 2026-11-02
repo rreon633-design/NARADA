@@ -16,7 +16,7 @@ export function settings(ctx) {
       { class: "page" },
       pageHeader(
         "PREFERENCES",
-        "Workspace settings",
+        "Computer settings",
         "Connect to the local agent to load your saved preferences.",
       ),
       button("Retry connection", ctx.refresh, { leading: "sync" }),
@@ -101,19 +101,19 @@ export function settings(ctx) {
   const general = h(
     "section",
     { class: "panel settings-section", id: "general" },
-    panelHead("General", "The details that make this space yours."),
+    panelHead("General", null),
     h(
       "div",
       { class: "name-setting" },
       h(
         "label",
         { class: "setting-title", for: "device-name" },
-        "Workspace name",
+        "Computer name",
       ),
       h(
         "p",
         { class: "setting-description", id: "name-help" },
-        "A familiar name for this desktop. Stored only in local metadata.",
+        "A local device label, not a folder.",
       ),
       h(
         "div",
@@ -133,7 +133,7 @@ export function settings(ctx) {
     ),
     toggle(
       "Reduce motion",
-      "Keep transitions quiet and minimize interface animations.",
+      "Reduce interface animations.",
       draft.reduce_motion,
       change("reduce_motion"),
     ),
@@ -156,10 +156,7 @@ export function settings(ctx) {
   const privacy = h(
     "section",
     { class: "panel settings-section", id: "privacy" },
-    panelHead(
-      "Privacy & notifications",
-      "Thoughtful defaults. You stay in control.",
-    ),
+    panelHead("Privacy & notifications", null),
     toggle(
       "Allow notifications",
       "Preference for upcoming transfer and chat notifications; delivery is not yet implemented.",
@@ -183,7 +180,7 @@ export function settings(ctx) {
         h(
           "p",
           {},
-          "Peer networking is opt-in and local-only. Private history, drafts and E2EE state live in a separate protected store. No cloud account or external telemetry is enabled.",
+          "Local connections are opt-in. Chat and drafts use protected storage. No cloud account or external telemetry.",
         ),
       ),
     ),
@@ -191,21 +188,16 @@ export function settings(ctx) {
   const about = h(
     "section",
     { class: "panel settings-section", id: "about" },
-    panelHead("About this build", "An honest look at where things stand."),
+    panelHead("About this build", null),
     h(
       "dl",
       { class: "about-list" },
+      h("div", {}, h("dt", {}, "Application"), h("dd", {}, "NARADA")),
       h(
         "div",
         {},
-        h("dt", {}, "Application"),
-        h("dd", {}, "NARADA ", badge("0.3.0")),
-      ),
-      h(
-        "div",
-        {},
-        h("dt", {}, "Current phase"),
-        h("dd", {}, "01 · Desktop foundation"),
+        h("dt", {}, "Agent version"),
+        h("dd", {}, ctx.snapshot.agent.version),
       ),
       h(
         "div",
@@ -217,10 +209,10 @@ export function settings(ctx) {
         "div",
         {},
         h("dt", {}, "Sensitive storage"),
-        h("dd", {}, "Not implemented · no secrets stored"),
+        h("dd", {}, "Separate protected store · checked when opened"),
       ),
     ),
-    button("View implementation roadmap", ctx.openRoadmap, {
+    button("Build limitations", ctx.openRoadmap, {
       kind: "text",
       trailing: "arrow",
     }),
@@ -228,11 +220,7 @@ export function settings(ctx) {
   return h(
     "div",
     { class: "page settings-page" },
-    pageHeader(
-      "MAKE IT YOURS",
-      "Workspace settings",
-      "Small preferences. A space that feels like you.",
-    ),
+    pageHeader("MAKE IT YOURS", "Computer settings", null),
     h(
       "div",
       { class: "settings-layout" },

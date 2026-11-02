@@ -69,7 +69,8 @@ def main():
     parser.add_argument('--destination', help='A new directory under .cache; never a live repository')
     args = parser.parse_args()
     rows = plan()
-    report = {'repository': 'https://github.com/rreon633-design/NARADA', 'intended_initial_tag': 'v0.0.1',
+    policy = json.loads((ROOT / 'release/ci-policy.json').read_text())
+    report = {'repository': 'https://github.com/rreon633-design/NARADA', 'intended_release_tag': policy.get('main_release_tag', policy['initial_github_tag']),
               'files': len(rows), 'bytes': sum(len(data) for _, data in rows.values()),
               'history': 'Original archives and campaigns remain in the handoff workspace, not relabeled as new CI.',
               'push_performed': False,

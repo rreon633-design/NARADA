@@ -35,6 +35,10 @@ class ConnectionsCoordinatorTest {
     private lateinit var discovery:Discovery
     private lateinit var coordinator:ConnectionsCoordinator
     private lateinit var peer:TrustedPeer
+    private lateinit var connector:PeerConnector
+    private val proofs=AtomicInteger()
+    private val acknowledgements=AtomicInteger()
+    @Volatile private var ownerApproved=false
     private val requests=AtomicInteger()
     @Volatile private var invalidHealth=false
     @Before fun setup()=runBlocking<Unit> {
@@ -44,13 +48,16 @@ class ConnectionsCoordinatorTest {
         peer=TrustedPeer(host.deviceId,host.fingerprint,Base64.getEncoder().encodeToString(host.certificate.encoded),"Fixture desktop", "windows","192.168.0.10:12345",UUID.randomUUID().toString(),UUID.randomUUID().toString(),System.currentTimeMillis()+120000,TrustStatus.ACTIVE)
         repository.mutate { it.copy(enabled=true,preferredPeer=peer.id,peers=listOf(peer)) }
         network=NetworkPolicy();discovery=Discovery()
-        val connector=object:PeerConnector {
+        connector=object:PeerConnector {
             override fun closeAll() {}
             override fun connect(endpoint:Endpoint,pin:PeerPin,identity:TransportIdentity?)=object:PeerSession {
                 override val certificate=host.certificate.encoded
                 override fun close(){}
                 override fun request(path:String,body:ByteArray):ByteArray {
-                    requests.incrementAndGet();assertEquals("/api/v1/health",path)
+                    requests.incrementAndGet()
+                    if(path=="/pair/v1/prove") { proofs.incrementAndGet();return Wire.encode(Envelope(true,PairState(Hello(),if(ownerApproved)"approved" else "awaiting_owner",Permissions()),null)) }
+                    if(path=="/pair/v1/ack") { acknowledgements.incrementAndGet();assertTrue(ownerApproved);return Wire.encode(Envelope(true,PairState(Hello(),"active",Permissions()),null)) }
+                    assertEquals("/api/v1/health",path)
                     return Wire.encode(Envelope(true,Health(Hello(),if(invalidHealth)"a".repeat(64)else peer.id,Permissions(),1,1,listOf("health","permissions")),null))
                 }
             }
@@ -111,4 +118,102 @@ class ConnectionsCoordinatorTest {
         val state=await{it.document?.peer(peer.id)?.status==TrustStatus.REVOKED}
         assertNull(state.connectedPeer);assertNull(state.document!!.preferredPeer);assertEquals(Permissions(),state.document.peer(peer.id).remotePermissions)
     }
+    @Test fun oneExplicitPreparationCreatesAndEnablesOnceWithoutClaiming()=runBlocking<Unit> {
+        keys=TestKeys();blob=TestBlob();repository=ProtectedConnectionsRepository(TestAnchor(),keys,blob)
+        coordinator=ConnectionsCoordinator(repository,connector,network,discovery,foundation.settings,scope)
+        coordinator.foregroundChanged(true);await{!it.loading}
+        assertEquals(0,keys.creations);assertFalse(network.allowed)
+        assertTrue(coordinator.preparePairingInput())
+        val first=repository.read()!!;assertTrue(first.enabled);assertTrue(first.peers.isEmpty());assertTrue(network.allowed)
+        assertTrue(coordinator.preparePairingInput());assertEquals(first,repository.read());assertEquals(1,keys.creations)
+        assertEquals(0,requests.get());assertNull(coordinator.state.value.connectedPeer)
+    }
+    @Test fun existingIdentityAndSavedTrustAreReusedWithoutNetworkWork()=runBlocking<Unit> {
+        repository.mutate{it.copy(enabled=false)};val before=repository.read()!!;network.foreground=true
+        assertTrue(coordinator.preparePairingInput());val after=repository.read()!!
+        assertEquals(before.deviceId,after.deviceId);assertEquals(before.fingerprint,after.fingerprint)
+        assertEquals(before.peers,after.peers);assertEquals(before.preferredPeer,after.preferredPeer)
+        assertEquals(1,keys.creations);assertTrue(after.enabled);assertEquals(0,requests.get())
+    }
+    @Test fun missingKeyOrStoreIsNeverRecreatedByQuickSetup()=runBlocking<Unit> {
+        network.foreground=true;val bytes=blob.bytes!!.clone();keys.key=null
+        assertFalse(coordinator.preparePairingInput());assertEquals("IDENTITY_KEY_MISSING",coordinator.state.value.error)
+        assertEquals(1,keys.creations);assertArrayEquals(bytes,blob.bytes);assertFalse(network.allowed)
+        blob.bytes=null
+        assertFalse(coordinator.preparePairingInput());assertNull(blob.bytes);assertEquals(1,keys.creations)
+    }
+    @Test fun missingStoreWithValidKeyAlsoFailsClosed()=runBlocking<Unit> {
+        network.foreground=true;blob.bytes=null
+        assertFalse(coordinator.preparePairingInput());assertEquals("TRUST_STORE_MISSING",coordinator.state.value.error)
+        assertEquals(1,keys.creations);assertNull(blob.bytes);assertEquals(0,requests.get())
+    }
+    @Test fun quickSetupRequiresForegroundAndAnEligibleRoute()=runBlocking<Unit> {
+        repository.mutate{it.copy(enabled=false)};val before=repository.read()
+        assertFalse(coordinator.preparePairingInput());assertEquals(before,repository.read())
+        network.foreground=true;network.eligible=false
+        assertFalse(coordinator.preparePairingInput());assertEquals(before,repository.read());assertEquals(0,requests.get())
+    }
+    private suspend fun interruptedPreparation(interrupt:()->Unit) {
+        repository.mutate{it.copy(enabled=false)};network.foreground=true
+        val entered=CompletableDeferred<Unit>();val resume=CompletableDeferred<Unit>()
+        val delayed=object:TrustRepository by repository {
+            override suspend fun identity():TransportIdentity { entered.complete(Unit);resume.await();return repository.identity() }
+        }
+        coordinator=ConnectionsCoordinator(delayed,connector,network,discovery,foundation.settings,scope)
+        coroutineScope {
+            val preparing=async{coordinator.preparePairingInput()};withTimeout(5000){entered.await()}
+            interrupt();resume.complete(Unit);assertFalse(withTimeout(5000){preparing.await()})
+        }
+        assertFalse(repository.read()!!.enabled);assertEquals(1,keys.creations);assertEquals(0,requests.get())
+    }
+    @Test fun backgroundAndImmediateReturnDropLateScannerReadiness()=runBlocking<Unit> {
+        interruptedPreparation { coordinator.foregroundChanged(false);coordinator.foregroundChanged(true) }
+    }
+    @Test fun routeChangeAndReturnDropLateScannerReadiness()=runBlocking<Unit> {
+        interruptedPreparation { network.eligible=false;network.onRouteChanged();network.eligible=true;network.onRouteChanged() }
+    }
+    @Test fun foregroundFenceIsCapturedBeforeWaitingForTheCommandMutex()=runBlocking<Unit> {
+        repository.mutate{it.copy(enabled=false)};network.foreground=true
+        val entered=CompletableDeferred<Unit>();val resume=CompletableDeferred<Unit>()
+        val delayed=object:TrustRepository by repository {
+            override suspend fun initialize():TrustDocument { entered.complete(Unit);resume.await();return repository.initialize() }
+        }
+        coordinator=ConnectionsCoordinator(delayed,connector,network,discovery,foundation.settings,scope)
+        coordinator.initialize();withTimeout(5000){entered.await()}
+        val preparing=async(start=CoroutineStart.UNDISPATCHED){coordinator.preparePairingInput()}
+        coordinator.foregroundChanged(false);coordinator.foregroundChanged(true);resume.complete(Unit)
+        assertFalse(withTimeout(5000){preparing.await()});assertFalse(repository.read()!!.enabled)
+    }
+    @Test fun pendingTrustNeverReplaysAClaimOrAcknowledgementOnQuickSetup()=runBlocking<Unit> {
+        network.foreground=true
+        for(status in listOf(TrustStatus.CLAIMING,TrustStatus.WAITING,TrustStatus.APPROVED,TrustStatus.ACK_PENDING)) {
+            repository.mutate{it.copy(preferredPeer=null,peers=listOf(peer.copy(status=status)))}
+            val before=repository.read();assertFalse(coordinator.preparePairingInput());assertEquals(before,repository.read())
+        }
+        assertEquals(0,requests.get());assertEquals(1,keys.creations)
+    }
+    @Test fun activeApprovalChecksAreVisibleButFinishAndPermissionsStayExplicit()=runBlocking<Unit> {
+        repository.mutate{it.copy(preferredPeer=null,peers=listOf(peer.copy(status=TrustStatus.WAITING)))}
+        coordinator.foregroundChanged(true);await{!it.loading};assertEquals(0,proofs.get())
+        coordinator.recover(peer.id);await{it.pairingInProgress && it.status.contains("Checking automatically")}
+        assertFalse(coordinator.preparePairingInput());assertTrue(coordinator.state.value.pairingInProgress)
+        ownerApproved=true;val approved=await{it.document?.peer(peer.id)?.status==TrustStatus.APPROVED && !it.pairingInProgress}
+        assertEquals(Permissions(),approved.document!!.peer(peer.id).remotePermissions)
+        assertNull(approved.connectedPeer);assertEquals(0,acknowledgements.get())
+        coordinator.finish(peer.id,false);await{it.error=="LOCAL_CONFIRMATION_REQUIRED" && !it.pairingInProgress}
+        assertEquals(0,acknowledgements.get());assertEquals(TrustStatus.APPROVED,repository.read()!!.peer(peer.id).status)
+        coordinator.finish(peer.id,true);await{it.connectedPeer==peer.id && !it.pairingInProgress}
+        assertEquals(1,acknowledgements.get());assertEquals(1,keys.creations)
+    }
+    @Test fun interruptedApprovalDoesNotPretendToKeepPollingOrResumeItSilently()=runBlocking<Unit> {
+        repository.mutate{it.copy(preferredPeer=null,peers=listOf(peer.copy(status=TrustStatus.WAITING)))}
+        coordinator.foregroundChanged(true);await{!it.loading};coordinator.recover(peer.id)
+        await{it.pairingInProgress && it.status.contains("Checking automatically")}
+        coordinator.foregroundChanged(false);assertFalse(coordinator.state.value.pairingInProgress)
+        await{!it.foreground && !it.busy};val count=proofs.get()
+        coordinator.foregroundChanged(true);await{it.foreground && !it.loading}
+        delay(2200);assertEquals(count,proofs.get());assertFalse(coordinator.state.value.pairingInProgress)
+        assertEquals(TrustStatus.WAITING,repository.read()!!.peer(peer.id).status)
+    }
+
 }

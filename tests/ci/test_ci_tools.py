@@ -136,7 +136,7 @@ class EvidenceTests(unittest.TestCase):
         build = (ROOT / 'apps/android/app/build.gradle.kts').read_text()
         collector = (ROOT / 'scripts/ci/artifacts.py').read_text()
         self.assertIn('scripts/build_android_storage.py --host --android', workflow)
-        self.assertIn('--minimum 430 connection', workflow)
+        self.assertIn('--minimum 490 connection', workflow)
         self.assertIn('dependsOn(verifyStorageBinaries)', build)
         self.assertIn('generated/storage/jniLibs', build)
         self.assertIn('Java_com_narada_connection_NativeStorageBridge_moveNoReplace', collector)

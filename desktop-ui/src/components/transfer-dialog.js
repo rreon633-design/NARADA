@@ -18,7 +18,7 @@ export async function openTransferDialog(
   const size = Number(offer?.manifest?.size ?? entry?.size);
   if (!Number.isSafeInteger(size) || size < 0 || size > MAX_FILE_BYTES)
     return toast(
-      "This development slice supports ordinary files up to 64 MiB.",
+      "Ordinary files are limited to 64 MiB. Original bytes are preserved; compression is not used to bypass the limit.",
       "error",
     );
   const peerOptions = eligibleRecipients(
@@ -48,6 +48,7 @@ export async function openTransferDialog(
   let available = [],
     sequence = 0,
     busy = false,
+    reviewed = null,
     dialog;
   const peerId = () =>
     accept ? offer.peer_id : download ? device : peers.value;
@@ -66,39 +67,40 @@ export async function openTransferDialog(
           ? "Start download"
           : "Queue for approval",
     async () => {
-      if (busy) return;
+      if (busy || !dialog.dialog.isConnected) return;
       try {
-        const peer_id = peerId();
-        if (!peer_id) throw new Error("Choose a recipient device first.");
-        const destination = isOffer
-          ? null
-          : validateDestination(
-              available.find((r) => r.root_id === roots.value),
-              filename.value,
-            );
+        if (!reviewed) {
+          const peer_id = peerId();
+          if (!peer_id) throw new Error("Choose a recipient device first.");
+          const destination = isOffer
+            ? null
+            : validateDestination(
+                available.find((r) => r.root_id === roots.value),
+                filename.value,
+              );
+          reviewed = structuredClone({
+            transfer_id: transferId,
+            peer_id,
+            ...(isOffer
+              ? { source }
+              : accept
+                ? { destination }
+                : {
+                    direction: download ? "download" : "upload",
+                    source,
+                    destination,
+                  }),
+          });
+        }
         busy = true;
         submit.disabled = true;
-        status.textContent = "Saving the reviewed transfer…";
-        if (isOffer)
-          await agent.create_transfer_offer({
-            transfer_id: transferId,
-            peer_id,
-            source,
-          });
-        else if (accept)
-          await agent.accept_transfer_offer({
-            transfer_id: transferId,
-            peer_id,
-            destination,
-          });
-        else
-          await agent.start_transfer({
-            transfer_id: transferId,
-            peer_id,
-            direction: download ? "download" : "upload",
-            source,
-            destination,
-          });
+        peers.disabled = roots.disabled = filename.disabled = true;
+        status.textContent =
+          "Saving the reviewed transfer… Closing this dialog does not cancel admitted work.";
+        if (isOffer) await agent.create_transfer_offer(reviewed);
+        else if (accept) await agent.accept_transfer_offer(reviewed);
+        else await agent.start_transfer(reviewed);
+        if (!dialog.dialog.isConnected) return;
         dialog.close();
         toast(
           isOffer
@@ -107,7 +109,10 @@ export async function openTransferDialog(
         );
         ctx.navigate("transfers");
       } catch (e) {
-        status.textContent = e.message;
+        if (!dialog.dialog.isConnected) return;
+        status.textContent = reviewed
+          ? `Result unconfirmed. Check Transfers before starting another copy. Retrying here keeps the same request and ID. ${e.message}`
+          : e.message;
         status.classList.add("is-error");
       } finally {
         busy = false;
@@ -117,6 +122,7 @@ export async function openTransferDialog(
     { kind: "primary", leading: isOffer ? "link" : "transfer", disabled: true },
   );
   async function loadRoots() {
+    if (reviewed || busy) return;
     const current = ++sequence;
     if (isOffer) {
       submit.disabled = !peers.value;
@@ -137,7 +143,8 @@ export async function openTransferDialog(
             peer_id: peerId(),
             query: { kind: "roots" },
           });
-      if (current !== sequence || !dialog.dialog.isConnected) return;
+      if (current !== sequence || !dialog.dialog.isConnected || reviewed)
+        return;
       available = result.roots.filter(
         (r) =>
           r.capabilities?.includes("browse") &&
@@ -190,7 +197,11 @@ export async function openTransferDialog(
         "div",
         { class: "transfer-review-file" },
         h("strong", {}, name),
-        h("span", {}, `${bytes(size)} · ordinary file · no automatic opening`),
+        h(
+          "span",
+          {},
+          `${bytes(size)} · original bytes · no compression or automatic opening`,
+        ),
       ),
       !download &&
         h("label", { class: "transfer-field" }, "Recipient device", peers),
@@ -215,7 +226,18 @@ export async function openTransferDialog(
         ),
       status,
     ),
-    actions: [button("Not now", () => dialog.close()), submit],
+    actions: [
+      button("Not now", () => dialog.close()),
+      button(
+        "Check Transfers",
+        () => {
+          dialog.close();
+          ctx.navigate("transfers");
+        },
+        { kind: "text" },
+      ),
+      submit,
+    ],
   });
   if (download) await loadRoots();
   else if (!isOffer) {

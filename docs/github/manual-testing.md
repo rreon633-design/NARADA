@@ -42,7 +42,11 @@ The accompanying build reports record the source commit, workflow run, byte size
 
 ## Version policy
 
-`v0.0.1` is the **first GitHub development release tag**. Existing internal versions remain Android/desktop shell `0.7.0`, Android versionCode `7`, and Rust workspace `0.7.1`. Protocol, trust-store and database schema versions are not reset. The separate `.ci` identity avoids claiming a downgrade or qualified upgrade of the earlier app.
+`v0.0.2` is the requested development release. Android/desktop/frontend advance to **0.7.1**, Android versionCode to **8**; Rust remains **0.7.1**. The existing v0.0.1 release (Android/desktop 0.7.0 / code 7) is unchanged. Protocol, trust-store and database schema versions are not reset. The `.ci` app ID remains the same as v0.0.1: a different temporary signer can block an in-place update despite the higher code. **Never uninstall, clear valued data or reset trust to force an update.** Use a separate test profile or device. No installed upgrade is qualified.
+
+## Sharing scope in v0.0.2
+
+Sharing Stage 1 improves duplicate suppression, bounded transient retry and checked-byte progress, keeping original file bytes. **Automatic two-way folder sync is not enabled.** The pure planner does not execute changes; durable links/provenance, versioned write consent, conflict-preserving execution and both-app foreground scheduling remain future work. Limits remain **64 MiB per ordinary private download**, **four retained transfers / 128 MiB shared reservation**, and **8 MiB plaintext per attachment**. Offline/background interruptions may require explicit Resume. Do not expect hundreds of files up to 100 MB or unattended synchronization. See [release scope](v0.0.2.md).
 
 ## Suggested end-to-end test
 

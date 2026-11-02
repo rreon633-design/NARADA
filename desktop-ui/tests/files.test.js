@@ -5,8 +5,10 @@ import {
   parseExclusions,
   validMutationName,
   grantForRole,
+  roleForGrant,
   boundedLayout,
   validatePreview,
+  resolveRootSelection,
 } from "../src/lib/files.js";
 test("file names reject traversal, streams, devices and bidi overrides", () => {
   for (const n of [
@@ -102,4 +104,31 @@ test("additional JPEG frames and trailing embedded images are refused", () => {
   assert.throws(() =>
     validatePreview(envelope(duplicate), "fixture", "version"),
   );
+});
+
+test("remembered folder is stable across reordered catalogs", () => {
+  const a = { root_id: "a" },
+    b = { root_id: "b" };
+  assert.equal(resolveRootSelection([b, a], "a").root, a);
+  assert.equal(resolveRootSelection([b, a], null).root, b);
+});
+test("missing folder never silently becomes another folder", () => {
+  assert.deepEqual(resolveRootSelection([{ root_id: "other" }], "missing"), {
+    root: null,
+    missing: true,
+  });
+  assert.deepEqual(resolveRootSelection([], null), {
+    root: null,
+    missing: false,
+  });
+});
+
+test("custom folder permissions are never rounded up to a broader role", () => {
+  assert.equal(roleForGrant(["read", "browse"]), "preview");
+  assert.equal(roleForGrant(["browse", "modify"]), "custom");
+  assert.equal(
+    roleForGrant(["browse", "read", "sync_read", "modify"]),
+    "custom",
+  );
+  assert.throws(() => grantForRole("root", "custom"));
 });

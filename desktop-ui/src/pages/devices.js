@@ -10,7 +10,14 @@ import {
   toast,
   toggle,
 } from "../components/ui.js";
-import { agent } from "../services/bridge.js";
+import { agent, isNative } from "../services/bridge.js";
+import {
+  isPrivateLan,
+  usableInterfaces,
+  suggestedInterface,
+  connectionSetupHint,
+  phonePairingPlan,
+} from "../lib/connections.js";
 import { platformName, relativeTime } from "../lib/format.js";
 import {
   parsePairingCode,
@@ -35,8 +42,13 @@ const labels = {
 };
 const watchers = new Set();
 let invitationSecret = null;
+let invitationStarting = false;
+const reviewDialogs = new Map();
+const invitationDialogs = new Set();
 export function clearPairingSecrets() {
   invitationSecret = null;
+  for (const dialog of invitationDialogs) dialog.close();
+  for (const dialog of reviewDialogs.values()) dialog.close();
 }
 function watch(dialog, fn) {
   watchers.add(fn);
@@ -100,17 +112,17 @@ export function devices(ctx) {
     pageHeader(
       "PERSONAL CONNECTIONS",
       "Your devices",
-      "Good connections start with trust. Yours to approve. Yours to revoke.",
+      "Approve and manage your devices.",
       headerActions,
     ),
     h(
       "div",
       { class: "connection-scope-note" },
-      badge("DESKTOP · PHASE 02"),
+      badge("DESKTOP ↔ PHONE"),
       h(
         "span",
         {},
-        "Real pairing. No accounts or internet required. Files are available only through explicit root grants; chat and Android remain later phases.",
+        "Use the same trusted network. Allow chat separately; folders are optional.",
       ),
     ),
     h(
@@ -130,11 +142,12 @@ export function devices(ctx) {
         h(
           "p",
           {},
-          "A one-time code pins the identity. Mutual TLS proves the private key. Only your explicit approval establishes trust. Every device starts with no file, chat or attachment access.",
+          "Compare full fingerprints before approval. New devices have no file, chat or attachment access unless you grant it.",
         ),
       ),
     ),
   );
+  const stillHere = () => page.isConnected && !document.hidden;
   function update(snapshot) {
     const c = snapshot?.connections;
     if (!c) {
@@ -187,10 +200,10 @@ export function devices(ctx) {
           "p",
           { class: "identity-footnote" },
           c.identity.protection.includes("Development")
-            ? "Loopback-only test vault, not native OS protection. Windows uses current-user DPAPI; native qualification remains open."
-            : "Your private transport key stays outside metadata SQLite. Native Windows validation remains a separate release gate.",
+            ? "Development test vault—not native OS protection."
+            : "The transport key is kept in protected storage, not metadata.",
         ),
-        button("Workspace settings", () => ctx.navigate("settings"), {
+        button("Computer settings", () => ctx.navigate("settings"), {
           className: "full-width",
           trailing: "arrow",
         }),
@@ -202,6 +215,7 @@ export function devices(ctx) {
       c.error,
       c.listening,
       c.identity.state,
+      c.interfaces,
       ctx.connected,
     ]);
     if (keyNetwork !== lastNetwork) {
@@ -252,7 +266,11 @@ export function devices(ctx) {
     const keyActions = JSON.stringify([
       c.listening,
       Boolean(c.invitation),
+      c.identity.state,
       ctx.connected,
+      c.interfaces,
+      c.config,
+      invitationStarting,
     ]);
     if (keyActions !== lastActions) {
       lastActions = keyActions;
@@ -262,11 +280,48 @@ export function devices(ctx) {
           leading: "link",
           disabled: !c.listening || !ctx.connected,
         }),
-        button("Pair a device", () => createInvitation(ctx), {
-          kind: "primary",
-          leading: "plus",
-          disabled: !c.listening || !ctx.connected || Boolean(c.invitation),
-        }),
+        button(
+          invitationStarting
+            ? "Preparing QR…"
+            : isNative && phonePairingPlan(c).kind === "enable"
+              ? "Enable & show QR"
+              : isNative
+                ? "Connect your phone"
+                : "Pair a device",
+          async () => {
+            if (invitationStarting) return;
+            const plan = isNative
+              ? phonePairingPlan(ctx.snapshot.connections)
+              : { kind: "ready" };
+            if (plan.kind === "choose") configure(ctx, true, stillHere);
+            else if (plan.kind !== "blocked") {
+              const task = createInvitation(
+                ctx,
+                plan.kind === "enable"
+                  ? {
+                      ...ctx.snapshot.connections.config,
+                      enabled: true,
+                      bind_ip: plan.ip,
+                    }
+                  : null,
+                stillHere,
+              );
+              update(ctx.snapshot);
+              await task;
+              if (stillHere()) update(ctx.snapshot);
+            }
+          },
+          {
+            kind: "primary",
+            leading: "plus",
+            disabled:
+              !ctx.connected ||
+              c.identity.state !== "ready" ||
+              Boolean(c.invitation) ||
+              invitationStarting ||
+              (!isNative && !c.listening),
+          },
+        ),
       );
     }
     const keyRequests = JSON.stringify([c.invitation, c.join, c.view_notice]);
@@ -557,25 +612,22 @@ function peerCard(ctx, p) {
     ),
   );
 }
-function configure(ctx) {
+function configure(ctx, inviteAfter = false, stillHere = () => true) {
   const c = ctx.snapshot.connections;
   const errors = errorBox();
   const select = h(
     "select",
     { id: "connection-interface", class: "connection-input" },
+    h("option", { value: "" }, "Choose your private Wi-Fi or Ethernet network"),
     c.interfaces.map((i) =>
       h(
         "option",
-        { value: i.ip, disabled: !i.eligible },
+        { value: i.ip, disabled: !usableInterfaces([i], !isNative).length },
         `${i.name} · ${i.ip} (${i.profile})`,
       ),
     ),
   );
-  select.value = c.interfaces.some(
-    (i) => i.eligible && i.ip === c.config.bind_ip,
-  )
-    ? c.config.bind_ip
-    : c.interfaces.find((i) => i.eligible)?.ip || "";
+  select.value = suggestedInterface(c.interfaces, c.config.bind_ip, !isNative);
   const port = h("input", {
     id: "connection-port",
     class: "connection-input",
@@ -590,7 +642,7 @@ function configure(ctx) {
     checked: c.config.discovery,
   });
   const changed = () => {
-    discover.disabled = select.value.startsWith("127.");
+    discover.disabled = !isPrivateLan(select.value);
     if (discover.disabled) discover.checked = false;
   };
   select.addEventListener("change", changed);
@@ -599,6 +651,7 @@ function configure(ctx) {
   const save = button(
     c.listening ? "Save network settings" : "Enable connections",
     async () => {
+      if (save.disabled || !dialog.dialog.open || !stillHere()) return;
       const value = Number(port.value);
       if (
         !Number.isInteger(value) ||
@@ -618,9 +671,12 @@ function configure(ctx) {
           api_port: value,
           discovery: discover.checked,
         });
+        const continuePairing = dialog.dialog.open && stillHere();
         dialog.close();
         await ctx.refresh(false);
         toast("Protected connections enabled on the selected interface.");
+        if (inviteAfter && continuePairing && stillHere())
+          await createInvitation(ctx, null, stillHere);
       } catch (e) {
         showError(errors, e);
         save.disabled = false;
@@ -635,31 +691,34 @@ function configure(ctx) {
     content: h(
       "div",
       { class: "connection-form" },
-      note(
-        "Only eligible local interfaces can be used. The Linux development preview is loopback-only. Windows LAN interfaces must be Private or Domain-authenticated.",
-      ),
+      note(connectionSetupHint(c.interfaces, !isNative)),
       h("label", { for: "connection-interface" }, "Network interface"),
       select,
-      h("label", { for: "connection-port" }, "Listen port"),
-      port,
       h(
-        "p",
-        { class: "small muted" },
-        "Use 0 to select an available port. The selected port is saved for reconnects.",
-      ),
-      h(
-        "label",
-        { class: "connection-checkbox", for: "connection-discovery" },
-        discover,
-        h("span", {}, "Discover nearby devices"),
-      ),
-      h(
-        "p",
-        { class: "small muted" },
-        "Discovery never establishes trust. Loopback tests use pairing codes instead.",
+        "details",
+        { open: !isNative },
+        h("summary", {}, "Advanced network settings"),
+        h("label", { for: "connection-port" }, "Listen port"),
+        port,
+        h(
+          "p",
+          { class: "small muted" },
+          "Use 0 to select an available port. The selected port is saved for reconnects.",
+        ),
+        h(
+          "label",
+          { class: "connection-checkbox", for: "connection-discovery" },
+          discover,
+          h("span", {}, "Discover nearby devices"),
+        ),
+        h(
+          "p",
+          { class: "small muted" },
+          "Discovery never establishes trust. Loopback tests use pairing codes instead.",
+        ),
       ),
       note(
-        "Changing this policy closes active sessions and invitations. Saved trust remains. NARADA never opens firewall rules automatically.",
+        "Changes close sessions and invitations, but keep saved trust. Firewall rules are never opened automatically.",
       ),
       errors,
     ),
@@ -697,13 +756,59 @@ function disable(ctx) {
     ],
   });
 }
-async function createInvitation(ctx) {
+async function createInvitation(
+  ctx,
+  configuration = null,
+  stillHere = () => true,
+) {
+  if (invitationStarting || !stillHere()) return;
+  invitationStarting = true;
+  let created;
+  let abandoned = false;
+  const visibility = () => {
+    if (document.hidden) abandoned = true;
+  };
+  document.addEventListener("visibilitychange", visibility);
+  const active = () => !abandoned && stillHere();
+  const discard = async () => {
+    created.code = "";
+    if (invitationSecret === created) invitationSecret = null;
+    await agent.cancel_pairing({ invitation_id: created.invitation_id });
+  };
   try {
-    invitationSecret = await agent.start_pairing();
+    if (configuration) {
+      await agent.configure_connections(configuration);
+      await ctx.refresh(false);
+      if (!active()) return;
+    }
+    created = await agent.start_pairing();
+    if (!active()) {
+      await discard();
+      return;
+    }
     await ctx.refresh(false);
+    if (!active()) {
+      await discard();
+      return;
+    }
+    if (
+      ctx.snapshot.connections.invitation?.invitation_id !==
+      created.invitation_id
+    ) {
+      created.code = "";
+      return toast(
+        "This invitation is no longer available. Review Devices before trying again.",
+        "error",
+      );
+    }
+    // Publish only after the post-start snapshot: an older in-flight poll must not erase it.
+    invitationSecret = created;
     showInvitation(ctx);
   } catch (e) {
     toast(e.message, "error");
+  } finally {
+    document.removeEventListener("visibilitychange", visibility);
+    invitationStarting = false;
   }
 }
 function showInvitation(ctx) {
@@ -777,7 +882,7 @@ function showInvitation(ctx) {
       h(
         "p",
         { class: "muted" },
-        "On the other desktop, choose Join with a code. Read this QR image offline or paste the text code, then return here to approve.",
+        "On your phone, open Devices and scan this QR. Verify the computer, then request pairing. This window will open the approval step automatically.",
       ),
       qr,
       timer,
@@ -790,6 +895,7 @@ function showInvitation(ctx) {
     ),
     actions: [cancel, button("Close", () => dialog.close())],
   });
+  invitationDialogs.add(dialog);
   QRCode.toCanvas(canvas, current.code, {
     scale: 4,
     margin: 4,
@@ -801,8 +907,14 @@ function showInvitation(ctx) {
       note("The QR renderer failed. The text code still works.", "alert"),
     );
   });
-  let requesterFingerprint;
+  let requesterFingerprint, childReview;
+  const reviewed = new Set();
+  const openReview = (pending) => {
+    reviewed.add(pending.attempt_id);
+    childReview = review(ctx, pending);
+  };
   const update = (c) => {
+    if (!dialog.dialog.open || !dialog.dialog.isConnected) return;
     const inv = c.invitation;
     if (inv?.pending) requesterFingerprint = inv.pending.fingerprint;
     if (!inv || inv.invitation_id !== current.invitation_id) {
@@ -820,7 +932,7 @@ function showInvitation(ctx) {
         : "This invitation is closed or expired.";
       if (paired)
         dialog.dialog.querySelector(".modal-header h2").textContent =
-          "You’re connected.";
+          "Pairing saved.";
       replace(
         status,
         h(
@@ -853,50 +965,88 @@ function showInvitation(ctx) {
         ),
         inv.pending.proof_verified &&
           !inv.pending.approved &&
-          button("Review request", () => review(ctx, inv.pending), {
+          button("Review request", () => openReview(inv.pending), {
             kind: "primary",
             leading: "shield",
           }),
       );
+    // Advance the UI only. Never steal focus or reopen a review the owner dismissed.
+    if (
+      inv.pending?.proof_verified &&
+      !inv.pending.approved &&
+      !reviewed.has(inv.pending.attempt_id) &&
+      !document.hidden &&
+      document.hasFocus() &&
+      [...document.querySelectorAll("dialog[open]")].at(-1) === dialog.dialog
+    )
+      openReview(inv.pending);
   };
   watch(dialog, update);
   update(ctx.snapshot.connections);
   dialog.dialog.addEventListener(
     "close",
     () => {
+      invitationDialogs.delete(dialog);
       current.code = "";
       manual.value = "";
       canvas.width = canvas.height = 0;
-      invitationSecret = null;
+      if (invitationSecret === current) invitationSecret = null;
+      childReview?.close();
     },
     { once: true },
   );
 }
 function review(ctx, pending) {
+  pending = { ...pending }; // Keep the reviewed identity fixed across later snapshots.
+  const existing = reviewDialogs.get(pending.attempt_id);
+  if (existing?.dialog.open) return existing;
   const errors = errorBox();
   const check = h("input", { type: "checkbox", id: "compare-fingerprints" });
-  let dialog;
+  const chatConsent = h("input", { type: "checkbox", id: "pair-chat-consent" });
+  let dialog,
+    submitting = false;
+  const currentRequest = () => {
+    const p = ctx.snapshot.connections.invitation?.pending;
+    return (
+      p?.attempt_id === pending.attempt_id &&
+      p.fingerprint === pending.fingerprint &&
+      p.proof_verified &&
+      !p.approved
+    );
+  };
   const approve = button(
     "Approve this device",
     async () => {
+      if (
+        submitting ||
+        !dialog.dialog.open ||
+        !check.checked ||
+        !currentRequest()
+      )
+        return;
+      submitting = true;
       approve.disabled = true;
+      check.disabled = chatConsent.disabled = true;
       try {
         await agent.approve_pairing({
           attempt_id: pending.attempt_id,
-          permissions: NO_CONTENT,
+          permissions: { ...NO_CONTENT, chat: chatConsent.checked },
         });
         dialog.close();
         await ctx.refresh(false);
         toast("Approved. Waiting for the joining device’s final confirmation.");
       } catch (e) {
         showError(errors, e);
-        approve.disabled = !check.checked;
+      } finally {
+        submitting = false;
+        check.disabled = chatConsent.disabled = !currentRequest();
+        approve.disabled = !check.checked || !currentRequest();
       }
     },
     { kind: "primary", leading: "shield", disabled: true },
   );
   check.addEventListener("change", () => {
-    approve.disabled = !check.checked;
+    approve.disabled = submitting || !check.checked || !currentRequest();
   });
   dialog = modal({
     title: `Trust ${pending.name}?`,
@@ -905,7 +1055,7 @@ function review(ctx, pending) {
       "div",
       {},
       note(
-        "Names and platform labels are self-reported. Compare the full requester fingerprint with the fingerprint shown on the joining desktop.",
+        "Names and platform labels are self-reported. Compare the full requester fingerprint with the fingerprint shown on the phone or joining computer.",
       ),
       fp("REQUESTER FINGERPRINT", pending.fingerprint),
       fp("THIS OWNER DESKTOP", ctx.snapshot.connections.identity.fingerprint),
@@ -922,17 +1072,26 @@ function review(ctx, pending) {
       h(
         "div",
         { class: "permission-summary" },
-        h("h3", {}, "Connection only. Nothing shared."),
+        h("h3", {}, "Choose what this device can do"),
+        h(
+          "label",
+          { class: "connection-checkbox", for: "pair-chat-consent" },
+          chatConsent,
+          h("span", {}, "Allow private text chat with this device"),
+        ),
         h(
           "p",
           {},
-          "No file roots, chat or attachment access. Owner controls are never granted to a peer.",
+          "Unchecked means connection only. Chat needs no folder. Files and attachments need separate grants; owner controls stay private.",
         ),
       ),
       errors,
     ),
     actions: [
       button("Reject request", async () => {
+        if (submitting || !currentRequest()) return;
+        submitting = true;
+        approve.disabled = true;
         await action(
           ctx,
           () => agent.reject_pairing({ attempt_id: pending.attempt_id }),
@@ -943,19 +1102,28 @@ function review(ctx, pending) {
       approve,
     ],
   });
-  watch(dialog, (c) => {
-    const p = c.invitation?.pending;
-    if (!p || p.attempt_id !== pending.attempt_id || p.approved) {
+  reviewDialogs.set(pending.attempt_id, dialog);
+  dialog.dialog.addEventListener(
+    "close",
+    () => {
+      if (reviewDialogs.get(pending.attempt_id) === dialog)
+        reviewDialogs.delete(pending.attempt_id);
+    },
+    { once: true },
+  );
+  watch(dialog, () => {
+    if (!currentRequest()) {
       approve.disabled = true;
-      check.disabled = true;
+      check.disabled = chatConsent.disabled = true;
       showError(
         errors,
         Error(
           "This request is no longer awaiting approval. Refresh the device list.",
         ),
       );
-    } else approve.disabled = !p.proof_verified || !check.checked;
+    } else approve.disabled = submitting || !check.checked;
   });
+  return dialog;
 }
 function join(ctx) {
   const errors = errorBox();
@@ -1045,7 +1213,7 @@ function join(ctx) {
       "div",
       { class: "connection-form" },
       note(
-        "Open a different desktop or reference-agent workspace to generate a code. This desktop cannot pair with itself.",
+        "Use a code from another computer. This computer cannot pair with itself.",
       ),
       h("label", { for: "join-code" }, "Pairing code"),
       input,

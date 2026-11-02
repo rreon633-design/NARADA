@@ -20,8 +20,13 @@ export function transferBytes(value) {
 export function progressOf(job) {
   const size = transferBytes(job.size),
     verified = transferBytes(job.verified_bytes);
-  if (job.state === "completed" && verified !== size)
-    throw new Error("Completion requires all bytes and a publication receipt.");
+  if (
+    job.state === "completed" &&
+    (verified !== size || !hasPublicationReceipt(job))
+  )
+    throw new Error(
+      "Completion requires all bytes and a matching publication receipt.",
+    );
   if (verified > size) throw new Error("Checkpoint exceeds the manifest size.");
   return {
     size,
@@ -33,6 +38,47 @@ export function progressOf(job) {
           ? Math.floor((verified / size) * 100)
           : 0,
   };
+}
+// Presentation validation supplements (never replaces) the agent's immutable receipt checks.
+export function hasPublicationReceipt(job) {
+  const r = job.result;
+  const uuid = (value) =>
+    typeof value === "string" &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(
+      value,
+    );
+  const hash = (value) =>
+    typeof value === "string" && /^[0-9a-f]{64}$/.test(value);
+  return Boolean(
+    r &&
+    r.state === "completed" &&
+    uuid(r.transfer_id) &&
+    r.transfer_id === job.transfer_id &&
+    r.size === job.size &&
+    hash(r.sha256) &&
+    r.sha256 === job.sha256 &&
+    hash(r.manifest_id) &&
+    uuid(r.root_id) &&
+    typeof r.name === "string" &&
+    validMutationName(r.name) &&
+    typeof r.published_at === "string" &&
+    r.published_at.length <= 64 &&
+    /^\d{4}-\d{2}-\d{2}T/.test(r.published_at) &&
+    Number.isFinite(Date.parse(r.published_at)),
+  );
+}
+// Never run a perpetual simulation. Snap on rewind, first observation or reduced motion.
+export function progressMotion(from, to, reduced = false) {
+  if (
+    reduced ||
+    !Number.isFinite(from) ||
+    !Number.isFinite(to) ||
+    from < 0 ||
+    to > 100 ||
+    from >= to
+  )
+    return null;
+  return { from: from / 100, to: to / 100, duration: 180 };
 }
 export function transferLabel(job) {
   if (job.state === "running")
@@ -101,6 +147,12 @@ export function transferHint(code) {
         "The approved source moved or changed. No other version was substituted.",
       STAGING_CHANGED:
         "The saved staging identity changed. Unknown data has been preserved, not adopted.",
+      PEER_UNREACHABLE:
+        "Check the saved device and private network, then retry this transfer. Re-pairing is not needed for a brief connection loss.",
+      PEER_TIMEOUT:
+        "The peer did not respond in time. Keep the same transfer and its saved checkpoints; check the connection before retrying.",
+      CONNECTION_INTERRUPTED:
+        "The connection was interrupted. Retained checkpoints stay with this transfer; do not create another copy to retry.",
       NETWORK_DISABLED:
         "Enable an approved connection before retrying. No background internet fallback is used.",
     }[code] ||

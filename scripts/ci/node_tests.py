@@ -19,7 +19,7 @@ def main():
     require(not report.exists(), 'Never overwrite frontend test evidence')
     code = run('node-tests', command(report))
     if code != 0: return code
-    record_junit('node-tests', [report.relative_to(ROOT).as_posix()], 37)
+    record_junit('node-tests', [report.relative_to(ROOT).as_posix()], 53)
     return 0
 
 

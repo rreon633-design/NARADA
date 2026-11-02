@@ -16,6 +16,7 @@ import {
   ATTENTION,
   filterTransfers,
   progressOf,
+  progressMotion,
   transferLabel,
   transferHint,
 } from "../lib/transfers.js";
@@ -34,6 +35,51 @@ export function transfers(ctx) {
     snapshot: ctx.snapshot,
     lastKey: "",
   };
+  const lastProgress = new Map();
+  const animations = new Set();
+  const meterKey = (job, receive) =>
+    `${receive ? "receive" : "job"}:${job.peer_id}:${job.transfer_id}`;
+  function progressMeter(job, p, receive) {
+    const key = meterKey(job, receive);
+    const fill = h("span", { class: "transfer-meter-fill" });
+    // Individual CSSOM assignment works under the native style-src 'self' policy.
+    // An inline style attribute is correctly blocked; never weaken CSP for progress.
+    fill.style.transform = `scaleX(${p.percent / 100})`;
+    const meter = h(
+      "div",
+      {
+        class: "transfer-meter",
+        role: "progressbar",
+        "aria-label": `Verified bytes for ${job.name}`,
+        "aria-valuemin": 0,
+        "aria-valuemax": 100,
+        "aria-valuenow": p.percent,
+        "aria-valuetext": `${p.verified} of ${p.size} bytes verified`,
+      },
+      fill,
+    );
+    const motion = progressMotion(
+      lastProgress.get(key),
+      p.percent,
+      document.hidden ||
+        typeof matchMedia !== "function" ||
+        matchMedia("(prefers-reduced-motion: reduce)").matches,
+    );
+    lastProgress.set(key, p.percent);
+    if (motion && typeof fill.animate === "function") {
+      const animation = fill.animate(
+        [
+          { transform: `scaleX(${motion.from})` },
+          { transform: `scaleX(${motion.to})` },
+        ],
+        { duration: motion.duration, easing: "linear" },
+      );
+      animations.add(animation);
+      animation.onfinish = animation.oncancel = () =>
+        animations.delete(animation);
+    }
+    return meter;
+  }
   const peerName = (id) =>
     s.snapshot?.connections?.peers?.find((p) => p.peer_id === id)?.name ||
     "Saved peer";
@@ -326,13 +372,8 @@ export function transfers(ctx) {
         h(
           "div",
           { class: "transfer-meter-line" },
-          h("progress", {
-            class: "transfer-meter",
-            value: p.percent,
-            max: 100,
-            "aria-label": `Verified bytes for ${job.name}`,
-          }),
-          h("span", { class: "transfer-percent" }, `${p.percent}%`),
+          progressMeter(job, p, receive),
+          h("span", { class: "transfer-percent" }, `${p.percent}% checked`),
         ),
         job.error_code &&
           h(
@@ -466,6 +507,14 @@ export function transfers(ctx) {
   }
   function draw() {
     if (!s.alive) return;
+    for (const animation of animations) animation.cancel();
+    animations.clear();
+    const live = new Set([
+      ...(s.data?.jobs || []).map((j) => meterKey(j, false)),
+      ...(s.data?.receives || []).map((j) => meterKey(j, true)),
+    ]);
+    for (const key of lastProgress.keys())
+      if (!live.has(key)) lastProgress.delete(key);
     const focused = body.contains(document.activeElement)
       ? document.activeElement?.getAttribute("data-transfer-focus")
       : null;
@@ -502,13 +551,16 @@ export function transfers(ctx) {
     const header = pageHeader(
       "FILE MOVEMENT",
       "Transfers",
-      "Every byte checked. Every destination chosen by you.",
+      "Original bytes. No compression. Every destination chosen by you.",
       [
         button("Pause all", pauseAll, {
           leading: "pause",
           disabled:
             s.busy || !s.online || !data.jobs.some((j) => RUNNING.has(j.state)),
           "data-transfer-focus": "pause-all",
+        }),
+        button("Devices & connection", () => ctx.navigate("devices"), {
+          kind: "text",
         }),
         button("Browse files", () => ctx.navigate("files"), {
           kind: "primary",
@@ -574,7 +626,9 @@ export function transfers(ctx) {
               "h2",
               {},
               !s.data
-                ? "Loading your queue…"
+                ? s.error
+                  ? "Queue unavailable"
+                  : "Loading your queue…"
                 : s.tab === "all"
                   ? "Your next file starts here"
                   : "Nothing in this view",
@@ -583,7 +637,9 @@ export function transfers(ctx) {
               "p",
               {},
               !s.data
-                ? "Reading durable state from the local agent."
+                ? s.error
+                  ? "No new transfer state was accepted. Retry to read the saved queue."
+                  : "Reading durable state from the local agent."
                 : "Select an approved file to send or download. Your queue will show real checkpoints—not simulated activity.",
             ),
             button("Open Files", () => ctx.navigate("files"), {
@@ -663,10 +719,7 @@ export function transfers(ctx) {
     const storage = h(
       "section",
       { class: "panel transfer-storage" },
-      panelHead(
-        "A bounded workspace",
-        "Small, explicit limits for this desktop slice.",
-      ),
+      panelHead("Transfer limits", "Original quality, with bounded storage."),
       h(
         "dl",
         {},
@@ -714,11 +767,7 @@ export function transfers(ctx) {
           {},
           "Mutual TLS protects transport. Staged file bytes are ordinary local files, not end-to-end encrypted storage.",
         ),
-        h(
-          "p",
-          {},
-          "Native Windows and power-loss qualification remain pending. Android comes later.",
-        ),
+        h("p", {}, "Device and power-loss validation remain open."),
       ),
     );
     const error =
@@ -768,6 +817,9 @@ export function transfers(ctx) {
   view.dispose = () => {
     s.alive = false;
     clearInterval(timer);
+    for (const animation of animations) animation.cancel();
+    animations.clear();
+    lastProgress.clear();
   };
   view.updateTransferConnection = (snapshot, connected) => {
     s.snapshot = snapshot;

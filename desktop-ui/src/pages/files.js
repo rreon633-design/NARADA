@@ -18,17 +18,24 @@ import {
   parseExclusions,
   validMutationName,
   grantForRole,
+  roleForGrant,
   boundedLayout,
   validatePreview,
+  resolveRootSelection,
 } from "../lib/files.js";
+
+// Session-only navigation preference; never persist personal paths or file content here.
+const lastRoots = new Map();
+let lastDevice = "local";
 
 export function files(ctx) {
   const view = h("div", { class: "page files-page phase3-files" });
   const s = {
     alive: true,
-    device: "local",
+    device: lastDevice,
     roots: [],
     root: null,
+    requestedRootId: lastRoots.get(lastDevice) || null,
     directory: null,
     entries: [],
     crumbs: [],
@@ -110,7 +117,15 @@ export function files(ctx) {
       if (seq !== s.sequence || !s.alive) return;
       const previous = s.root;
       s.roots = response.roots;
-      s.root = s.roots.find((r) => r.root_id === s.root?.root_id) || null;
+      const selection = resolveRootSelection(
+        s.roots,
+        s.root?.root_id || s.requestedRootId,
+      );
+      s.root = selection.root;
+      if (selection.missing) {
+        clearContent();
+        s.notice = "Choose another folder. None was opened automatically.";
+      }
       if (
         previous?.index_epoch !== s.root?.index_epoch ||
         previous?.revision !== s.root?.revision
@@ -118,8 +133,9 @@ export function files(ctx) {
         s.expanded.clear();
         s.topFolders.clear();
       }
-      if (!s.root && s.roots.length) {
-        s.root = s.roots[0];
+      if (!previous && s.root && !selection.missing) {
+        s.requestedRootId = s.root.root_id;
+        lastRoots.set(s.device, s.root.root_id);
         s.directory = null;
         s.trash = false;
         clearContent();
@@ -162,7 +178,8 @@ export function files(ctx) {
         }
       } else {
         clearContent();
-        s.notice = "No roots are registered or granted to this device.";
+        if (!selection.missing)
+          s.notice = "No folders have been added or shared with this device.";
       }
       s.error = null;
     } catch (e) {
@@ -191,6 +208,9 @@ export function files(ctx) {
   function chooseFolder(root, directory = null) {
     const changed = s.root?.root_id !== root.root_id;
     s.root = root;
+    s.requestedRootId = root.root_id;
+    lastRoots.set(s.device, root.root_id);
+    s.notice = "";
     s.directory = directory;
     s.search = "";
     s.trash = false;
@@ -252,6 +272,7 @@ export function files(ctx) {
         ? "Choose a folder…"
         : "/absolute/path/on/the/agent/host",
       autocomplete: "off",
+      readonly: isNative,
       spellcheck: "false",
     });
     const name = h("input", {
@@ -275,16 +296,21 @@ export function files(ctx) {
         try {
           if (!path.value.trim() || !name.value.trim())
             throw new Error("Choose a folder and give it a display label.");
-          await agent.register_root({
+          const registered = await agent.register_root({
             path: path.value.trim(),
             label: name.value.trim(),
             exclusions: parseExclusions(excluded.value),
           });
           d.close();
-          toast("Folder registered. No device received access automatically.");
-          s.root = null;
+          toast("Folder added on this computer. No device has access yet.");
+          s.root = registered;
+          s.requestedRootId = registered.root_id;
+          lastRoots.set(s.device, registered.root_id);
+          s.directory = null;
           await load();
           ctx.refresh(false);
+          if (isNative && s.root?.root_id === registered.root_id)
+            await shareDialog();
         } catch (e) {
           error.textContent = e.message;
         } finally {
@@ -335,10 +361,15 @@ export function files(ctx) {
           "Whole disks, system/application directories, links and overlapping roots are refused.",
         ),
         inputField("Display label", name),
-        inputField(
-          "Excluded relative prefixes",
-          excluded,
-          "One per line. Hidden files and unsafe entries are always omitted. No wildcards.",
+        h(
+          "details",
+          { open: !isNative },
+          h("summary", {}, "Advanced: exclude subfolders"),
+          inputField(
+            "Excluded relative prefixes",
+            excluded,
+            "One per line. Hidden files and unsafe entries are always omitted. No wildcards.",
+          ),
         ),
         error,
       ),
@@ -392,7 +423,7 @@ export function files(ctx) {
         h(
           "p",
           { class: "muted small" },
-          "Up to eight roots, 5,000 visited entries per root. Metadata is stored locally and is not encrypted. Native Windows filesystem qualification remains open.",
+          "Up to 8 folders and 5,000 checked entries each. Local metadata is not encrypted.",
         ),
         error,
       ),
@@ -424,6 +455,7 @@ export function files(ctx) {
           });
           d.close();
           s.root = null;
+          // Keep the removed opaque ID until the user chooses another folder.
           clearContent();
           await load();
           ctx.refresh(false);
@@ -474,9 +506,14 @@ export function files(ctx) {
     const role = h(
       "select",
       { class: "text-input", "aria-label": "Folder permission level" },
+      h(
+        "option",
+        { value: "custom", disabled: true },
+        "Custom existing access — choose a level to change",
+      ),
       h("option", { value: "none" }, "No access"),
       h("option", { value: "browse" }, "Browse names and metadata"),
-      h("option", { value: "preview" }, "Browse + image previews"),
+      h("option", { value: "preview" }, "View & download (read-only)"),
       h("option", { value: "offline" }, "Browse + read + offline pins"),
       h(
         "option",
@@ -491,15 +528,7 @@ export function files(ctx) {
       const c =
         p?.permissions.roots.find((g) => g.root_id === root.root_id)
           ?.capabilities || [];
-      role.value = c.includes("sync_read")
-        ? "offline"
-        : c.includes("modify") || c.includes("trash")
-          ? "manage"
-          : c.includes("read")
-            ? "preview"
-            : c.includes("browse")
-              ? "browse"
-              : "none";
+      role.value = roleForGrant(c);
     });
     const save = button(
       "Save device access",
@@ -533,14 +562,14 @@ export function files(ctx) {
     );
     d = modal({
       eyebrow: "ONE DEVICE. ONE FOLDER.",
-      title: `Access to ${root.label}`,
+      title: `Share ${root.label}`,
       content: h(
         "div",
         {},
         h(
           "p",
           {},
-          "Pairing grants no files. Choose exactly which device can use this folder. Exclusions still apply, and local owner controls are never delegated.",
+          "Review this device’s access before saving. No access stops future sharing; files and received copies are kept.",
         ),
         !devices.length &&
           h(
@@ -1004,7 +1033,10 @@ export function files(ctx) {
         value: s.device,
         onchange: (e) => {
           s.device = e.target.value;
+          lastDevice = s.device;
           s.root = null;
+          s.requestedRootId = lastRoots.get(s.device) || null;
+          s.notice = "";
           s.directory = null;
           s.trash = false;
           s.search = "";
@@ -1013,6 +1045,13 @@ export function files(ctx) {
         },
       },
       h("option", { value: "local" }, "This desktop"),
+      s.device !== "local" &&
+        !peers().some((p) => p.peer_id === s.device) &&
+        h(
+          "option",
+          { value: s.device, disabled: true },
+          "Previously selected device — unavailable",
+        ),
       peers().map((p) => h("option", { value: p.peer_id }, p.name)),
     );
     device.value = s.device;
@@ -1074,7 +1113,9 @@ export function files(ctx) {
       h(
         "div",
         { class: "tree-label" },
-        "APPROVED FOLDERS",
+        s.device === "local"
+          ? "FOLDERS ON THIS COMPUTER"
+          : "FOLDERS SHARED WITH YOU",
         badge(s.roots.length),
       ),
       s.roots.map((r) =>
@@ -1106,7 +1147,7 @@ export function files(ctx) {
         "p",
         { class: "tree-hint" },
         s.device === "local"
-          ? "Registered locally, not automatically shared. Grant each device separately."
+          ? "Adding a folder does not share it. Select it, then review Device access. Chat works without any folders."
           : "Only folders this device is currently allowed to browse appear.",
       ),
       s.root &&
@@ -1158,18 +1199,27 @@ export function files(ctx) {
             h(
               "h2",
               {},
-              s.device === "local"
-                ? "A folder. Chosen by you."
-                : "No folders granted yet.",
+              s.busy
+                ? "Loading your folders…"
+                : s.requestedRootId
+                  ? "The selected folder is unavailable."
+                  : s.device === "local"
+                    ? "A folder. Chosen by you."
+                    : "No folders granted yet.",
             ),
             h(
               "p",
               {},
-              s.device === "local"
-                ? "Register a specific folder on the agent host. Browse it locally, then choose whether a paired device gets access."
-                : "Ask this device’s owner to grant a root in Files → Device access. Pairing alone grants no files.",
+              s.busy
+                ? "Checking the selected device’s current folders and permissions."
+                : s.requestedRootId
+                  ? s.notice
+                  : s.device === "local"
+                    ? "Register a specific folder on the agent host. Browse it locally, then choose whether a paired device gets access."
+                    : "Ask this device’s owner to grant a root in Files → Device access. Pairing alone grants no files.",
             ),
             s.device === "local" &&
+              !s.requestedRootId &&
               button("Add your first folder", addRoot, {
                 kind: "primary",
                 leading: "plus",
@@ -1393,11 +1443,11 @@ export function files(ctx) {
       h(
         "div",
         { class: "phase-note" },
-        badge("DESKTOP · PHASE 03"),
+        badge("OPTIONAL FOLDER SHARING"),
         h(
           "span",
           {},
-          "Real metadata and bounded image previews. Transfers, chat and Android are still later phases.",
+          "Chat needs no folder. Added folders stay private until you grant access.",
         ),
       ),
       workspace,
@@ -1406,12 +1456,12 @@ export function files(ctx) {
         { class: "inline-note file-status", role: "status" },
         icon(s.busy ? "clock" : "shield", 15),
         s.busy
-          ? "Working against the real agent…"
+          ? "Working…"
           : s.error
             ? "Content was cleared because it could not be reauthorized."
             : s.root
-              ? `${s.root.entry_count} indexed · ${s.root.omitted_count} omitted · ${s.root.state}${s.root.error_code ? ` (${s.root.error_code})` : ""}. ${s.trash ? s.notice : "Hidden files and unsafe objects are excluded. Native Windows filesystem qualification remains open."}`
-              : "No folder is accessed until the owner registers it.",
+              ? `${s.root.entry_count} indexed · ${s.root.omitted_count} omitted · ${s.root.state}${s.root.error_code ? ` (${s.root.error_code})` : ""}. ${s.trash ? s.notice : "Hidden files and unsafe objects are excluded."}`
+              : "No folder is selected. Choose one from the list; pairing alone grants no file access.",
       ),
     );
     if (focused)

@@ -28,12 +28,12 @@ data class ChatUiState(
     val peers: List<ChatPeer> = emptyList(), val peerId: String? = null, val access: ChatAccess? = null,
     val enabled: Boolean = false, val renewal: Boolean = false, val networkEligible: Boolean = false,
     val rows: List<ChatRow> = emptyList(), val draft: String = "", val composerEpoch: Long = 0, val viewEpoch: Long = 0,
-    val retained: Int = 0, val error: String? = null,
+    val retained: Int = 0, val error: String? = null, val liveUpdates: Boolean = false, val receiving: Boolean = false,
 ) { override fun toString() = "ChatUiState([private presentation redacted])" }
 fun interface ChatNotice { suspend fun delivered() }
 
-/** No poller, service, boot sender or UI-owned socket. One explicit bounded batch belongs to this
- * coordinator; leaving Chat, foreground or authority cancels/joins it, then recovers run markers. */
+/** One bounded batch and one opt-in, receive-only foreground scheduler. No service, boot sender
+ * or UI-owned socket. Leaving Chat, foreground or authority revokes ephemeral live consent. */
 @Singleton
 class ChatCoordinator @Inject constructor(
     private val repository: TrustRepository, private val crypto: OlmCryptography, private val gateway: ChatGateway,
@@ -46,6 +46,8 @@ class ChatCoordinator @Inject constructor(
     private val control = Mutex()
     private val generation = AtomicLong()
     @Volatile private var worker: Job? = null
+    @Volatile private var liveJob: Job? = null
+    @Volatile private var receivingOnly = false
     private var recovered = false
     init {
         scope.launch {
@@ -70,6 +72,7 @@ class ChatCoordinator @Inject constructor(
         return c.foreground && c.transportAllowed && c.networkAvailable && p.status == TrustStatus.ACTIVE && !p.blocked && p.failures < 6 && p.remotePermissions.chat && ChatRules.CAPABILITY in p.remoteOperations && c.document.peers.all { it.status in setOf(TrustStatus.ACTIVE, TrustStatus.REVOKED) }
     }
     private fun clear(error: String? = null) {
+        stopLive()
         val epoch = generation.incrementAndGet(); gateway.cancel(); worker?.cancel()
         mutable.update { it.copy(rows = emptyList(), draft = "", peers = emptyList(), access = null, enabled = false, renewal = false, retained = 0, error = error, viewEpoch = epoch) }
     }
@@ -87,7 +90,7 @@ class ChatCoordinator @Inject constructor(
                 block(turn); refresh(turn)
             } catch (e: CancellationException) { throw e }
             catch (e: Exception) { report(e, turn) }
-            finally { if (turn == generation.get()) mutable.update { it.copy(busy = worker?.isActive == true) } }
+            finally { if (turn == generation.get()) mutable.update { it.copy(busy = worker?.isActive == true, receiving = receivingOnly && worker?.isActive == true) } }
         } }
     }
     fun visible(value: Boolean) {
@@ -95,7 +98,7 @@ class ChatCoordinator @Inject constructor(
         if (!value) { clear(); scope.launch { control.withLock { try { stopWorker() } catch (e: Exception) { report(e) } } } }
         else reload()
     }
-    fun reload() = command { turn -> stopWorker(); recover(); refresh(turn) }
+    fun reload() = command { turn -> stopLive(); stopWorker(); recover(); refresh(turn) }
     fun select(peerId: String) {
         clear(); mutable.update { it.copy(peerId = peerId) }
         command { turn -> stopWorker(); refresh(turn) }
@@ -110,9 +113,39 @@ class ChatCoordinator @Inject constructor(
     }
     fun send(id: String, text: String) = command { turn ->
         demand(worker?.isActive != true, "CHAT_BUSY"); engine.queue(selected(), id, text) { guard(turn) }
-        mutable.update { it.copy(composerEpoch = it.composerEpoch + 1) }; startBatch(turn)
+        mutable.update { it.copy(composerEpoch = it.composerEpoch + 1) }; startBatch(turn, outgoingId = id)
     }
     fun sync() = command { turn -> startBatch(turn) }
+    fun receive() = command { turn -> startBatch(turn, receiveOnly = true) }
+    private fun stopLive() {
+        liveJob?.cancel(); liveJob = null
+        mutable.update { it.copy(liveUpdates = false) }
+    }
+    /** Consent is memory-only for this visible conversation. Receiving never drains the outbox. */
+    fun liveUpdates(enabled: Boolean) = command { turn ->
+        stopLive()
+        if (!enabled) {
+            if (receivingOnly) stopWorker()
+        } else {
+            demand(mutable.value.enabled && !mutable.value.renewal && eligible(connections.state.value, selected()), "CHAT_OFFLINE")
+            val peer = selected()
+            mutable.update { it.copy(liveUpdates = true) }
+            liveJob = scope.launch {
+                while (isActive && generation.get() == turn && mutable.value.liveUpdates && mutable.value.peerId == peer) {
+                    control.withLock {
+                        if (generation.get() != turn || !mutable.value.liveUpdates) return@withLock
+                        if (!eligible(connections.state.value, peer)) { stopLive(); return@withLock }
+                        if (worker?.isActive != true) {
+                            try { startBatch(turn, receiveOnly = true) }
+                            catch (e: CancellationException) { throw e }
+                            catch (e: Exception) { report(e, turn) }
+                        }
+                    }
+                    delay(5000) // Shared gateway admission still bounds every request; never overlap batches.
+                }
+            }
+        }
+    }
     fun stop() { clear("CHAT_INTERRUPTED"); command { turn -> stopWorker(); refresh(turn) } }
     fun retry(id: String, reviewed: Boolean) = command { turn ->
         demand(worker?.isActive != true, "CHAT_BUSY"); requireSelected(id); engine.retry(id, reviewed); guard(turn)
@@ -123,14 +156,16 @@ class ChatCoordinator @Inject constructor(
     fun markRead() = command { engine.markRead(selected()) }
     private fun selected() = mutable.value.peerId ?: fail("PEER_NOT_FOUND")
     private suspend fun requireSelected(id: String) { demand(repository.read()?.chat?.message(id)?.peerId == selected(), "CHAT_STOPPED") }
-    private suspend fun startBatch(turn: Long) {
+    private suspend fun startBatch(turn: Long, receiveOnly: Boolean = false, outgoingId: String? = null) {
         guard(turn); demand(worker?.isActive != true, "CHAT_BUSY"); val peerId = selected()
         demand(eligible(connections.state.value, peerId), "CHAT_OFFLINE")
         val before = repository.read()?.chat?.messages?.count { it.direction == ChatDirection.INCOMING } ?: 0
         val job = scope.launch(start = CoroutineStart.LAZY) {
             val self = currentCoroutineContext().job
             try {
-                engine.sync(peerId, gateway) { guard(turn) }
+                if (receiveOnly) engine.receiveOnly(peerId, gateway) { guard(turn) }
+                else if (outgoingId != null) engine.sendOne(peerId, outgoingId, gateway) { guard(turn) }
+                else engine.sync(peerId, gateway) { guard(turn) }
                 guard(turn)
                 val after = repository.read()?.chat?.messages?.count { it.direction == ChatDirection.INCOMING } ?: 0
                 if (after > before) notice.delivered() // No private values cross the notification interface.
@@ -139,16 +174,16 @@ class ChatCoordinator @Inject constructor(
             finally {
                 withContext(NonCancellable) { try { engine.recover() } catch (e: Exception) { report(e) } }
                 scope.launch { control.withLock {
-                    if (worker === self) { worker = null; if (turn == generation.get()) { mutable.update { it.copy(busy = false) }; try { refresh(turn) } catch (e: Exception) { report(e, turn) } } }
+                    if (worker === self) { worker = null; receivingOnly = false; if (turn == generation.get()) { mutable.update { it.copy(busy = false, receiving = false) }; try { refresh(turn) } catch (e: Exception) { report(e, turn) } } }
                 } }
             }
         }
-        worker = job; mutable.update { it.copy(busy = true) }; job.start()
+        worker = job; receivingOnly = receiveOnly; mutable.update { it.copy(busy = true, receiving = receiveOnly) }; job.start()
     }
     private suspend fun stopWorker() {
-        val old = worker; worker = null; gateway.cancel(); old?.cancelAndJoin()
+        val old = worker; worker = null; receivingOnly = false; gateway.cancel(); old?.cancelAndJoin()
         if (repository.read()?.chat != null) engine.recover()
-        mutable.update { it.copy(busy = false) }
+        mutable.update { it.copy(busy = false, receiving = false) }
     }
     private suspend fun refresh(turn: Long) {
         guard(turn); val doc = repository.read(); guard(turn)
@@ -164,10 +199,11 @@ class ChatCoordinator @Inject constructor(
         guard(turn)
         mutable.update { it.copy(loading = false, peers = peers, peerId = id, access = access, enabled = b != null, renewal = b != null && b.pairingAttempt != p?.attemptId,
             rows = rows, draft = doc?.chat?.drafts?.find { d -> d.peerId == id }?.text.orEmpty(), retained = doc?.chat?.messages?.size ?: 0,
-            foreground = c.foreground, networkEligible = eligible(c, id), busy = worker?.isActive == true) }
+            foreground = c.foreground, networkEligible = eligible(c, id), busy = worker?.isActive == true, receiving = receivingOnly && worker?.isActive == true) }
     }
     private fun report(e: Exception, turn: Long? = null) {
         if (e is CancellationException) return
+        if (turn == null || turn == generation.get()) stopLive() // An error requires review, not unattended retries.
         if (isProtectedStorageFailure(e)) { clear(); connections.fileStorageFailure(e) }
         if (turn == null || turn == generation.get() || isProtectedStorageFailure(e)) mutable.update { it.copy(loading = false, error = (e as? ConnectionFailure)?.code ?: "CHAT_UNAVAILABLE") }
     }

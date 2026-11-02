@@ -53,16 +53,22 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var offline: OfflineCoordinator
     @Inject lateinit var capture: PairingCapture
     @Inject lateinit var images: PairingImageReader
+    private val pairingInput = PairingInputGate()
+    private var pairingScreenVisible = false
     private val scanner = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val code = capture.take()
-        if (result.resultCode == RESULT_OK && code != null) connections.acceptCode(code)
+        if (result.resultCode == RESULT_OK && code != null) lifecycleScope.launch {
+            try { withStartedPairingResult(lifecycle) { if (pairingScreenVisible) connections.acceptPairingInput(code) } }
+            finally { pairingInput.returned() }
+        } else pairingInput.returned()
     }
     private val qrImage = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) lifecycleScope.launch {
-            try { connections.acceptCode(images.read(uri)) }
+            try { val code = images.read(uri); withStartedPairingResult(lifecycle) { if (pairingScreenVisible) connections.acceptPairingInput(code) } }
             catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
             catch (_: Exception) { connections.inputUnavailable() }
-        }
+            finally { pairingInput.returned() }
+        } else pairingInput.returned()
     }
     private val notificationPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) model.setNotifications(true) else model.permissionDenied()
@@ -129,11 +135,12 @@ class MainActivity : ComponentActivity() {
                         adopt = offline::adopt, release = offline::release, unpin = offline::unpin, forget = offline::forgetMetadata,
                         openTransfers = { model.requestedRoute.value = Destination.TRANSFERS }),
                     chat = chatState, chatActions = ChatActions(visible = chat::visible, reload = chat::reload, select = chat::select, enable = chat::enable,
-                        saveDraft = chat::saveDraft, send = chat::send, sync = chat::sync, stop = chat::stop, retry = chat::retry, cancel = chat::cancel, markRead = chat::markRead),
+                        saveDraft = chat::saveDraft, send = chat::send, sync = chat::sync, stop = chat::stop, retry = chat::retry, cancel = chat::cancel, markRead = chat::markRead, liveUpdates = chat::liveUpdates, receive = chat::receive),
                     transferActions = TransferActions(
                         visible = transfers::visible, reload = transfers::reload, pause = transfers::pause, pauseAll = transfers::pauseAll,
                         resume = transfers::resume, cancel = transfers::cancel, remove = transfers::remove, finish = transfers::finish,
                         export = transfers::prepareExport, stopExport = transfers::stopExport, dismissExport = transfers::dismissExport, forgetExport = transfers::forgetExport,
+                        openDevices = { model.requestedRoute.value = Destination.DEVICES },
                     ),
                     fileActions = FileActions(
                         visible = files.browser::visible, roots = files.browser::roots, refresh = files.browser::refresh, back = files.browser::back,
@@ -151,11 +158,13 @@ class MainActivity : ComponentActivity() {
                     connectionActions = ConnectionActions(
                         available = true, initialize = connections::initialize, enable = connections::enable,
                         acceptCode = connections::acceptCode, discardCode = connections::discardCode, request = connections::requestPairing,
-                        scanQr = { safely { scanner.launch(Intent(this, ScanPairingActivity::class.java)) } },
-                        importQr = { safely { qrImage.launch(arrayOf("image/png", "image/jpeg", "image/webp")) } },
+                        inputVisible = { visible -> pairingScreenVisible = visible; if (!visible) pairingInput.invalidate() },
+                        scanQr = { launchPairingInput { scanner.launch(Intent(this, ScanPairingActivity::class.java)) } },
+                        importQr = { launchPairingInput { qrImage.launch(arrayOf("image/png", "image/jpeg", "image/webp")) } },
                         wifiSettings = { safely { startActivity(Intent(Settings.ACTION_WIFI_SETTINGS)) } },
                         finish = connections::finish, recover = connections::recover, reconnect = connections::reconnect,
                         revoke = connections::revoke, discover = connections::scanNetwork, stopDiscovery = connections::stopDiscovery, reload = connections::reload,
+                        openChat = { model.requestedRoute.value = Destination.CHAT },
                     ),
                     actions = WorkspaceActions(
                         completeSetup = model::completeSetup, saveName = model::saveName, editName = model::editName, discardName = model::discardName,
@@ -182,6 +191,16 @@ class MainActivity : ComponentActivity() {
     override fun onStop() { connections.foregroundChanged(false); super.onStop() }
     override fun onResume() { super.onResume(); model.onForeground() }
     override fun onNewIntent(intent: Intent) { super.onNewIntent(intent); setIntent(intent); if (intent.action == ACTION_LOCAL_ACTIVITY) model.showNotifications(); if (intent.action == ACTION_PRIVATE_CHAT) model.requestedRoute.value = Destination.CHAT }
+    private fun launchPairingInput(open: () -> Unit) {
+        lifecycleScope.launch {
+            try { pairingInput.start(
+                isStarted = { lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED) && !isFinishing && pairingScreenVisible },
+                prepare = { connections.preparePairingInput() }, open = open,
+            ) }
+            catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+            catch (_: Exception) { model.externalActionUnavailable() }
+        }
+    }
     private fun requestNotifications() {
         if (Build.VERSION.SDK_INT >= 33 && !notifications.runtimePermissionGranted()) notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
         else model.setNotifications(true)

@@ -111,7 +111,7 @@ class WorkspaceViewModel @Inject constructor(
             FailureCode.PERMISSION_UNAVAILABLE -> "Folder permission is unavailable. Choose the folder again."
             FailureCode.SCHEDULER_UNAVAILABLE -> "Android could not schedule this check. Its durable status has been preserved."
             FailureCode.NOTIFICATIONS_DENIED -> "Notifications were not enabled. You can keep using NARADA without them."
-            FailureCode.SENSITIVE_STORAGE_UNAVAILABLE -> "Sensitive content storage is not implemented in Phase 1."
+            FailureCode.SENSITIVE_STORAGE_UNAVAILABLE -> "Protected storage is unavailable. Do not clear app data."
             FailureCode.REPORT_UNAVAILABLE -> "A diagnostic report could not be created. No private content was exported."
             else -> "Local storage could not be read or updated. No reset was attempted. Retry or review diagnostics."
         }

@@ -17,6 +17,8 @@ data class TransfersUiState(
     val loading: Boolean = true, val records: List<DownloadRecord> = emptyList(), val activeId: String? = null,
     val error: String? = null, val visible: Boolean = false, val providerBusy: Boolean = false,
     val picker: ExportPicker? = null, val foreground: Boolean = false, val networkEligible: Boolean = false,
+    val reservedBytes: Long = 0, val notice: String? = null,
+    val retryingId: String? = null, val retryNumber: Int = 0,
 )
 /** Accepted work belongs to the application, not a Composable/ViewModel. Foreground only: no service,
  * WorkManager transfer, boot auto-resume or guessed progress. Restart always requires explicit resume. */
@@ -65,7 +67,7 @@ class TransfersCoordinator @Inject constructor(
     }
     private suspend fun ensureRecovered() { if (!recovered) { engine.recover(); recovered = true }; refresh() }
     private fun command(block: suspend () -> Unit) { scope.launch { control.withLock {
-        try { ensureRecovered(); mutable.update { it.copy(error = null) }; block(); refresh() }
+        try { ensureRecovered(); mutable.update { it.copy(error = null, notice = null) }; block(); refresh() }
         catch (e: CancellationException) { throw e }
         catch (e: Exception) { report(e) }
     } } }
@@ -73,32 +75,76 @@ class TransfersCoordinator @Inject constructor(
     fun reload() = command { demand(!providerIo.busy && exportJob?.isActive != true, "PROVIDER_BUSY"); stopWorker(); synchronized(pickerLock) { claimedPicker = null; mutable.update { it.copy(picker = null) } }; recovered = false; ensureRecovered() }
     fun enqueue(choice: DownloadChoice, confirmed: Boolean) = command {
         demand(mutable.value.picker == null && !providerIo.busy, "PROVIDER_BUSY")
-        engine.enqueue(choice.peerId, choice.pairingAttempt, choice.source, choice.name, choice.size, confirmed); pump()
+        val knownIds = mutable.value.records.map { it.id }.toSet()
+        val record = engine.enqueue(choice.peerId, choice.pairingAttempt, choice.source, choice.name, choice.size, confirmed)
+        if (record.id in knownIds) mutable.update { it.copy(notice = "EXACT_COPY_REUSED") }
+        pump()
     }
     fun startQueued() = command { pump() } // Only after an explicit pin/create-refresh consent.
     fun inputFailure(e: Exception) { report(e) }
     private suspend fun pump() {
         if (worker?.isActive == true || providerIo.busy || exportJob?.isActive == true || mutable.value.picker != null) return
-        val next = repository.read()?.downloads?.firstOrNull { it.state == DownloadState.QUEUED } ?: return
+        val document = repository.read() ?: return
+        val next = document.downloads.firstOrNull { it.state == DownloadState.QUEUED } ?: return
+        val authority = document.peers.find { it.id == next.peerId }
         if (!mutable.value.foreground || !mutable.value.networkEligible && !next.stagedComplete) { pauseQueued("FOREGROUND_PAUSED"); return }
         activeId = next.id
+        val epoch = connections.state.value.accessEpoch
         val job = scope.launch(start = CoroutineStart.LAZY) {
             val self = currentCoroutineContext().job
             var failure: String? = null
             try {
-                engine.run(next.id) { demand(connections.state.value.foreground, "FOREGROUND_PAUSED") }
+                var failedAttempt = 0
+                while (true) {
+                    try {
+                        engine.run(next.id) {
+                            val connection = connections.state.value
+                            demand(connection.foreground, "FOREGROUND_PAUSED")
+                            demand(connection.accessEpoch == epoch, "TRANSFER_ACCESS_CHANGED")
+                        }
+                        break
+                    } catch (e: CancellationException) { throw e }
+                    catch (e: ConnectionFailure) {
+                        currentCoroutineContext().ensureActive()
+                        val wait = TransferRetryPolicy.delayAfter(e.code, ++failedAttempt) ?: throw e
+                        retryGuard(next, epoch, authority)
+                        mutable.update { it.copy(retryingId = next.id, retryNumber = failedAttempt) }
+                        engine.pause(next.id, e.code)
+                        delay(wait) // One bounded, cancellable wait; no new worker, timer or reset.
+                        currentCoroutineContext().ensureActive()
+                        retryGuard(next, epoch, authority)
+                        engine.queueResume(next.id, true) // Same accepted intent, exact ID/manifest.
+                        mutable.update { it.copy(retryingId = null, retryNumber = 0) }
+                    }
+                }
                 try { engine.finish(next.id) } catch (e: CancellationException) { throw e }
                 catch (e: Exception) { report(e) } // Saved private receipt is independent of a lost desktop finish ACK.
             } catch (e: CancellationException) { failure = "TRANSFER_STOPPED"; throw e }
             catch (e: Exception) { failure = code(e); report(e) }
             finally {
-                withContext(NonCancellable) { try { engine.pause(next.id, failure); refresh() } catch (e: Exception) { report(e) } }
+                withContext(NonCancellable) {
+                    mutable.update { it.copy(retryingId = null, retryNumber = 0) }
+                    try { engine.pause(next.id, failure); refresh() } catch (e: Exception) { report(e) }
+                }
                 scope.launch { control.withLock {
                     if (worker === self) { worker = null; activeId = null; refreshSafely(); try { pump() } catch (e: Exception) { report(e) } }
                 } }
             }
         }
         worker = job; refresh(); job.start()
+    }
+    private suspend fun retryGuard(record: DownloadRecord, epoch: Long, authority: TrustedPeer?) {
+        val connection = connections.state.value
+        demand(connection.foreground, "FOREGROUND_PAUSED")
+        demand(connection.accessEpoch == epoch && connection.transportAllowed && connection.networkAvailable, "TRANSFER_ACCESS_CHANGED")
+        val doc = repository.read() ?: fail("IDENTITY_NOT_READY")
+        val peer = doc.peer(record.peerId)
+        demand(doc.enabled && peer.status == TrustStatus.ACTIVE && !peer.blocked && peer.attemptId == record.pairingAttempt, "TRANSFER_SCOPE_CHANGED")
+        demand(authority != null && peer.remoteRevision == authority.remoteRevision && peer.remoteEpoch == authority.remoteEpoch &&
+            peer.remotePermissions == authority.remotePermissions, "TRANSFER_ACCESS_CHANGED")
+        demand("transfers.v1" in peer.remoteOperations, "TRANSFERS_UNSUPPORTED")
+        val caps = peer.remotePermissions.roots.singleOrNull { it.root_id == record.source.root_id }?.capabilities.orEmpty()
+        demand(caps.containsAll(listOf("browse", "read")) && (!record.syncRequired || "sync_read" in caps), "TRANSFER_ACCESS_CHANGED")
     }
     private suspend fun stopWorker() {
         val old = worker; worker = null; activeId = null
@@ -109,7 +155,10 @@ class TransfersCoordinator @Inject constructor(
     }
     fun pause(id: String) = command { if (activeId == id) stopWorker(); engine.pause(id); pump() }
     fun pauseAll() = command { stopWorker(); pauseQueued("USER_PAUSED") }
-    fun resume(id: String, confirmed: Boolean) = command { engine.queueResume(id, confirmed); pump() }
+    fun resume(id: String, confirmed: Boolean) = command {
+        demand(activeId != id || worker?.isActive != true, "TRANSFER_BUSY")
+        engine.queueResume(id, confirmed); pump()
+    }
     fun cancel(id: String, confirmed: Boolean) = command { demand(!providerIo.busy, "PROVIDER_BUSY"); if (activeId == id) stopWorker(); engine.cancel(id, confirmed); pump() }
     fun remove(id: String, confirmed: Boolean) = command { demand(!providerIo.busy && mutable.value.picker == null, "PROVIDER_BUSY"); if (activeId == id) stopWorker(); engine.remove(id, confirmed); pump() }
     fun finish(id: String) = command { engine.finish(id) }
@@ -156,7 +205,9 @@ class TransfersCoordinator @Inject constructor(
     }
     private suspend fun refresh() {
         val doc = repository.read()
-        mutable.update { it.copy(loading = false, records = doc?.downloads.orEmpty(), activeId = activeId, providerBusy = providerIo.busy || exportJob?.isActive == true) }
+        mutable.update { it.copy(loading = false, records = doc?.downloads.orEmpty(), activeId = activeId,
+            reservedBytes = doc?.let { d -> d.downloads.sumOf { r -> r.size } + d.attachments.sumOf { a -> a.reservedBytes } } ?: 0,
+            providerBusy = providerIo.busy || exportJob?.isActive == true) }
     }
     private suspend fun refreshSafely() { try { refresh() } catch (e: Exception) { report(e) } }
     private fun code(e: Exception) = (e as? ConnectionFailure)?.code ?: "LOCAL_STORAGE_UNAVAILABLE"

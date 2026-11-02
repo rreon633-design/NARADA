@@ -18,26 +18,23 @@ export function home(ctx) {
   const stats = [
     {
       icon: "folder",
-      label: "Shared folders",
+      label: "Added folders",
       value: String(s?.shared_roots ?? 0).padStart(2, "0"),
-      detail: "Your files, on your terms",
-      phase: "Phase 3",
+      detail: "Sharing is granted separately",
       route: "files",
     },
     {
       icon: "devices",
       label: "Paired devices",
       value: String(s?.paired_devices ?? 0).padStart(2, "0"),
-      detail: "Explicitly approved identities",
-      phase: "Phase 2",
+      detail: "Approved devices",
       route: "devices",
     },
     {
       icon: "transfer",
       label: "Active transfers",
       value: String(s?.active_transfers ?? 0).padStart(2, "0"),
-      detail: "Durable jobs, never simulated",
-      phase: "Desktop development",
+      detail: "Current transfer jobs",
       route: "transfers",
     },
     {
@@ -45,7 +42,6 @@ export function home(ctx) {
       label: "Local data",
       value: s ? bytes(s.storage.database_bytes) : "—",
       detail: "Metadata stored on this host",
-      phase: "Metadata only",
       route: "diagnostics",
     },
   ];
@@ -55,7 +51,7 @@ export function home(ctx) {
     pageHeader(
       "YOUR WORKSPACE",
       "Welcome to your own space.",
-      "Everything you need. Right where it belongs.",
+      null,
       h(
         "span",
         { class: "date-label" },
@@ -80,24 +76,24 @@ export function home(ctx) {
           "A CLOSER CONNECTION",
         ),
         h("h2", {}, "Your devices. ", h("br"), "Your private corner."),
-        h(
-          "p",
-          {},
-          "A simpler way to bring your laptop and phone together.\nNo accounts. No mandatory cloud. Just yours.",
-        ),
+        h("p", {}, "Connect your computer and phone without a cloud account."),
         h(
           "div",
           { class: "hero-actions" },
           button(
             s?.settings.setup_completed
-              ? "Workspace settings"
-              : "Set up workspace",
+              ? "Connect your phone"
+              : "Set up this computer",
             () =>
               s?.settings.setup_completed
-                ? ctx.navigate("settings")
+                ? ctx.navigate("devices")
                 : ctx.openSetup(),
             { kind: "primary", trailing: "arrow", disabled: !ctx.connected },
           ),
+          s?.settings.setup_completed &&
+            button("Computer settings", () => ctx.navigate("settings"), {
+              kind: "text",
+            }),
           button("How it works", ctx.openHelp, {
             kind: "text",
             trailing: "chevron",
@@ -126,7 +122,6 @@ export function home(ctx) {
             h("span", {}, stat.detail),
             icon("arrowUp", 13),
           ),
-          h("span", { class: "stat-scope" }, stat.phase),
         ),
       ),
     ),
@@ -139,28 +134,24 @@ export function home(ctx) {
         h(
           "section",
           { class: "panel setup-panel" },
-          panelHead(
-            "Make yourself at home",
-            "A few small steps for a good foundation.",
-            badge(`${completed} of 3 ready`),
-          ),
+          panelHead("Get started", null, badge(`${completed} of 3 ready`)),
           h(
             "div",
             { class: "setup-steps" },
             step(
               "01",
               ctx.connected
-                ? "Your local engine is ready"
-                : "Reconnect your local engine",
-              "A lightweight Rust agent, working in the background.",
+                ? "Local service is ready"
+                : "Reconnect the local service",
+              "Local service status, not a phone connection.",
               ctx.connected,
               () => ctx.navigate("diagnostics"),
               "View status",
             ),
             step(
               "02",
-              "Make this workspace yours",
-              "Give it a name and set your preferences.",
+              "Name this computer",
+              "A device label, not a folder.",
               Boolean(s?.settings.setup_completed),
               ctx.openSetup,
               s?.settings.setup_completed ? "Edit setup" : "Personalize",
@@ -168,8 +159,8 @@ export function home(ctx) {
             ),
             step(
               "03",
-              "Check that everything feels right",
-              "Run a quick check of your local workspace.",
+              "Check this computer",
+              "Check local storage and service status.",
               Boolean(s?.last_diagnostics),
               ctx.runDiagnostics,
               s?.last_diagnostics ? "Check again" : "Run check",
@@ -180,7 +171,7 @@ export function home(ctx) {
             "div",
             { class: "setup-footnote" },
             icon("info", 14),
-            "Trusted desktop pairing is available in Devices. Register a folder and grant access in Files.",
+            "Connect your phone in Devices. Share folders separately in Files.",
           ),
         ),
         h(
@@ -188,7 +179,7 @@ export function home(ctx) {
           { class: "panel recent-panel" },
           panelHead(
             "Recent activity",
-            "Small things happening in your workspace.",
+            null,
             button("View all", ctx.showActivity, {
               kind: "text",
               trailing: "chevron",
@@ -207,7 +198,7 @@ export function home(ctx) {
                     "span",
                     {},
                     ctx.connected
-                      ? "Your workspace is quiet. New activity will appear here."
+                      ? "New activity appears here."
                       : "Waiting for the local agent…",
                   ),
                 ),
@@ -226,7 +217,7 @@ export function home(ctx) {
           h(
             "p",
             {},
-            "Connections are opt-in. Each device needs your approval, and no folders or messages are exposed in this build.",
+            "Connections and sharing stay off until you approve them.",
           ),
           h("div", { class: "privacy-rule" }),
           h(
@@ -287,7 +278,7 @@ export function home(ctx) {
       h(
         "span",
         {},
-        "NARADA 0.7.0",
+        "NARADA 0.7.1",
         h("span", { class: "separator-dot" }, "·"),
         "Trusted desktop connections",
       ),

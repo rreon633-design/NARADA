@@ -1,6 +1,6 @@
 # GitHub build and release workflow
 
-Target repository: **https://github.com/rreon633-design/NARADA**. Initial requested tag: **`v0.0.1`**.
+Target repository: **https://github.com/rreon633-design/NARADA**. Current requested tag: **`v0.0.2`**. The historical initial tag **`v0.0.1`** is immutable.
 
 ## Fresh campaigns, not rewritten history
 
@@ -32,26 +32,26 @@ These are reproducibility/provenance controls, not a complete dependency advisor
 
 Successful platform build jobs expose `windows-x64-manual-test-attempt-N` and `android-per-abi-manual-test-attempt-N` artifacts for 14 days. Every artifact name includes the attempt number, so reruns never overwrite earlier evidence. They are platform-job candidates: **check the overall workflow outcome before using them**, because another required job can still fail. Evidence is retained on failures where available.
 
-A version-tag push, or the first successful `main` campaign while `v0.0.1` is absent, enables the release job only in the owner repository. It requires **every** listed job, including both emulator jobs, to succeed. It verifies:
+A push of the explicitly configured version tag, or a successful `main` campaign while the configured `main_release_tag` (`v0.0.2`) is absent, enables publication only in the owner repository. Arbitrary/unconfigured tag pushes cannot publish with these release notes. It requires **every** listed job, including both emulator jobs, to succeed. It verifies:
 
 1. Same commit, workflow run and attempt across all successful job records.
 2. File checksums, actual package bytes, source-input fingerprints and per-ABI completeness.
 3. Exact identity of the minified APK used in both emulator runs.
 4. Installed Windows application/agent hashes matching the packaged build.
-5. The existing remote tag identifying the tested commit, or (for the one-time initial release) `main` still identifying that commit before creating the new annotated tag.
+5. The existing remote tag identifying the tested commit, or (for the configured new main release) `main` still identifying that commit before creating the new annotated tag.
 
-After the first green `main` campaign, the job creates the requested annotated **`v0.0.1` tag once, only if absent**. Later main pushes leave that tag/release untouched. It uses the successful same-commit campaign directly; a workflow-token-created tag does not need to trigger a second campaign. Branch-candidate binaries are copied under versioned filenames without changing their tested bytes.
+After all gates pass on `main`, the job creates the explicitly requested annotated **`v0.0.2` tag once, only if absent**. `release/ci-policy.json` retains `initial_github_tag: v0.0.1` as history and adds `main_release_tag: v0.0.2`; the publisher no longer mistakes the already-published initial version for the new request. Later main pushes leave the configured published tag/release untouched. Reviewed version-specific notes must exist before any tag is created. It uses the successful same-commit campaign directly; a workflow-token-created tag does not need to trigger a second campaign. Branch-candidate binaries are copied under versioned filenames without changing their tested bytes.
 
-The job creates a **draft prerelease**, uploads and checks all assets, then publishes it. It will not move or replace tags, overwrite an existing release, or promote this to a production release. A failed upload leaves a draft unpublished. If the initial tag was already created, the owner must review/remove the failed draft and rerun **all jobs of the same initial commit** to retry publication; do not move the tag. Rerunning only failed jobs is deliberately rejected when it would mix artifacts from different attempts. Tag-ref creation is create-only, so a concurrent existing tag is never overwritten. Never retag a published version to conceal a failure.
+The job creates a **draft prerelease**, uploads and checks all assets, then publishes it. It will not move or replace tags, overwrite an existing release, or promote this to a production release. A failed upload leaves a draft unpublished. If the requested tag was already created, the owner must review/remove the failed draft and rerun **all jobs of the same tested commit** to retry publication; do not move the tag. Rerunning only failed jobs is deliberately rejected when it would mix artifacts from different attempts. Tag-ref creation is create-only, so a concurrent existing tag is never overwritten. Never retag a published version to conceal a failure.
 
-## Initial push procedure
+## Authorized push procedure
 
 1. User installs the named SSH deploy key with write access and confirms.
 2. Verify GitHub's SSH host key through trusted HTTPS metadata; authenticate without printing the private key.
-3. Reinspect remote heads/tags/default branch. Preserve existing history. No force push and no replacement of an existing `v0.0.1` tag.
+3. Reinspect remote heads/tags/default branch. Preserve existing history. No force push and no replacement of any existing tag or release. Clone/fetch the existing history; do not initialize a replacement repository.
 4. Export a source-only staging tree with `python scripts/prepare_github.py --destination .cache/github-publish` (the destination must be new). It excludes prior binary/evidence dumps, runtime profiles, signing material and historical auto-running workflows. This command does **not** push or tag.
 5. Commit/push to the appropriate inspected branch and observe the new CI run. Fix failures in new commits; never change historical reports to make CI green.
-6. The workflow creates the requested annotated `v0.0.1` tag and publishes the prerelease **only after all required branch checks pass**. No second SSH operation or private key in Actions is needed. For later versions, an owner-created version tag runs the full tag campaign before publication.
+6. Set the explicitly authorized target and reviewed notes in the release policy. The workflow creates the requested annotated `v0.0.2` tag and publishes the prerelease **only after all required branch checks pass**. No second SSH operation or private key in Actions is needed. Future versions require an explicit policy/notes update; a matching owner-created version tag can instead run the full tag campaign before publication.
 
 The SSH deploy key grants Git access only. It cannot enable disabled Actions, modify repository settings through the REST API, sign application packages, or provide production publishing approval. If Actions are disabled or organization policy blocks a pinned action, the repository owner must adjust the setting.
 
@@ -69,7 +69,7 @@ Android command-line tools are explicitly pinned to `16111833`; the obsolete SDK
 
 In-flight source revisions now retain their own commit-scoped concurrency groups instead of cancelling the earlier platform campaign on every repair push. This preserves complete diagnostics/caches. Publication still requires the current `main` SHA and all same-attempt evidence; an older or failed campaign cannot release a newer commit.
 
-The Node 22 test entrypoint enumerates the actual test files explicitly and emits TAP plus JUnit. A directory argument that passed with local Node 20 failed under Node 22; the local Node 22 failure is recorded separately, and a zero/partial test selection cannot satisfy the 37-case minimum.
+The Node 22 test entrypoint enumerates the actual test files explicitly and emits TAP plus JUnit. A directory argument that passed with local Node 20 failed under Node 22; the local Node 22 failure is recorded separately, and a zero/partial test selection cannot satisfy the 53-case minimum. Current connection/app/browser minima are 490/317/76; prior historical minimum changes described below are not the current gate values.
 
 Lint still treats application warnings as errors. `OldTargetApi` is retained as an **informational advisory**, like pinned dependency-update notices: target API 36 is intentional for this development package, and target-37 LAN permission/compatibility work remains an explicit production gate. APK audits still enforce the declared target/minimum SDK. This is not a claim of Play-store eligibility or target-37 qualification. No application finding is hidden in a lint baseline.
 

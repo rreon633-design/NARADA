@@ -57,16 +57,14 @@ test("setup saves real preferences and survives reload", async ({
 }) => {
   await ready(page);
   await page
-    .getByRole("button", { name: "Set up workspace", exact: true })
+    .getByRole("button", { name: "Set up this computer", exact: true })
     .click();
-  await page
-    .getByLabel("Workspace name", { exact: true })
-    .fill("NARADA Studio");
+  await page.getByLabel("Computer name", { exact: true }).fill("NARADA Studio");
   await page.getByRole("button", { name: "Continue", exact: true }).click();
   await page.getByRole("checkbox", { name: /Reduce interface motion/ }).check();
   await page.getByRole("button", { name: "Continue", exact: true }).click();
   await page
-    .getByRole("button", { name: "Make yourself at home", exact: true })
+    .getByRole("button", { name: "Save & open Devices", exact: true })
     .click();
   await expect(page.locator("dialog")).toHaveCount(0);
   const saved = await rpc(request, "get_snapshot");
@@ -75,9 +73,11 @@ test("setup saves real preferences and survives reload", async ({
     setup_completed: true,
     reduce_motion: true,
   });
+  await expect(page).toHaveURL(/#devices$/);
   await page.reload();
+  await page.getByRole("button", { name: "Home", exact: true }).click();
   await expect(
-    page.getByRole("button", { name: "Workspace settings", exact: true }),
+    page.getByRole("button", { name: "Computer settings", exact: true }),
   ).toBeVisible();
   await expect(page.locator("body")).toHaveClass(/reduce-motion/);
 });
@@ -87,7 +87,7 @@ test("settings validation, saving, dirty guarding, and discard are functional", 
   request,
 }) => {
   await ready(page, "settings");
-  const input = page.getByLabel("Workspace name", { exact: true });
+  const input = page.getByLabel("Computer name", { exact: true });
   await input.fill("");
   await expect(
     page.getByRole("button", { name: "Save changes" }),
@@ -107,11 +107,11 @@ test("settings validation, saving, dirty guarding, and discard are functional", 
   expect((await rpc(request, "get_snapshot")).data.settings.device_name).toBe(
     "My desk",
   );
-  await page.getByLabel("Workspace name", { exact: true }).fill("Discard this");
+  await page.getByLabel("Computer name", { exact: true }).fill("Discard this");
   await page.getByRole("button", { name: "Home", exact: true }).click();
   await page.getByRole("button", { name: "Discard & continue" }).click();
   await page.getByRole("button", { name: "Settings", exact: true }).click();
-  await expect(page.getByLabel("Workspace name", { exact: true })).toHaveValue(
+  await expect(page.getByLabel("Computer name", { exact: true })).toHaveValue(
     "My desk",
   );
 });
@@ -266,7 +266,7 @@ test("offline is a real error state, not a fake successful connection", async ({
   await expect(page.locator(".header-status")).toHaveText("Agent offline");
   await expect(page.locator(".connection-banner")).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Set up workspace", exact: true }),
+    page.getByRole("button", { name: "Set up this computer", exact: true }),
   ).toBeDisabled();
   await page.unroute("**/__narada/rpc");
   await page.getByRole("button", { name: "Retry", exact: true }).click();
@@ -347,7 +347,7 @@ test("small viewports remain usable and retain accessible navigation", async ({
   ).toBeVisible();
   await page.getByRole("button", { name: "Settings", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Workspace settings", exact: true }),
+    page.getByRole("heading", { name: "Computer settings", exact: true }),
   ).toBeVisible();
   expect(
     await page.evaluate(
@@ -366,12 +366,12 @@ test("small viewports remain usable and retain accessible navigation", async ({
   await page.screenshot({ path: "artifacts/desktop-5-9/desktop-compact.png" });
 });
 
-test("setup, help, command search, and roadmap dialogs pass automated checks", async ({
+test("setup, help, command search, and build-limitations dialogs pass automated checks", async ({
   page,
 }) => {
   await ready(page);
   for (const name of [
-    "Set up workspace",
+    "Set up this computer",
     "Help and local-first guide",
     "Search pages and settings",
   ]) {
@@ -404,4 +404,41 @@ test("response version and correlation mismatch cannot become successful UI stat
   await expect(page.locator(".connection-banner")).toContainText(
     "incompatible response",
   );
+});
+
+test("concise help keeps verification and upgrade warnings, and About uses the actual agent version", async ({
+  page,
+  request,
+}) => {
+  await ready(page, "settings");
+  const snapshot = await rpc(request, "get_snapshot");
+  await expect(page.locator("#about")).toContainText(
+    snapshot.data.agent.version,
+  );
+  await expect(page.locator("#about")).not.toContainText("Desktop foundation");
+  await expect(page.locator("#about")).not.toContainText("no secrets stored");
+  await page
+    .locator("#about")
+    .getByRole("button", { name: "Build limitations", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).toContainText("Do not clear app data");
+  await expect(
+    page.getByRole("dialog").getByText("Pending", { exact: true }),
+  ).toHaveCount(3);
+  await page.keyboard.press("Escape");
+  await page
+    .getByRole("button", { name: "Help and local-first guide", exact: true })
+    .click();
+  const help = page.getByRole("dialog");
+  await expect(help).toContainText("Compare full fingerprints");
+  await expect(help).toContainText("Chat does not require a folder");
+  await expect(help).not.toContainText("Android comes later");
+  await help
+    .getByRole("button", { name: "Build limitations", exact: true })
+    .click();
+  await expect(
+    page
+      .getByRole("dialog")
+      .getByRole("heading", { name: "Safe upgrades", exact: true }),
+  ).toBeVisible();
 });

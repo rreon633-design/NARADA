@@ -402,3 +402,288 @@ test("compact transfer layout has no horizontal overflow", async ({ page }) => {
     fullPage: true,
   });
 });
+
+test("sharing connection shortcut navigates without pairing or granting folders", async ({
+  page,
+  request,
+}) => {
+  await ready(page);
+  await expect(
+    page.getByText(
+      "Original bytes. No compression. Every destination chosen by you.",
+    ),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Devices & connection", exact: true })
+    .click();
+  await expect(page).toHaveURL(/#devices$/);
+  const snapshot = await rpc(request, "get_snapshot");
+  expect(snapshot.connections.invitation).toBeNull();
+  expect(
+    snapshot.connections.peers.filter((p) => p.state === "active"),
+  ).toHaveLength(0);
+});
+
+// Synthetic UI snapshots only. These cases do not claim network throughput or publication.
+function progressFixture(verified = "0") {
+  return {
+    jobs: [
+      {
+        transfer_id: "a0a0a0a0-1234-4234-8234-123456789abc",
+        peer_id: "a".repeat(64),
+        direction: "download",
+        name: "Synthetic progress fixture.bin",
+        state: "running",
+        phase: "transferring",
+        size: "16",
+        verified_bytes: verified,
+        sha256: "b".repeat(64),
+        result: null,
+        ack_pending: false,
+      },
+    ],
+    receives: [],
+    offers: [],
+    sent_offers: [],
+    limits: {},
+  };
+}
+test("synthetic progress respects native style policy, reduced motion and finite animation", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    window.__transferMotions = [];
+    const original = Element.prototype.animate;
+    Element.prototype.animate = function (frames, options) {
+      const animation = original.call(this, frames, options);
+      if (this.classList.contains("transfer-meter-fill"))
+        window.__transferMotions.push({ frames, options, animation });
+      return animation;
+    };
+  });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  let fixture = progressFixture();
+  await page.route("**/__narada/rpc", async (route) => {
+    const req = route.request().postDataJSON();
+    if (req.command?.type !== "list_transfers") return route.continue();
+    await route.fulfill({
+      json: { version: 1, id: req.id, ok: true, data: fixture, error: null },
+    });
+  });
+  await ready(page);
+  const meter = page.getByRole("progressbar", {
+    name: "Verified bytes for Synthetic progress fixture.bin",
+  });
+  await expect(meter).toHaveAttribute("aria-valuenow", "0");
+  // Exercise the native CSP's inline-attribute restriction without blocking Vite's
+  // already-loaded development style elements. This is a browser policy fixture,
+  // not an installed Windows WebView/GUI qualification.
+  expect(
+    await page.evaluate(() => {
+      const policy = document.createElement("meta");
+      policy.httpEquiv = "Content-Security-Policy";
+      policy.content = "style-src-attr 'none'";
+      document.head.append(policy);
+      const probe = document.createElement("div");
+      probe.setAttribute("style", "opacity: 0.12345");
+      document.body.append(probe);
+      const observed = getComputedStyle(probe).opacity;
+      probe.remove();
+      return observed;
+    }),
+  ).toBe("1");
+  fixture = progressFixture("8");
+  await expect(meter).toHaveAttribute("aria-valuenow", "50");
+  await expect(meter).toHaveAttribute(
+    "aria-valuetext",
+    "8 of 16 bytes verified",
+  );
+  await expect(meter.locator(".transfer-meter-fill")).toHaveCSS(
+    "transform",
+    "matrix(0.5, 0, 0, 1, 0, 0)",
+  );
+  expect(await page.evaluate(() => window.__transferMotions.length)).toBe(0);
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  fixture = progressFixture("4");
+  await expect(meter).toHaveAttribute("aria-valuenow", "25");
+  expect(await page.evaluate(() => window.__transferMotions.length)).toBe(0);
+  fixture = progressFixture("12");
+  await expect(meter).toHaveAttribute("aria-valuenow", "75");
+  expect(
+    await page.evaluate(() =>
+      window.__transferMotions.map((m) => ({
+        frames: m.frames,
+        duration: m.options.duration,
+      })),
+    ),
+  ).toEqual([
+    {
+      frames: [{ transform: "scaleX(0.25)" }, { transform: "scaleX(0.75)" }],
+      duration: 180,
+    },
+  ]);
+  await page
+    .getByRole("button", { name: "Devices & connection", exact: true })
+    .click();
+  expect(
+    await page.evaluate(() =>
+      window.__transferMotions.some((m) => m.animation.playState === "running"),
+    ),
+  ).toBe(false);
+});
+test("synthetic completed state without a receipt cannot become a verified delivery", async ({
+  page,
+}) => {
+  const fixture = progressFixture("16");
+  fixture.jobs[0].state = "completed";
+  await page.route("**/__narada/rpc", async (route) => {
+    const req = route.request().postDataJSON();
+    if (req.command?.type !== "list_transfers") return route.continue();
+    await route.fulfill({
+      json: { version: 1, id: req.id, ok: true, data: fixture, error: null },
+    });
+  });
+  await ready(page);
+  await expect(
+    page.getByRole("alert").filter({ hasText: "matching publication receipt" }),
+  ).toBeVisible();
+  await expect(
+    page.locator(`[data-transfer-id="${fixture.jobs[0].transfer_id}"]`),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "Queue unavailable", exact: true }),
+  ).toBeVisible();
+  await expect(page.locator(".transfer-stat strong")).toHaveText([
+    "—",
+    "—",
+    "—",
+  ]);
+});
+async function openSyntheticDownloadReview(page, request) {
+  const registered = await rpc(request, "register_root", {
+    path: folder,
+    label: "Reviewed destination",
+    exclusions: [],
+  });
+  await page.evaluate(async (root) => {
+    window.__reviewNavigations = [];
+    const { openTransferDialog } =
+      await import("/src/components/transfer-dialog.js");
+    await openTransferDialog(
+      {
+        snapshot: { connections: { peers: [] } },
+        navigate: (route) => window.__reviewNavigations.push(route),
+      },
+      {
+        mode: "download",
+        device: "a".repeat(64),
+        root: { root_id: root },
+        entry: {
+          object_id: "b0b0b0b0-1234-4234-8234-123456789abc",
+          version: "b".repeat(64),
+          name: "reviewed.bin",
+          size: "16",
+        },
+      },
+    );
+  }, registered.root_id);
+  await page
+    .getByRole("combobox", { name: "Destination folder", exact: true })
+    .selectOption(registered.root_id);
+}
+test("unconfirmed transfer dialog retries the same frozen arguments and ID", async ({
+  page,
+  request,
+}) => {
+  await ready(page);
+  const attempts = [];
+  await page.route("**/__narada/rpc", async (route) => {
+    const req = route.request().postDataJSON();
+    if (req.command?.type !== "start_transfer") return route.continue();
+    attempts.push(req.command.payload);
+    await route.fulfill({
+      json: {
+        version: 1,
+        id: req.id,
+        ok: false,
+        data: null,
+        error: { code: "IPC_UNAVAILABLE", message: "Synthetic reply loss" },
+      },
+    });
+  });
+  await openSyntheticDownloadReview(page, request);
+  const submit = page.getByRole("button", {
+    name: "Start download",
+    exact: true,
+  });
+  await submit.click();
+  await expect(page.getByRole("dialog")).toContainText(
+    "Result unconfirmed. Check Transfers before starting another copy.",
+  );
+  await expect(
+    page.getByRole("textbox", { name: "Destination filename", exact: true }),
+  ).toBeDisabled();
+  await expect(
+    page.getByRole("combobox", { name: "Destination folder", exact: true }),
+  ).toBeDisabled();
+  await page
+    .getByRole("textbox", { name: "Destination filename", exact: true })
+    .evaluate((el) => {
+      el.value = "changed-after-submission.bin";
+    });
+  await submit.click();
+  await expect.poll(() => attempts.length).toBe(2);
+  expect(attempts[1]).toEqual(attempts[0]);
+  expect(attempts[0].destination.name).toBe("reviewed.bin");
+  await page
+    .getByRole("button", { name: "Check Transfers", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  expect(await page.evaluate(() => window.__reviewNavigations)).toEqual([
+    "transfers",
+  ]);
+});
+test("closed transfer review cannot navigate on a late submission result", async ({
+  page,
+  request,
+}) => {
+  await ready(page);
+  let release;
+  const held = new Promise((resolve) => {
+    release = resolve;
+  });
+  let admitted = 0;
+  await page.route("**/__narada/rpc", async (route) => {
+    const req = route.request().postDataJSON();
+    if (req.command?.type !== "start_transfer") return route.continue();
+    admitted++;
+    await held;
+    await route.fulfill({
+      json: {
+        version: 1,
+        id: req.id,
+        ok: true,
+        data: { transfer_id: req.command.payload.transfer_id, queued: true },
+        error: null,
+      },
+    });
+  });
+  await openSyntheticDownloadReview(page, request);
+  await page
+    .getByRole("button", { name: "Start download", exact: true })
+    .click();
+  await expect.poll(() => admitted).toBe(1);
+  await page.getByRole("button", { name: "Not now", exact: true }).click();
+  await page.getByRole("button", { name: "Browse files", exact: true }).click();
+  await expect(page).toHaveURL(/#files$/);
+  const response = page.waitForResponse(
+    (r) =>
+      r.url().endsWith("/__narada/rpc") &&
+      r.request().postDataJSON()?.command?.type === "start_transfer",
+  );
+  release();
+  await response;
+  await page.waitForTimeout(100);
+  expect(await page.evaluate(() => window.__reviewNavigations)).toEqual([]);
+  await expect(page).toHaveURL(/#files$/);
+});

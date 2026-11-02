@@ -97,7 +97,7 @@ jobs:
       - run: python scripts/ci/evidence.py run frontend-size -- python scripts/ci/artifacts.py frontend
       - run: python scripts/ci/evidence.py browser-redirect
       - run: npx --no-install playwright test -c scripts/ci/playwright.config.mjs
-      - run: python scripts/ci/evidence.py junit --minimum 1 browser '.cache/ci-evidence/desktop-linux/browser-results.xml'
+      - run: python scripts/ci/evidence.py junit --minimum 76 browser '.cache/ci-evidence/desktop-linux/browser-results.xml'
       - run: python scripts/ci/evidence.py finish
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
@@ -235,9 +235,9 @@ jobs:
         run: |
           python scripts/ci/evidence.py run --cwd apps/android android-regression -- bash gradlew --no-daemon --no-build-cache --max-workers=2 --dependency-verification=strict --stacktrace '-Dorg.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=1g -XX:ActiveProcessorCount=2 -Dfile.encoding=UTF-8' "-PnaradaAgentBinary=$GITHUB_WORKSPACE/target/debug/narada-agent" "-PnaradaEvidenceDir=$GITHUB_WORKSPACE/.cache/ci-evidence/android/renders" :core:domain:test :core:connection:test :core:connection:interopTest :app:testDebugUnitTest :app:lintDebug
       - run: python scripts/ci/evidence.py junit --minimum 22 domain 'apps/android/core/domain/build/test-results/test/TEST-*.xml'
-      - run: python scripts/ci/evidence.py junit --minimum 430 connection 'apps/android/core/connection/build/test-results/test/TEST-*.xml'
+      - run: python scripts/ci/evidence.py junit --minimum 490 connection 'apps/android/core/connection/build/test-results/test/TEST-*.xml'
       - run: python scripts/ci/evidence.py junit --minimum 65 real-peer-interop 'apps/android/core/connection/build/test-results/interopTest/TEST-*.xml'
-      - run: python scripts/ci/evidence.py junit --minimum 263 android-host 'apps/android/app/build/test-results/testDebugUnitTest/TEST-*.xml'
+      - run: python scripts/ci/evidence.py junit --minimum 317 android-host 'apps/android/app/build/test-results/testDebugUnitTest/TEST-*.xml'
       - name: Build the minified, signed manual-test APKs and matching instrumentation APK
         run: |
           python scripts/ci/evidence.py run --cwd apps/android manual-test-build -- bash gradlew --no-daemon --no-build-cache --max-workers=2 --dependency-verification=strict --stacktrace '-Dorg.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=1g -XX:ActiveProcessorCount=2 -Dfile.encoding=UTF-8' -PnaradaAbiSplits=true -PnaradaTestBuildType=manualTest :app:assembleManualTest :app:assembleManualTestAndroidTest :app:lintManualTest
@@ -359,7 +359,7 @@ jobs:
         with:
           pattern: evidence-*-attempt-${{ github.run_attempt }}
           path: .cache/release-inputs/evidence/
-      - name: Verify all gates; create initial tag once if absent; publish prerelease last
+      - name: Verify all gates; create configured tag once if absent; publish prerelease last
         env:
           GH_TOKEN: ${{ github.token }}
         run: python scripts/ci/publish.py

@@ -358,8 +358,10 @@ test("folder policy excludes existing names and unregister never removes origina
     .getByRole("button", { name: "Unregister folder", exact: true })
     .click();
   await expect(
-    page.getByRole("heading", { name: "A folder. Chosen by you." }),
+    page.getByRole("heading", { name: "The selected folder is unavailable." }),
   ).toBeVisible();
+  await expect(page.locator(".root-node.selected-folder")).toHaveCount(0);
+  await expect(page.locator(".file-row")).toHaveCount(0);
   expect(await fs.readFile(path.join(folder, "notes.txt"), "utf8")).toBe(
     "Actual disposable document.",
   );
@@ -520,9 +522,11 @@ test("separate real agent exposes granted roots, then revocation clears the clie
     permissions: { chat: false, attachment: false, roots: [] },
   });
   await expect(
-    page.getByRole("heading", { name: "No folders granted yet." }),
+    page.getByRole("heading", { name: "The selected folder is unavailable." }),
   ).toBeVisible({ timeout: 12000 });
   await expect(page.locator(".selected-file-name")).toHaveCount(0);
+  await expect(page.locator(".file-row")).toHaveCount(0);
+  await expect(page.locator(".root-node.selected-folder")).toHaveCount(0);
 });
 
 test("owner device-access dialog persists and withdraws an explicit single-root grant", async ({
@@ -628,4 +632,103 @@ test("owner device-access dialog persists and withdraws an explicit single-root 
       })
     ).roots,
   ).toEqual([]);
+});
+
+test("folder selection survives navigation instead of returning to the first root", async ({
+  page,
+  request,
+}) => {
+  await seeded(request);
+  const other = path.join(base, "other");
+  await fs.mkdir(other);
+  await fs.writeFile(
+    path.join(other, "other-only.txt"),
+    "Disposable second folder",
+  );
+  await rpc(request, "register_root", {
+    path: other,
+    label: "Other folder",
+    exclusions: [],
+  });
+  await ready(page);
+  await page
+    .locator(".folder-tree")
+    .getByRole("button", { name: "Other folder", exact: true })
+    .click();
+  await expect(
+    page.locator(".file-row").filter({ hasText: "other-only.txt" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Home", exact: true }).click();
+  await page.getByRole("button", { name: "Files", exact: true }).click();
+  await expect(page.locator(".root-node.selected-folder")).toHaveText(
+    "Other folder",
+  );
+  await expect(
+    page.locator(".file-row").filter({ hasText: "other-only.txt" }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Folder policy", exact: true })
+    .click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Unregister folder", exact: true })
+    .click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Unregister folder", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.locator(".root-node.selected-folder")).toHaveCount(0);
+  await expect(page.locator(".file-row")).toHaveCount(0);
+  await expect(
+    page
+      .locator(".folder-tree")
+      .getByRole("button", { name: "Design library", exact: true }),
+  ).toBeVisible();
+});
+test("a removed selection never silently opens the remaining folder", async ({
+  page,
+  request,
+}) => {
+  const first = await seeded(request);
+  const other = path.join(base, "other");
+  await fs.mkdir(other);
+  await fs.writeFile(
+    path.join(other, "other-only.txt"),
+    "Not automatically selected",
+  );
+  await rpc(request, "register_root", {
+    path: other,
+    label: "Other folder",
+    exclusions: [],
+  });
+  await ready(page);
+  await page
+    .locator(".folder-tree")
+    .getByRole("button", { name: "Design library", exact: true })
+    .click();
+  await expect(
+    page.locator(".file-row").filter({ hasText: "notes.txt" }),
+  ).toBeVisible();
+  await rpc(request, "remove_root", {
+    root_id: first.root_id,
+    expected_revision: first.revision,
+  });
+  await expect(
+    page
+      .locator(".folder-tree")
+      .getByRole("button", { name: "Design library", exact: true }),
+  ).toHaveCount(0);
+  await expect(page.locator(".root-node.selected-folder")).toHaveCount(0);
+  await expect(page.locator(".file-row")).toHaveCount(0);
+  await expect(page.locator(".files-page")).toContainText(
+    "None was opened automatically",
+  );
+  await page
+    .locator(".folder-tree")
+    .getByRole("button", { name: "Other folder", exact: true })
+    .click();
+  await expect(
+    page.locator(".file-row").filter({ hasText: "other-only.txt" }),
+  ).toBeVisible();
 });

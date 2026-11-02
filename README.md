@@ -9,7 +9,8 @@ Native Windows desktop (Rust + Tauri) and an outbound-only Android companion (Ko
 ## Download and test
 
 - [GitHub Actions — fresh test/build runs](https://github.com/rreon633-design/NARADA/actions/workflows/build-test-release.yml)
-- [Releases](https://github.com/rreon633-design/NARADA/releases) — the requested first tag is **`v0.0.1`**; the initial tag and assets appear only after all required first-release checks pass.
+- [v0.0.2 development release](https://github.com/rreon633-design/NARADA/releases/tag/v0.0.2) — published only after the required same-commit GitHub gates pass. The existing v0.0.1 release stays unchanged.
+- [v0.0.2 changes and limits](docs/github/v0.0.2.md) — connection/chat/workspace repairs, simpler pairing, interface cleanup and sharing Stage 1. **Automatic two-way folder sync is not yet enabled.**
 - [Installation, APK selection and manual-test checklist](docs/github/manual-testing.md)
 
 Successful platform jobs provide a **Windows x64 installer** and **four separate Android APKs**, one per ABI. Check the entire workflow status, not just the presence of a platform artifact. The gated prerelease includes SHA-256 checksums, actual byte-size reports and same-commit CI evidence.
@@ -35,7 +36,7 @@ See [lightweight policy and measurement gaps](docs/github/lightweight.md).
 - [Android roadmap](android-plan.md), [desktop roadmap](plan.md), [`docs/`](docs/) — focused architecture, feature, security, workflow and phase documents.
 - [`references/`](references/) — supplied visual design references, not runtime browser bundles.
 
-Existing internal versions remain Android/desktop shell `0.7.0`, Android versionCode `7`, and Rust workspace `0.7.1`; the first GitHub tag `v0.0.1` does not reset app data or protocol/schema versions.
+The v0.0.2 application metadata is Android/desktop/frontend **0.7.1**, Android versionCode **8**; Rust remains **0.7.1**. Protocol, trust-store and database versions are not reset. Higher version numbers do not establish upgrade/signing continuity. Never uninstall or clear valued data to force an update; use isolated disposable test profiles.
 
 ## Validation boundaries
 

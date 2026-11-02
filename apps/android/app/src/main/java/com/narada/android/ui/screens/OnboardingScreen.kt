@@ -33,14 +33,14 @@ fun OnboardingScreen(initialName: String, busy: Boolean, complete: (String) -> U
         when (page) {
             0 -> {
                 Text("Your devices.\nCloser together.", style = MaterialTheme.typography.headlineLarge)
-                Caption("A personal workspace for your phone and computer. No cloud account to get in the way.")
-                InfoPanel("Start with this phone", "This development build sets up the native Android foundation. Pairing and shared content arrive in later phases.", R.drawable.ic_phone)
+                Caption("Connect your phone and computer—no cloud account.")
+                InfoPanel("Start with this phone", "Connect with a QR invitation. Chat needs no shared folder.", R.drawable.ic_phone)
                 PrimaryAction("Get started", { page = 1 }, Modifier.fillMaxWidth())
-                Caption("Phase 1 · No devices connected. No content sent.")
+                Caption("Setup does not pair devices or send content.")
             }
             1 -> {
                 Text("Make it yours.", style = MaterialTheme.typography.headlineLarge)
-                Caption("Give this phone a name you will recognize. This is a local label, not an account.")
+                Caption("Choose a name for this phone.")
                 OutlinedTextField(
                     value = name, onValueChange = { if (it.length <= 192) name = it }, label = { Text("Device name") },
                     supportingText = { Text(if (valid) "1–48 characters. You can change this later." else "Enter a name without control characters, up to 48 characters.") },
@@ -52,11 +52,10 @@ fun OnboardingScreen(initialName: String, busy: Boolean, complete: (String) -> U
             }
             else -> {
                 Text("Your phone.\nYour choices.", style = MaterialTheme.typography.headlineLarge)
-                Caption("No permissions are needed to explore. NARADA asks only when you choose an action that needs access.")
+                Caption("Permissions are requested only when you need them.")
                 DeviceCard(DeviceNamePolicy.normalize(name))
-                InfoPanel("Access stays intentional", "Choose a folder or enable a generic notification from Settings. Declining either does not block the app.")
-                InfoPanel("A foundation, not a connection", "Pairing, transfers and encrypted chat are not available yet. There are no sample devices or messages.", R.drawable.ic_devices)
-                PrimaryAction(if (busy) "Saving setup…" else "Open my workspace", { complete(name) }, Modifier.fillMaxWidth(), enabled = !busy)
+                InfoPanel("Connect after setup", "In Devices, scan your computer’s QR, compare fingerprints and finish approval. Folder sharing is optional.", R.drawable.ic_devices)
+                PrimaryAction(if (busy) "Saving setup…" else "Open NARADA", { complete(name) }, Modifier.fillMaxWidth(), enabled = !busy)
             }
         }
         Spacer(Modifier.height(16.dp))

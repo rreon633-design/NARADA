@@ -17,15 +17,26 @@ class DownloadEngine(
         demand(confirmed, "LOCAL_CONFIRMATION_REQUIRED"); source.validate(); FileRules.newName(name)
         demand(size in 0..TransferRules.MAX_BYTES, "TRANSFER_LIMIT")
         val r = DownloadRecord(UUID.randomUUID().toString(), peerId, pairingAttempt, source, name, size, now()); r.validate()
+        var admitted = r
         repository.mutate { doc ->
             val p = doc.peer(peerId)
             demand(doc.enabled && p.status == TrustStatus.ACTIVE && p.attemptId == pairingAttempt && !p.blocked, "TRANSFER_SCOPE_CHANGED")
             demand("transfers.v1" in p.remoteOperations, "TRANSFERS_UNSUPPORTED")
             demand(p.remotePermissions.roots.singleOrNull { it.root_id == source.root_id }?.capabilities?.containsAll(listOf("browse", "read")) == true, "ACCESS_DENIED")
+            // Exact source identity, not name/hash similarity. Never widen a pin's authority or
+            // silently restart paused work. Check consent/current grants even when reusing a copy.
+            val existing = doc.downloads.firstOrNull { it.peerId == peerId && it.pairingAttempt == pairingAttempt &&
+                it.source == source && !it.syncRequired && it.state !in setOf(DownloadState.CANCELLED, DownloadState.CORRUPT) }
+            if (existing != null) {
+                demand(existing.name == name && existing.size == size, "MANIFEST_MISMATCH")
+                admitted = existing
+                doc
+            } else {
             demand(doc.downloads.size < TransferRules.MAX_JOBS && doc.downloads.sumOf { it.size } + doc.attachments.sumOf { it.reservedBytes } + size <= TransferRules.QUOTA, "TRANSFER_LOCAL_QUOTA")
             doc.copy(version = maxOf(doc.version, 3), downloads = doc.downloads + r)
+            }
         }
-        changed(); return r // Intent and immutable source arguments precede even PREPARE.
+        changed(); return admitted // Intent and immutable source arguments precede even PREPARE.
     }
     suspend fun recover() {
         if (repository.read() == null) return

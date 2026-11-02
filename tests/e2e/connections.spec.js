@@ -282,17 +282,20 @@ test("complete UI approval and revocation against a separate real reference proc
   await expect(invitation.locator("canvas")).toBeVisible();
   const code = await invitation.locator("textarea").inputValue();
   await ipc(dir, "join_pairing", { code });
-  await expect(
-    invitation.getByRole("button", { name: "Review request", exact: true }),
-  ).toBeVisible();
-  expect((await rpc(request, "get_snapshot")).data.paired_devices).toBe(0);
-  await invitation
-    .getByRole("button", { name: "Review request", exact: true })
-    .click();
+  // The visible QR flow advances after proof; approval itself must remain explicit.
   const approval = page.getByRole("dialog").last();
   await expect(
     approval.getByRole("button", { name: "Approve this device" }),
+  ).toBeVisible();
+  expect((await rpc(request, "get_snapshot")).data.paired_devices).toBe(0);
+  await expect(
+    approval.getByRole("button", { name: "Approve this device" }),
   ).toBeDisabled();
+  const chatConsent = approval.getByRole("checkbox", {
+    name: /Allow private text chat/,
+  });
+  await expect(chatConsent).not.toBeChecked();
+  await chatConsent.check();
   // Only the approval dialog is captured; no bootstrap code/QR secret is archived.
   await approval.screenshot({
     path: "artifacts/desktop-5-9/desktop-approval.png",
@@ -325,6 +328,14 @@ test("complete UI approval and revocation against a separate real reference proc
   await page.screenshot({
     path: "artifacts/desktop-5-9/desktop-paired.png",
     fullPage: true,
+  });
+  const approved = (
+    await rpc(request, "get_snapshot")
+  ).data.connections.peers.find((p) => p.state === "active");
+  expect(approved.permissions).toEqual({
+    chat: true,
+    attachment: false,
+    roots: [],
   });
   await card.getByRole("button", { name: "Details & permissions" }).click();
   await expect(page.getByRole("dialog")).toContainText("Never delegated");

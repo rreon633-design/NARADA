@@ -1,5 +1,12 @@
 package com.narada.android.ui.screens
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -32,6 +39,7 @@ data class TransferActions(
     val export: (String, String, Boolean) -> Unit = { _, _, _ -> }, val stopExport: () -> Unit = {},
     val dismissExport: (String, String, Boolean) -> Unit = { _, _, _ -> },
     val forgetExport: (String, String, Boolean) -> Unit = { _, _, _ -> },
+    val openDevices: () -> Unit = {},
 )
 private data class TransferReviewChoice(val record: DownloadRecord, val kind: String, val exportId: String? = null)
 @Composable
@@ -56,13 +64,15 @@ private fun TransfersContent(state: TransfersUiState, actions: TransferActions, 
         item { Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Eyebrow("VERIFIED COPIES")
             Text("Your files.\nA checked copy.", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.SemiBold)
-            Caption("Download an ordinary desktop file, verify it privately, then choose whether to export. No automatic publication, file opening or background presence.")
+            Caption("Original bytes, no compression. Verify a private copy, then choose whether to export.")
             OutlinedButton(files, Modifier.heightIn(min = 48.dp)) { Glyph(R.drawable.ic_folder); Spacer(Modifier.width(8.dp)); Text("Choose from Files") }
+            TextButton(actions.openDevices, Modifier.heightIn(min = 48.dp)) { Text("Devices & connection") }
         } }
         item { Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             listOf("All", "Active", "Saved", "Review").forEach { label -> FilterChip(filter == label, { filter = label }, label = { Text(label) }, modifier = Modifier.heightIn(min = 48.dp)) }
         } }
-        item { InfoPanel("${state.records.count { it.state == DownloadState.RUNNING }} running · ${state.records.count { it.state == DownloadState.QUEUED }} queued", "Keep NARADA visible. Leaving the app or losing the route pauses downloads; resume is explicit. Up to four retained jobs / 128 MiB; 64 MiB per file.") }
+        item { InfoPanel("${state.records.size} / 4 records · ${transferSize(state.reservedBytes)} / 128 MiB reserved", "64 MiB per file; reservation includes attachments. Brief connection failures retry twice. Leaving the app or losing its network route pauses work until you resume.") }
+        state.notice?.let { code -> item { InfoPanel("Existing copy", transferMessage(code)) } }
         if (state.loading) item { Text("Opening protected transfer records…") }
         state.error?.let { code -> item { InfoPanel("Needs attention", transferMessage(code)) } }
         if (state.providerBusy) item { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -77,17 +87,26 @@ private fun TransfersContent(state: TransfersUiState, actions: TransferActions, 
                     Glyph(R.drawable.ic_file)
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(r.name, style = MaterialTheme.typography.titleMedium, maxLines = 3, overflow = TextOverflow.Ellipsis)
-                        Caption(downloadStateLabel(r.state)); Caption("${transferSize(r.verifiedBytes)} checked / ${transferSize(r.size)}")
+                        Caption(if (state.retryingId == r.id) "Reconnecting · retry ${state.retryNumber} of 2" else downloadStateLabel(r.state)); Caption("${transferSize(r.verifiedBytes)} checked / ${transferSize(r.size)}")
                     }
                 }
                 val progress = if (r.size == 0L) { if (r.state == DownloadState.VERIFIED) 1f else 0f } else (r.verifiedBytes.toDouble() / r.size).toFloat().coerceIn(0f, 1f)
-                LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth())
+                // Finite interpolation only between checked-byte values. Never visually exceed a
+                // decreased checkpoint; accessibility/text report the exact value, not animation.
+                // Compose honors the system animation duration scale (including reduced motion).
+                val animated by animateFloatAsState(progress, tween(180, easing = LinearEasing), label = "checkedBytes")
+                LinearProgressIndicator(progress = { minOf(animated, progress) }, modifier = Modifier.fillMaxWidth().clearAndSetSemantics {
+                    contentDescription = "Verified byte progress"
+                    progressBarRangeInfo = ProgressBarRangeInfo(progress, 0f..1f)
+                })
                 if (r.verifiedBytes == r.size && r.state != DownloadState.VERIFIED) Caption("All staged bytes still require full-file verification and a durable receipt. This is not a completed copy.")
-                r.error?.let { Caption(transferMessage(it)) }
+                if (state.retryingId != r.id) r.error?.let { Caption(transferMessage(it)) }
                 Caption("Transfer ${r.id}")
                 when (r.state) {
                     DownloadState.QUEUED, DownloadState.RUNNING -> OutlinedButton({ actions.pause(r.id) }, Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("Pause transfer") }
-                    DownloadState.PAUSED -> OutlinedButton({ actions.resume(r.id, true) }, Modifier.fillMaxWidth().heightIn(min = 48.dp), enabled = !blocked && state.foreground && (state.networkEligible || r.stagedComplete)) { Text(if (r.stagedComplete) "Verify saved fragments" else "Resume exact transfer") }
+                    DownloadState.PAUSED -> if (state.retryingId == r.id) {
+                        OutlinedButton({ actions.pause(r.id) }, Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("Pause transfer") }
+                    } else OutlinedButton({ actions.resume(r.id, true) }, Modifier.fillMaxWidth().heightIn(min = 48.dp), enabled = !blocked && state.foreground && (state.networkEligible || r.stagedComplete)) { Text(if (r.stagedComplete) "Verify saved fragments" else "Resume exact transfer") }
                     DownloadState.VERIFIED -> {
                         Caption("Private receipt saved. Every export rechecks the full private copy; no preview or file viewer is launched.")
                         r.receipt?.let { Caption("SHA-256 · ${it.sha256}") }
@@ -118,7 +137,7 @@ private fun TransfersContent(state: TransfersUiState, actions: TransferActions, 
             } }
         }
         item { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(actions.pauseAll, Modifier.fillMaxWidth().heightIn(min = 48.dp), enabled = state.records.any { it.state in setOf(DownloadState.QUEUED, DownloadState.RUNNING) }) { Text("Pause all downloads") }
+            OutlinedButton(actions.pauseAll, Modifier.fillMaxWidth().heightIn(min = 48.dp), enabled = state.retryingId != null || state.records.any { it.state in setOf(DownloadState.QUEUED, DownloadState.RUNNING) }) { Text("Pause all downloads") }
             TextButton(actions.reload, Modifier.fillMaxWidth().heightIn(min = 48.dp), enabled = !blocked) { Text("Reopen protected records") }
             Caption("Ordinary desktop-to-phone downloads and offline candidates. Encrypted attachments use Chat. No automatic filesystem sync. Cancel is local; already admitted work and provider copies cannot be undone.")
         } }

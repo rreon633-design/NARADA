@@ -13,6 +13,8 @@ import androidx.compose.runtime.saveable.LocalSaveableStateRegistry
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -29,6 +31,7 @@ data class ChatActions(
     val enable: (Boolean) -> Unit = {}, val saveDraft: (String) -> Unit = {}, val send: (String, String) -> Unit = { _, _ -> },
     val sync: () -> Unit = {}, val stop: () -> Unit = {}, val retry: (String, Boolean) -> Unit = { _, _ -> },
     val cancel: (String, Boolean) -> Unit = { _, _ -> }, val markRead: () -> Unit = {},
+    val liveUpdates: (Boolean) -> Unit = {}, val receive: () -> Unit = {},
 )
 private data class ChatReview(val kind: String, val id: String? = null)
 @Composable
@@ -55,16 +58,16 @@ private fun ChatContent(state: ChatUiState, safe: Boolean, actions: ChatActions,
         item { Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Eyebrow("ENCRYPTED MESSAGES")
             Text("A private\nconversation.", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.SemiBold)
-            Caption("One approved desktop. An explicit foreground sync. No always-on phone presence or automatic sending after restart.")
+            Caption("Chat with an approved computer. No folder needed.")
         } }
         if (!safe) item { Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            InfoPanel("Private view is closed", "Load protected history while NARADA is visible. Unsaved typing is not restored after leaving Chat or losing authority.")
+            InfoPanel("Private view is closed", "Leaving Chat or losing access clears unsaved typing. Load saved history to continue.")
             OutlinedButton(actions.reload, Modifier.fillMaxWidth().heightIn(min = 48.dp), enabled = state.foreground) { Text("Load protected history") }
             TextButton(openConnections, Modifier.heightIn(min = 48.dp)) { Text("Open Connections") }
         } }
         state.error?.let { code -> item { InfoPanel("Needs attention", chatMessage(code)) } }
         if (safe && state.peers.isEmpty()) item { Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            InfoPanel("No approved conversation yet", "Pair with your desktop, compare fingerprints, and have its owner explicitly grant chat. No demonstration messages are added.")
+            InfoPanel("No approved conversation yet", "Pair your computer, compare fingerprints and allow chat in its permissions.")
             OutlinedButton(openConnections, Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("Open Connections") }
         } }
         if (safe && state.peerId != null) {
@@ -77,28 +80,38 @@ private fun ChatContent(state: ChatUiState, safe: Boolean, actions: ChatActions,
                 } }
             } }
             if (!state.enabled || state.renewal) item { Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                InfoPanel(if (state.renewal) "Review renewed pairing" else "Enable this private conversation", "Olm software account and session secrets are sealed by the existing AndroidKeyStore storage key. They are not hardware-held ratchet keys. No insecure fallback is offered.")
+                InfoPanel(if (state.renewal) "Review renewed pairing" else "Enable this private conversation", "Enable encrypted chat with this computer. Existing history is kept.")
                 Button({ review = ChatReview("enable") }, Modifier.fillMaxWidth().heightIn(min = 48.dp), enabled = state.networkEligible && !state.busy && !attachments.busy && !attachments.providerBusy) { Text(if (state.renewal) "Review renewed authority" else "Review & enable private chat") }
             } }
             if (state.enabled) {
                 item { Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(if (state.busy) "Explicit batch in progress" else if (state.networkEligible) "Ready for an explicit sync" else "Saved history · offline or not authorized", style = MaterialTheme.typography.titleSmall)
-                    Caption("${state.retained} / 32 retained messages across up to four conversations. No silent history or unknown-outcome eviction.")
+                    Text(if (state.receiving) "Checking incoming messages" else if (state.busy) "Chat action in progress" else if (state.networkEligible) "Ready to send or check for messages" else "Saved history · offline or not authorized", style = MaterialTheme.typography.titleSmall)
+                    Caption("${state.retained} / 32 saved messages · 4 conversations max. Nothing is auto-deleted.")
                     if (state.busy) OutlinedButton(actions.stop, Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("Stop this batch") }
-                    else Button(actions.sync, Modifier.fillMaxWidth().heightIn(min = 48.dp), enabled = canSend) { Text("Sync this conversation") }
-                    Caption("A batch sends up to three eligible queued messages and pulls up to three desktop messages. Delivered means a saved receipt, not that a person has read it.")
+                    else {
+                        Button(actions.receive, Modifier.fillMaxWidth().heightIn(min = 48.dp), enabled = canSend) { Text("Check messages") }
+                        if (state.rows.any { it.outgoing && !it.oldPairing && it.status in setOf(ChatStatus.QUEUED, ChatStatus.READY, ChatStatus.UNCERTAIN) }) {
+                            OutlinedButton(actions.sync, Modifier.fillMaxWidth().heightIn(min = 48.dp), enabled = canSend) { Text("Send queued & retry pending") }
+                        }
+                    }
+                    Caption("Check messages never sends. Delivered means saved on the other device, not read.")
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Text("Live updates while this chat is open", Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+                        Switch(state.liveUpdates, actions.liveUpdates, enabled = state.liveUpdates || (canSend && !state.renewal), modifier = Modifier.testTag("chat_live_updates").semantics { contentDescription = "Live updates while this chat is open" })
+                    }
+                    Caption(if (state.liveUpdates) "Checks every 5 seconds when idle; never sends pending messages." else "Receive here without sending pending messages. Leaving Chat turns this off.")
                 } }
                 item { Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedTextField(draft, { value -> if (runCatching { ChatRules.text(value, true) }.isSuccess) { draft = value; intentId = UUID.randomUUID().toString() } },
                         Modifier.fillMaxWidth().testTag("chat_composer"), label = { Text("Private text") }, minLines = 3, maxLines = 7,
-                        enabled = !state.busy && !state.renewal, keyboardOptions = KeyboardOptions(autoCorrectEnabled = false),
+                        enabled = (!state.busy || state.receiving) && !state.renewal, keyboardOptions = KeyboardOptions(autoCorrectEnabled = false),
                         supportingText = { Text("${draft.toByteArray(Charsets.UTF_8).size} / 4096 UTF-8 bytes · attachment caption ≤ 1024") })
-                    Button({ actions.send(intentId, draft) }, Modifier.fillMaxWidth().heightIn(min = 48.dp), enabled = canSend && textValid) { Text("Queue & sync text") }
+                    Button({ actions.send(intentId, draft) }, Modifier.fillMaxWidth().heightIn(min = 48.dp), enabled = canSend && textValid) { Text("Send") }
                     OutlinedButton({ actions.saveDraft(draft) }, Modifier.fillMaxWidth().heightIn(min = 48.dp), enabled = !state.busy && !state.renewal) { Text("Save encrypted draft") }
-                    Caption("Typing is memory-only until saved or queued. Attachment bytes are separately encrypted and verified. Notifications never contain message text, filenames or sender names.")
+                    Caption("Save a draft to keep it. Unsaved typing is cleared when you leave.")
                 } }
                 item { AttachmentsPanel(attachments, connections, attachmentActions, state.peerId, draft, canSend) }
-                if (state.rows.isEmpty()) item { InfoPanel("No saved messages", "Sync explicitly to check this desktop. No sample messages, fabricated delivery ticks or background activity appear here.") }
+                if (state.rows.isEmpty()) item { InfoPanel("No saved messages", "Send a message or check for new messages.") }
                 if (state.rows.any { it.unread }) item { TextButton(actions.markRead, Modifier.heightIn(min = 48.dp), enabled = !state.busy) { Text("Mark viewed on this phone") } }
                 items(state.rows, key = { it.id }) { row ->
                     Column(Modifier.fillMaxWidth(), horizontalAlignment = if (row.outgoing) Alignment.End else Alignment.Start) {
@@ -121,15 +134,15 @@ private fun ChatContent(state: ChatUiState, safe: Boolean, actions: ChatActions,
                 }
             }
         }
-        item { HorizontalDivider(); Spacer(Modifier.height(12.dp)); Caption("Development build · vodozemac 0.11.1 / Olm v1 with the desktop's 64-bit MAC. Independent crypto/storage review and Android execution are still qualification gates.") }
+        item { HorizontalDivider(); Spacer(Modifier.height(12.dp)); Caption("Development build · independent security review pending.") }
     }
     review?.let { choice ->
         var confirmed by remember(choice) { mutableStateOf(false) }
         val title = when (choice.kind) { "enable" -> "Enable protected private chat?"; "retry" -> "Allow an exact retry?"; else -> "Stop local retries?" }
         val explanation = when (choice.kind) {
-            "enable" -> "This creates a software Olm account only if one has never been enrolled. Existing account keys, peer pins, sessions and history are never reset. Renewed pairing preserves old history without resending old-pairing messages. This development integration is not independently reviewed or device-qualified."
-            "retry" -> "Keep this message ID, text and any already saved ciphertext exactly unchanged. An earlier attempt may have reached the desktop. Review that uncertainty before allowing up to three more attempts; this action does not send until you explicitly sync."
-            else -> "Stop future local retries, not remote execution. A submitted text may already have been saved on the desktop. Keep its ID, ciphertext and unknown outcome; this is not recall or deletion."
+            "enable" -> "Enable encrypted chat without resetting keys or history. Earlier-pairing messages are not resent. Development build: independent security and device validation are pending."
+            "retry" -> "Retry the same message ID, text and saved ciphertext. It may already be on the computer. Allows up to three more attempts; sending waits for Send queued & retry pending."
+            else -> "Stops future retries only. The computer may already have the message; this does not recall or delete it."
         }
         AlertDialog(onDismissRequest = { review = null }, title = { Text(title) },
             text = { Column(Modifier.heightIn(max = 420.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
