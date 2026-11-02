@@ -16,7 +16,7 @@ def adb(*args, timeout=180):
     return p.stdout
 
 
-def parse_result(text, minimum=13):
+def parse_result(text, minimum=14):
     failure_summary = text.rsplit("INSTRUMENTATION_RESULT: stream=", 1)[-1].strip()[-2200:]
     require(not any(s in text for s in ("FAILURES!!!", "INSTRUMENTATION_FAILED", "Process crashed", "INSTRUMENTATION_ABORTED")), "Native instrumentation failed: " + failure_summary)
     status = [int(n) for n in re.findall(r"^INSTRUMENTATION_STATUS_CODE: (-?\d+)\s*$", text, flags=re.MULTILINE)]

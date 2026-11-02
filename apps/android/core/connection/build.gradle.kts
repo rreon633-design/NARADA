@@ -36,5 +36,5 @@ tasks.register<Test>("interopTest") {
 
 // All core/JNI/actual-agent tests use the real host build of the same stateless Rust adapter.
 tasks.withType<Test>().configureEach {
-    jvmArgs("-Djava.library.path=" + rootProject.file("app/build/generated/olm/host").absolutePath + File.pathSeparator + rootProject.file("app/build/generated/age/host").absolutePath)
+    jvmArgs("-Djava.library.path=" + rootProject.file("app/build/generated/olm/host").absolutePath + File.pathSeparator + rootProject.file("app/build/generated/age/host").absolutePath + File.pathSeparator + rootProject.file("app/build/generated/storage/host").absolutePath)
 }

@@ -229,12 +229,13 @@ jobs:
       - run: python scripts/ci/evidence.py run olm-host-tests -- cargo test --locked --manifest-path apps/android/native-olm/Cargo.toml
       - run: python scripts/ci/evidence.py run age-jni-build -- python scripts/build_android_age.py --host --android
       - run: python scripts/ci/evidence.py run olm-jni-build -- python scripts/build_android_olm67.py --host --android
+      - run: python scripts/ci/evidence.py run storage-jni-build -- python scripts/build_android_storage.py --host --android
       - run: python scripts/ci/evidence.py run real-peer-build -- cargo build --locked -p narada-agent --features narada-connection/dev-vault
       - name: Execute JVM, JNI, real-peer and Robolectric tests; strict debug lint
         run: |
           python scripts/ci/evidence.py run --cwd apps/android android-regression -- bash gradlew --no-daemon --no-build-cache --max-workers=2 --dependency-verification=strict --stacktrace '-Dorg.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=1g -XX:ActiveProcessorCount=2 -Dfile.encoding=UTF-8' "-PnaradaAgentBinary=$GITHUB_WORKSPACE/target/debug/narada-agent" "-PnaradaEvidenceDir=$GITHUB_WORKSPACE/.cache/ci-evidence/android/renders" :core:domain:test :core:connection:test :core:connection:interopTest :app:testDebugUnitTest :app:lintDebug
       - run: python scripts/ci/evidence.py junit --minimum 22 domain 'apps/android/core/domain/build/test-results/test/TEST-*.xml'
-      - run: python scripts/ci/evidence.py junit --minimum 418 connection 'apps/android/core/connection/build/test-results/test/TEST-*.xml'
+      - run: python scripts/ci/evidence.py junit --minimum 430 connection 'apps/android/core/connection/build/test-results/test/TEST-*.xml'
       - run: python scripts/ci/evidence.py junit --minimum 65 real-peer-interop 'apps/android/core/connection/build/test-results/interopTest/TEST-*.xml'
       - run: python scripts/ci/evidence.py junit --minimum 263 android-host 'apps/android/app/build/test-results/testDebugUnitTest/TEST-*.xml'
       - name: Build the minified, signed manual-test APKs and matching instrumentation APK

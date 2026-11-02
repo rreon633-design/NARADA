@@ -27,7 +27,7 @@ See [lightweight policy and measurement gaps](docs/github/lightweight.md).
 
 ## Build and architecture
 
-- [`apps/android/`](apps/android/) — Kotlin/Compose/Hilt app, JVM core, Room/Keystore boundaries, age/Olm Rust JNI adapters.
+- [`apps/android/`](apps/android/) — Kotlin/Compose/Hilt app, JVM core, Room/Keystore boundaries, age/Olm Rust JNI adapters and a separate small filesystem-only C JNI publication bridge.
 - [`apps/desktop-shell/`](apps/desktop-shell/), [`desktop-ui/`](desktop-ui/) — Tauri shell and production frontend.
 - [`apps/windows-agent/`](apps/windows-agent/), [`crates/`](crates/) — native agent, same-owner IPC, storage, pairing/content protocols and file engine.
 - [`tests/`](tests/) — browser, native-agent process, unit and CI-tool tests.

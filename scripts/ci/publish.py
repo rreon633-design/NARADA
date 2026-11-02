@@ -139,7 +139,7 @@ def main():
     for p in (base / "evidence").rglob("native-execution.json"):
         r = json.loads(p.read_text())
         require(r["api"] in (29, 35) and r["api"] not in native, "Unexpected/duplicate native execution")
-        require(r["commit"] == sha and r["app_sha256"] == x64["sha256"] and r["executed"] == r["passed"] and r["passed"] >= 13 and r["failed"] == 0, "Emulator did not execute the exact released minified APK")
+        require(r["commit"] == sha and r["app_sha256"] == x64["sha256"] and r["executed"] == r["passed"] and r["passed"] >= 14 and r["failed"] == 0, "Emulator did not execute the exact released minified APK")
         native[r["api"]] = r
     require(set(native) == {29, 35}, "Missing required native emulator execution")
     smoke_files = list((base / "evidence").rglob("windows-native-smoke.json"))

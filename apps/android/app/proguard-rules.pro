@@ -5,3 +5,6 @@
 -keep class com.narada.connection.NativeOlmBridge { *; }
 
 -keep class com.narada.connection.NativeAgeBridge { *; }
+
+# Exact JNI entry point for the filesystem-only no-replace publication primitive.
+-keep class com.narada.connection.NativeStorageBridge { *; }

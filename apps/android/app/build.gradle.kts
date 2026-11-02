@@ -52,6 +52,7 @@ android {
     ndkVersion = "30.0.16248370"
     sourceSets.getByName("main").jniLibs.srcDir(layout.buildDirectory.dir("generated/olm/jniLibs"))
     sourceSets.getByName("main").jniLibs.srcDir(layout.buildDirectory.dir("generated/age/jniLibs"))
+    sourceSets.getByName("main").jniLibs.srcDir(layout.buildDirectory.dir("generated/storage/jniLibs"))
     defaultConfig {
         applicationId = "com.narada.mobile.dev"
         minSdk = 29
@@ -101,7 +102,7 @@ android {
             // Native Robolectric extraction must not fill a small host /tmp tmpfs.
             val testTmp = rootProject.file(".cache/java-tmp").apply { mkdirs() }
             it.systemProperty("java.io.tmpdir", testTmp.absolutePath)
-            it.jvmArgs("-Djava.library.path=" + layout.buildDirectory.dir("generated/olm/host").get().asFile.absolutePath + File.pathSeparator + layout.buildDirectory.dir("generated/age/host").get().asFile.absolutePath)
+            it.jvmArgs("-Djava.library.path=" + layout.buildDirectory.dir("generated/olm/host").get().asFile.absolutePath + File.pathSeparator + layout.buildDirectory.dir("generated/age/host").get().asFile.absolutePath + File.pathSeparator + layout.buildDirectory.dir("generated/storage/host").get().asFile.absolutePath)
             it.maxHeapSize = "320m"
             it.forkEvery = 1
             it.jvmArgs("-XX:+UseSerialGC", "-XX:ActiveProcessorCount=2", "-XX:MaxMetaspaceSize=256m", "-XX:ReservedCodeCacheSize=48m", "-XX:MaxDirectMemorySize=32m", "-Djava.awt.headless=true")
@@ -405,6 +406,30 @@ abstract class NaradaInstrumentedEntryPoints : DefaultTask() {
         logger.lifecycle("NARADA inferred {} class/member boundary headers; app and test shrinking remain enabled", headers.size)
     }
 }
+
+// A missing/stale no-replace primitive must never turn into an overwrite fallback.
+val verifyStorageBinaries = tasks.register("verifyStorageBinaries") {
+    val native = layout.buildDirectory.dir("generated/storage")
+    val repository = rootProject.projectDir.parentFile.parentFile
+    val sourceNames = setOf("apps/android/native-storage/storage.c", "scripts/build_android_storage.py", "apps/android/app/src/main/assets/native-storage-notices.txt.gz")
+    inputs.files(sourceNames.map { File(repository, it) })
+    inputs.dir(native)
+    doLast {
+        val receipt = native.get().file("build-receipt.json").asFile
+        check(receipt.isFile) { "First run: python3 scripts/build_android_storage.py --host --android" }
+        val parsed = groovy.json.JsonSlurper().parse(receipt) as Map<*, *>
+        check(parsed["ndk"] == "30.0.16248370" && parsed["bridge_version"] == 1)
+        fun digest(file: File) = MessageDigest.getInstance("SHA-256").digest(file.readBytes()).joinToString("") { "%02x".format(it) }
+        val sources = parsed["source_sha256"] as Map<*, *>
+        check(sources.keys == sourceNames)
+        sources.forEach { (path, sha) -> check(digest(File(repository, path as String)) == sha) { "Storage native source changed; rebuild" } }
+        val libraries = parsed["libraries"] as List<*>
+        check(libraries.map { (it as Map<*, *>)["abi"] }.toSet() == setOf("linux-x86_64-host", "arm64-v8a", "armeabi-v7a", "x86_64", "x86"))
+        check(libraries.size == 5)
+        libraries.forEach { entry -> val row = entry as Map<*, *>; check(digest(File(repository, row["path"] as String)) == row["sha256"]) { "Storage native binary changed; rebuild" } }
+    }
+}
+tasks.named("preBuild").configure { dependsOn(verifyStorageBinaries) }
 
 // Only the explicit manual-test host gets these entry points. Debug and a
 // future production release are not silently changed by an instrumentation task.

@@ -12,7 +12,7 @@ import re
 import shutil
 
 ROOT = Path(__file__).resolve().parents[1]
-EXCLUDED_DIRS = {'.git', '.ssh', '.cache', '.gradle', '.historical-runtime', '.narada-data',
+EXCLUDED_DIRS = {'.git', '.ssh', '.cache', '.gradle', '.kotlin', '.historical-runtime', '.narada-data',
                  'node_modules', 'target', 'build', 'dist', 'out', '__pycache__', '.pytest_cache',
                  'test-fixtures', 'test-results', 'playwright-report', 'ci-results', 'release-assets'}
 EXCLUDED_SUFFIXES = {'.apk', '.aab', '.jks', '.keystore', '.p12', '.pfx', '.key', '.log',

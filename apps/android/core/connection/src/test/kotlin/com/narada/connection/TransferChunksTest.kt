@@ -39,4 +39,46 @@ class TransferChunksTest {
     @Test fun unsafeDirectoryAndHostileIdentifiersAreRejected(){Fixture().use{f->Files.createSymbolicLink(f.base,f.root);expectFailure("LOCAL_COPY_CHANGED"){f.store.reserve(f.owner,f.record)}};Fixture().use{f->expectFailure{f.store.reserve("../outside",f.record)};assertFalse(Files.exists(f.base))}}
     @Test fun cleanupPreservesUnrecognizedObjectsUntilReviewed(){Fixture().use{f->f.store.reserve(f.owner,f.record);f.store.write(f.owner,f.record,0,f.bytes);Files.writeString(f.folder.resolve("unrecognized"),"evidence");expectFailure("LOCAL_COPY_CHANGED"){f.store.remove(f.owner,f.record)};assertTrue(Files.exists(f.file));assertEquals("evidence",Files.readString(f.folder.resolve("unrecognized")))}}
     @Test fun explicitCleanupOnlyRemovesCanonicalOwnedFragments(){Fixture().use{f->f.store.reserve(f.owner,f.record);f.store.write(f.owner,f.record,0,f.bytes);val outside=f.root.resolve("keep.txt");Files.writeString(outside,"keep");f.store.remove(f.owner,f.record);assertFalse(Files.exists(f.folder));assertTrue(Files.exists(outside));f.store.remove(f.owner,f.record)}}
+    @Test fun platformMovePublishesReopensAndRetriesWithoutChangingCiphertext() { Fixture().use { f ->
+        f.store.reserve(f.owner, f.record)
+        val platform = EncryptedChunkFiles(f.base, f.crypto, freeBytes = { f.free }, atomicMoveNoReplace = NativeStorageBridge::publish)
+        platform.write(f.owner, f.record, 0, f.bytes)
+        val installed = Files.readAllBytes(f.file)
+        assertFalse(Files.exists(f.folder.resolve("chunk-0.pending")))
+        assertArrayEquals(f.bytes, f.open().read(f.owner, f.record, 0))
+        platform.write(f.owner, f.record, 0, f.bytes)
+        assertArrayEquals(installed, Files.readAllBytes(f.file))
+    } }
+    @Test fun platformMoveDirectorySyncFailureCannotAcknowledgePublication() { Fixture().use { f ->
+        f.store.reserve(f.owner, f.record)
+        val platform = EncryptedChunkFiles(f.base, f.crypto, freeBytes = { f.free },
+            syncDirectory = { throw java.io.IOException("Synthetic final directory sync failure") }, atomicMoveNoReplace = NativeStorageBridge::publish)
+        expectFailure("LOCAL_STORAGE_UNAVAILABLE") { platform.write(f.owner, f.record, 0, f.bytes) }
+        assertTrue(Files.exists(f.file)); assertFalse(Files.exists(f.folder.resolve("chunk-0.pending")))
+        assertArrayEquals(f.bytes, f.open().read(f.owner, f.record, 0))
+    } }
+    @Test fun platformMoveRejectsLateCollisionAndPreservesBothObjects() { Fixture().use { f ->
+        f.store.reserve(f.owner, f.record)
+        val collision = "synthetic collision".toByteArray()
+        val platform = EncryptedChunkFiles(f.base, f.crypto, freeBytes = { f.free }, atomicMoveNoReplace = { pending, installed ->
+            Files.write(installed, collision, java.nio.file.StandardOpenOption.CREATE_NEW)
+            NativeStorageBridge.publish(pending, installed)
+        })
+        expectFailure("LOCAL_COPY_CHANGED") { platform.write(f.owner, f.record, 0, f.bytes) }
+        assertArrayEquals(collision, Files.readAllBytes(f.file))
+        assertArrayEquals(f.bytes, f.crypto.unseal(f.context, Files.readAllBytes(f.folder.resolve("chunk-0.pending"))))
+    } }
+    @Test fun platformMovePostPublicationErrorNeverDeletesTheUncertainCopy() { Fixture().use { f ->
+        f.store.reserve(f.owner, f.record)
+        val platform = EncryptedChunkFiles(f.base, f.crypto, freeBytes = { f.free }, atomicMoveNoReplace = { pending, installed ->
+            NativeStorageBridge.publish(pending, installed)
+            throw java.io.IOException("Synthetic post-publication failure")
+        })
+        expectFailure("LOCAL_STORAGE_UNAVAILABLE") { platform.write(f.owner, f.record, 0, f.bytes) }
+        val installed = Files.readAllBytes(f.file)
+        assertArrayEquals(f.bytes, f.open().read(f.owner, f.record, 0))
+        f.store.write(f.owner, f.record, 0, f.bytes)
+        assertArrayEquals(installed, Files.readAllBytes(f.file))
+    } }
+
 }

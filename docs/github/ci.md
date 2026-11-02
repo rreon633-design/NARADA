@@ -13,7 +13,7 @@ Every job starts new evidence under `.cache/ci-evidence/<job>`, fingerprints the
 | Tooling | CI/audit/gating self-tests; existing packaging and release-tool tests |
 | Linux desktop | Workspace Rust tests and Clippy; real-agent lifecycle/pairing/files/transfers/chat/offline process checks including opt-in timing cases; Node unit tests; command surface; browser suites and UI size |
 | Windows x64 | Native Rust tests and Clippy; Node tests; command surface; production-feature agent and Tauri/NSIS build; silent installer/bootstrap smoke; actual size/hash audit |
-| Android | Pinned age/Olm Rust tests; host + four-ABI JNI builds; domain/connection/JVM-to-real-Rust interop/Robolectric checks; strict debug and manual-test lint; minified per-ABI candidates and matching instrumentation APK |
+| Android | Pinned age/Olm Rust tests; separate filesystem-only JNI bridge; host + four-ABI JNI builds; domain/connection/JVM-to-real-Rust interop/Robolectric checks; strict debug and manual-test lint; minified per-ABI candidates and matching instrumentation APK |
 | Emulators, API 29 and 35 | Execute existing native instrumentation against the **same minified x86_64 APK** intended for download; app launch; JNI and AndroidKeyStore cases |
 
 The API 29/35 runs do not execute ARM/x86 32-bit APKs or a 16 KiB-page image. Windows native bootstrap is not an end-to-end GUI/LAN qualification. Actual results are available only after GitHub executes the workflow. The earlier optional long-running fuzz campaign is not executed by this development-release pipeline; fuzz/security qualification remains open.
@@ -100,3 +100,7 @@ The eighth campaign passed Android collection and Windows native Rust/Clippy, bu
 ## Native Android storage result
 
 The ninth campaign passed tooling, Linux, Windows installation/bootstrap and Android build/audit. Each API 29/35 emulator executed all 13 exact-APK tests, with 12 passing and one storage failure; publication was skipped. Both Android chunk factories now supply a current app-private `StatFs.availableBytes` probe instead of inheriting the JVM mount-table query. See [the failure, narrow platform correction and regression scope](android-private-storage.md). The host-suite minimum rises from 259 to 263 for four adapter regressions, and the native fragment case covers both private stores. Neither test failure, skipped case nor unknown capacity is accepted. Failure annotations now retain the bounded JUnit cause without changing pass/fail parsing.
+
+## Android atomic publication boundary
+
+The tenth campaign again passed the four build/desktop gates, but each native suite was 12/13: reservation now succeeded and the write hit an Android-prohibited hard-link primitive. The new [filesystem-only atomic no-replace adapter](android-atomic-publication.md) keeps encryption, no-follow, fsync, immutable collision handling and uncertainty protections. New host cases raise the connection minimum to **430**; the exact-APK suite now requires **14** cases on each emulator. Native storage binary provenance and APK export/hardening/notice audits are mandatory, with no overwrite fallback or production-signing claim.

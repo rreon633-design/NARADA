@@ -10,6 +10,10 @@ Run [41288851145](https://github.com/rreon633-design/NARADA/actions/runs/4128885
 
 The APK definition inventory confirmed that `Trace` was absent from both APKs. Inspection also found other cross-APK reference gaps, including test-consumed futures/Compose/Kotlin interfaces. A single tracing keep rule would not address the general boundary. Type-reference absence alone does not prove every referenced path is executed; the runner crash is the observed failure.
 
+## Tenth-campaign follow-up
+
+The revised capacity adapter passed host tests and native reservation, but the same fragment case then failed at writing on both APIs (12/13 each). Android prohibits hard links; [the subsequent publication adapter](android-atomic-publication.md) adds a dedicated native collision/symlink case, raising the fresh requirement to **14**. Earlier partial results remain failures.
+
 ## Generated, explicit class/member boundary
 
 For the explicit `manualTest` test host, AGP's scoped pre-shrink class artifacts supply two inputs:

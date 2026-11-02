@@ -58,6 +58,7 @@ object TransferModule {
         // Android's NIO getFileStore is deliberately denied. Query only our
         // existing app-private volume; errors still fail closed in the engine.
         freeBytes = { StatFs(context.noBackupFilesDir.absolutePath).availableBytes },
+        atomicMoveNoReplace = { pending, installed -> NativeStorageBridge.publish(pending, installed) },
         syncDirectory = { path -> val fd = Os.open(path.toString(), OsConstants.O_RDONLY or OsConstants.O_NOFOLLOW, 0)
             try { Os.fsync(fd) } finally { Os.close(fd) } },
     )

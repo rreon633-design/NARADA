@@ -120,11 +120,27 @@ class EvidenceTests(unittest.TestCase):
         with self.assertRaises(RuntimeError): artifacts.elf_check(data, 'arm64-v8a')
 
     def test_native_adb_exit_zero_is_not_test_success(self):
-        for text in ('INSTRUMENTATION_CODE: -1', 'OK (0 tests)\nINSTRUMENTATION_CODE: -1', 'OK (13 tests)\nFAILURES!!!\nINSTRUMENTATION_CODE: -1', 'OK (13 tests)'):
+        for text in ('INSTRUMENTATION_CODE: -1', 'OK (0 tests)\nINSTRUMENTATION_CODE: -1', 'OK (14 tests)\nFAILURES!!!\nINSTRUMENTATION_CODE: -1', 'OK (14 tests)'):
             with self.assertRaises(RuntimeError): emulator.parse_result(text)
+        progress = 'INSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS_CODE: 0\n' * 14
+        self.assertEqual(14, emulator.parse_result(progress + 'OK (14 tests)\n\nINSTRUMENTATION_CODE: -1\n'))
+        with self.assertRaises(RuntimeError): emulator.parse_result(progress.replace('CODE: 0', 'CODE: -3', 1) + 'OK (14 tests)\nINSTRUMENTATION_CODE: -1\n')
+
+    def test_previous_thirteen_case_suite_cannot_satisfy_new_native_minimum(self):
         progress = 'INSTRUMENTATION_STATUS_CODE: 1\nINSTRUMENTATION_STATUS_CODE: 0\n' * 13
-        self.assertEqual(13, emulator.parse_result(progress + 'OK (13 tests)\n\nINSTRUMENTATION_CODE: -1\n'))
-        with self.assertRaises(RuntimeError): emulator.parse_result(progress.replace('CODE: 0', 'CODE: -3', 1) + 'OK (13 tests)\nINSTRUMENTATION_CODE: -1\n')
+        with self.assertRaises(RuntimeError):
+            emulator.parse_result(progress + 'OK (13 tests)\nINSTRUMENTATION_CODE: -1\n')
+
+    def test_storage_primitive_is_built_verified_and_audited(self):
+        workflow = (ROOT / '.github/workflows/build-test-release.yml').read_text()
+        build = (ROOT / 'apps/android/app/build.gradle.kts').read_text()
+        collector = (ROOT / 'scripts/ci/artifacts.py').read_text()
+        self.assertIn('scripts/build_android_storage.py --host --android', workflow)
+        self.assertIn('--minimum 430 connection', workflow)
+        self.assertIn('dependsOn(verifyStorageBinaries)', build)
+        self.assertIn('generated/storage/jniLibs', build)
+        self.assertIn('Java_com_narada_connection_NativeStorageBridge_moveNoReplace', collector)
+        self.assertIn('("age", "olm", "storage")', collector)
 
     def test_native_failure_keeps_the_junit_cause_visible(self):
         text = "INSTRUMENTATION_RESULT: stream=\nThere was 1 failure: fixture\nConnectionFailure(LOCAL_STORAGE_UNAVAILABLE)\nFAILURES!!!\nTests run: 13, Failures: 1\nINSTRUMENTATION_CODE: -1"

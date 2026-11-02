@@ -49,6 +49,9 @@ class EncryptedChunkFiles(
     private val base: Path, private val crypto: ChunkCryptography,
     private val freeBytes: () -> Long = { Files.getFileStore(base.parent).usableSpace },
     private val syncDirectory: (Path) -> Unit = { p -> FileChannel.open(p, StandardOpenOption.READ).use { it.force(true) } },
+    // A platform primitive must atomically consume staging WITHOUT replacing any destination.
+    // Null retains the JVM hard-link protocol; a failing primitive never falls back to it.
+    private val atomicMoveNoReplace: ((Path, Path) -> Unit)? = null,
 ) : TransferChunks {
     private val noFollow = LinkOption.NOFOLLOW_LINKS
     private fun existing(path: Path) = Files.exists(path, noFollow)
@@ -113,9 +116,17 @@ class EncryptedChunkFiles(
                 val buffer = ByteBuffer.wrap(encrypted); while (buffer.hasRemaining()) demand(channel.write(buffer) > 0, "LOCAL_STORAGE_UNAVAILABLE")
                 channel.force(true)
             }
-            // Hard-link install is no-replace even if a conflicting name appears after the check.
-            Files.createLink(installed, pending); syncDirectory(folder)
-            Files.delete(pending); syncDirectory(folder)
+            val move = atomicMoveNoReplace
+            if (move == null) {
+                // JVM hard-link install remains no-replace even after a racing name appears.
+                Files.createLink(installed, pending); syncDirectory(folder)
+                Files.delete(pending)
+            } else {
+                // Android forbids hard links: use its pinned native no-replace move instead.
+                // A failure after publication leaves the uncertain installed object untouched.
+                move(pending, installed)
+            }
+            syncDirectory(folder)
         } finally { encrypted.fill(0) }
     }
     @Synchronized override fun remove(storeId: String, record: DownloadRecord) = io {

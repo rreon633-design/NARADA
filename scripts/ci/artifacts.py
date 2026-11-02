@@ -262,7 +262,7 @@ def android():
     shutil.copy2(rule_file, output() / rule_file.name)
     shutil.copy2(rule_receipt, output() / rule_receipt.name)
     receipt_maps = {}
-    for lib in ("age", "olm"):
+    for lib in ("age", "olm", "storage"):
         receipt = json.loads((ROOT / f"apps/android/app/build/generated/{lib}/build-receipt.json").read_text())
         require(receipt["ndk"] == "30.0.16248370", "Unexpected NDK provenance")
         for source, sha in receipt["source_sha256"].items():
@@ -307,7 +307,7 @@ def android():
                 if n.startswith("lib/") and n.endswith(".so"):
                     data = z.read(n)
                     native[n] = {"bytes": len(data), "sha256": hashlib.sha256(data).hexdigest(), **elf_check(data, abi)}
-            for lib in ("age", "olm"):
+            for lib in ("age", "olm", "storage"):
                 n = f"lib/{abi}/libnarada_{lib}.so"
                 require(n in native, "Missing mandatory crypto JNI library")
                 original = receipt_maps[lib][abi]
@@ -326,7 +326,7 @@ def android():
                 command([llvm / "llvm-strip", "--strip-unneeded", "-o", reproduced, source_binary])
                 require(digest(reproduced) == native[n]["sha256"], "Packaged JNI does not match independently reproduced NDK stripping")
                 elf = command([llvm / "llvm-readelf", "--program-headers", "--dynamic", "--dyn-syms", reproduced])
-                symbols = ["Java_com_narada_connection_NativeAgeBridge_" + name for name in ("info", "validIdentity", "encrypt", "decrypt")] if lib == "age" else ["Java_com_narada_connection_NativeOlmBridge_call"]
+                symbols = {"age": ["Java_com_narada_connection_NativeAgeBridge_" + name for name in ("info", "validIdentity", "encrypt", "decrypt")], "olm": ["Java_com_narada_connection_NativeOlmBridge_call"], "storage": ["Java_com_narada_connection_NativeStorageBridge_moveNoReplace"]}[lib]
                 require(all(symbol in elf for symbol in symbols), "Mandatory JNI exports missing")
                 require("GNU_RELRO" in elf and re.search(r"FLAGS[^\n]*\b(?:BIND_NOW|NOW)\b", elf), "Native hardening flags missing")
                 stacks = [line for line in elf.splitlines() if "GNU_STACK" in line]

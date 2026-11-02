@@ -1,8 +1,8 @@
 {
   "repository": "https://github.com/rreon633-design/NARADA",
   "intended_initial_tag": "v0.0.1",
-  "files": 547,
-  "bytes": 9613747,
+  "files": 554,
+  "bytes": 9647734,
   "history": "Historical source/evidence remains preserved separately; these are new CI revisions.",
   "export_push_performed": false,
   "inputs": {
@@ -17,8 +17,8 @@
       "source": ".gitattributes"
     },
     ".github/workflows/build-test-release.yml": {
-      "sha256": "359ce0e7975be753352e171809f4073be6d1321ebec477397eda13b9317dc987",
-      "bytes": 18234,
+      "sha256": "a9cf5afade209f9510911fbedd3cc586eddcd715a685a3b18a8325ca09463b99",
+      "bytes": 18359,
       "source": ".github/workflows/build-test-release.yml"
     },
     ".github/workflows/ci-diagnostics.yml": {
@@ -87,8 +87,8 @@
       "source": "PHASE-4-HANDOFF.md"
     },
     "README.md": {
-      "sha256": "6a710602bb943b7d03e6e46baedf969deff653b890622f4d42ee021449dc4092",
-      "bytes": 4082,
+      "sha256": "e3228a88f4d3ec2e9a49b4fabefb5b229ed670db0b466d4401afd7c292c57f4e",
+      "bytes": 4144,
       "source": "release/github-readme.md.in"
     },
     "android-plan.md": {
@@ -107,8 +107,8 @@
       "source": "apps/android/README.md"
     },
     "apps/android/app/build.gradle.kts": {
-      "sha256": "0fcbfc77d0b7e181d0d6faad8991c9bc6e02064127358ae24839597e18ef8055",
-      "bytes": 25210,
+      "sha256": "6d5c30ad16a0e3b5716cf0cd41ddfdf2ef5974d77089ed41d4849cb9900beccb",
+      "bytes": 27171,
       "source": "apps/android/app/build.gradle.kts"
     },
     "apps/android/app/gradle.lockfile": {
@@ -122,8 +122,8 @@
       "source": "apps/android/app/lint.xml"
     },
     "apps/android/app/proguard-rules.pro": {
-      "sha256": "227f4afb051808c0a9f408f8be71f32c3813e0e54e2793df03f042d4aca95464",
-      "bytes": 342,
+      "sha256": "f855f9c266fb036a5eac1b1d2c6bad1589d1dec19c48c9821f79da304b26ee85",
+      "bytes": 486,
       "source": "apps/android/app/proguard-rules.pro"
     },
     "apps/android/app/schemas/com.narada.android.data.MetadataDatabase/2.json": {
@@ -161,6 +161,11 @@
       "bytes": 1389,
       "source": "apps/android/app/src/androidTest/java/com/narada/android/NativeFoundationSmokeTest.kt"
     },
+    "apps/android/app/src/androidTest/java/com/narada/android/NativeStoragePublicationTest.kt": {
+      "sha256": "522ad92b2c6eb01f1f527942bbd2ae91cd7b188c0993b375fa998b9ac4bab11c",
+      "bytes": 3181,
+      "source": "apps/android/app/src/androidTest/java/com/narada/android/NativeStoragePublicationTest.kt"
+    },
     "apps/android/app/src/androidTest/java/com/narada/android/NativeTransferBoundaryTest.kt": {
       "sha256": "534cf600f7f69f994f457eb4356f9bae72ed6c0f01906196ec50c9825c84c96f",
       "bytes": 5408,
@@ -191,6 +196,11 @@
       "bytes": 28875,
       "source": "apps/android/app/src/main/assets/native-olm-notices.txt.gz"
     },
+    "apps/android/app/src/main/assets/native-storage-notices.txt.gz": {
+      "sha256": "d1a9b24a616150e18c231bb95bdf775c35890b52c5597305cf720c490cbbc2ac",
+      "bytes": 246,
+      "source": "apps/android/app/src/main/assets/native-storage-notices.txt.gz"
+    },
     "apps/android/app/src/main/java/com/narada/android/MainActivity.kt": {
       "sha256": "bebda4c99d82ffad5ab2b64d4c808be9e5e8c337387eb7e1ae8a947aa0ac5545",
       "bytes": 14100,
@@ -207,8 +217,8 @@
       "source": "apps/android/app/src/main/java/com/narada/android/attachments/AttachmentPickerBinding.kt"
     },
     "apps/android/app/src/main/java/com/narada/android/attachments/AttachmentPlatform.kt": {
-      "sha256": "292983ca05fe8217afae30122f7c20ef7c91c97123563296926f57178a7a621b",
-      "bytes": 7660,
+      "sha256": "fdc5c69b57932b69f349841bdd3c62c2523d7c3bf3518331b216c4242fac0da4",
+      "bytes": 7765,
       "source": "apps/android/app/src/main/java/com/narada/android/attachments/AttachmentPlatform.kt"
     },
     "apps/android/app/src/main/java/com/narada/android/attachments/AttachmentsCoordinator.kt": {
@@ -332,8 +342,8 @@
       "source": "apps/android/app/src/main/java/com/narada/android/transfers/TransferMessages.kt"
     },
     "apps/android/app/src/main/java/com/narada/android/transfers/TransferPlatform.kt": {
-      "sha256": "6caec209745559468d20d44fac7b7a2ee81c224076d1ab7632c0433e65639434",
-      "bytes": 12896,
+      "sha256": "d206d3db931ef0426fbf64e84e7fedce822539c68ce37b3a16c2e011afd1096b",
+      "bytes": 13001,
       "source": "apps/android/app/src/main/java/com/narada/android/transfers/TransferPlatform.kt"
     },
     "apps/android/app/src/main/java/com/narada/android/transfers/TransfersCoordinator.kt": {
@@ -777,8 +787,8 @@
       "source": "apps/android/build.gradle.kts"
     },
     "apps/android/core/connection/build.gradle.kts": {
-      "sha256": "c56d6a1f5a94999b57bb1d4a4a7dbef03a4d1c432a1cf9cf269812e8cd050b62",
-      "bytes": 2329,
+      "sha256": "15fa1b6b243f6a51e9fc32bf3beded89797e84f7d5363cc29104b88d7725ed44",
+      "bytes": 2418,
       "source": "apps/android/core/connection/build.gradle.kts"
     },
     "apps/android/core/connection/gradle.lockfile": {
@@ -846,6 +856,11 @@
       "bytes": 16430,
       "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/FilesProtocol.kt"
     },
+    "apps/android/core/connection/src/main/kotlin/com/narada/connection/NativeStorageBridge.kt": {
+      "sha256": "29a9703f1c01bc7dfb53692302cfd6f3fabff0f2e0e043a4ebdd8b2f2e667b59",
+      "bytes": 1292,
+      "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/NativeStorageBridge.kt"
+    },
     "apps/android/core/connection/src/main/kotlin/com/narada/connection/OfflineClient.kt": {
       "sha256": "f432ca18278facfb208cdb9822f0bfbc0df02460aaec93b55df6a57b0c052aac",
       "bytes": 2342,
@@ -877,8 +892,8 @@
       "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/Protocol.kt"
     },
     "apps/android/core/connection/src/main/kotlin/com/narada/connection/TransferChunks.kt": {
-      "sha256": "b3c810f74a4ceb47e1fcf774242ff36c2666f4a88b4e23bd5e402477337814cd",
-      "bytes": 9515,
+      "sha256": "f940d02a18e34d2a1a4c141f6fce658b015d507533bc4954e837510f5ef0da0b",
+      "bytes": 10126,
       "source": "apps/android/core/connection/src/main/kotlin/com/narada/connection/TransferChunks.kt"
     },
     "apps/android/core/connection/src/main/kotlin/com/narada/connection/TransferExport.kt": {
@@ -1016,6 +1031,11 @@
       "bytes": 11140,
       "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/FilesProtocolTest.kt"
     },
+    "apps/android/core/connection/src/test/kotlin/com/narada/connection/NativeStorageBridgeTest.kt": {
+      "sha256": "ed4f46bc4ceababe93e47446345f546d0f5580f377f45f47afdfec7cf02b91f6",
+      "bytes": 5270,
+      "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/NativeStorageBridgeTest.kt"
+    },
     "apps/android/core/connection/src/test/kotlin/com/narada/connection/OfflineDesktopInteropTest.kt": {
       "sha256": "34071931e4467d484927b762eb968d491747d58e69e498717003808e6c61576e",
       "bytes": 6333,
@@ -1067,8 +1087,8 @@
       "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/TlsBoundaryTest.kt"
     },
     "apps/android/core/connection/src/test/kotlin/com/narada/connection/TransferChunksTest.kt": {
-      "sha256": "a7788f69262f7e028ec59d75597de1dee9a888f4d6f76c49c4ff3b425eb2109e",
-      "bytes": 6838,
+      "sha256": "7019e894edf544780f1c1bc4d05b31da4c9bb1b9f0a0b068e6661d393959a466",
+      "bytes": 9713,
       "source": "apps/android/core/connection/src/test/kotlin/com/narada/connection/TransferChunksTest.kt"
     },
     "apps/android/core/connection/src/test/kotlin/com/narada/connection/TransferExportTest.kt": {
@@ -1210,6 +1230,11 @@
       "sha256": "98c8a4f53fc6c9a78cc945d32d6ce5aeb1423eafcba164adda862e2aa66d1b95",
       "bytes": 23316,
       "source": "apps/android/native-olm/src/lib.rs"
+    },
+    "apps/android/native-storage/storage.c": {
+      "sha256": "c6861ae737decde0532199829df28c808c2504737433ae022a2b80f84b8bce44",
+      "bytes": 6403,
+      "source": "apps/android/native-storage/storage.c"
     },
     "apps/android/settings-gradle.lockfile": {
       "sha256": "e58bb2ed80db9f829601a658d7c33b9802eb7d2191c31e79c28e01f14c225926",
@@ -2121,14 +2146,19 @@
       "bytes": 7439,
       "source": "docs/files-and-recovery.md"
     },
+    "docs/github/android-atomic-publication.md": {
+      "sha256": "b15f07fee24cf84f680cbf0eff36455dbe6a432299e44d42913da3074de5f1e2",
+      "bytes": 4894,
+      "source": "docs/github/android-atomic-publication.md"
+    },
     "docs/github/android-instrumentation.md": {
-      "sha256": "95780c9cda519ab5a2907ad4d403b0f5f40df1ff23fc2070ca2495331fccef24",
-      "bytes": 5307,
+      "sha256": "4f0b228d98fcd15b2061adcb0e6d4aa9987e759ca2ccea434cad6ad3c1c23b06",
+      "bytes": 5713,
       "source": "docs/github/android-instrumentation.md"
     },
     "docs/github/android-private-storage.md": {
-      "sha256": "485a01db7c5ef9bcd0ab4e2b8d19c8a82943cb05d9fee85ed03a62b5b43873ca",
-      "bytes": 3041,
+      "sha256": "ace6394db6c163e56e79a3f54bfc050ad3f091ed310726c6b77781a97cda1604",
+      "bytes": 3417,
       "source": "docs/github/android-private-storage.md"
     },
     "docs/github/apk-audit.md": {
@@ -2137,8 +2167,8 @@
       "source": "docs/github/apk-audit.md"
     },
     "docs/github/ci.md": {
-      "sha256": "c0fb5f8ba717364ff575054a9bf3db99266c422fa3fb81d9bec444686d96b568",
-      "bytes": 13689,
+      "sha256": "2f7ba9455f2a27497449def9c16ec95cbc183e54210b0b66fcf02e258c0b7d68",
+      "bytes": 14389,
       "source": "docs/github/ci.md"
     },
     "docs/github/history.md": {
@@ -2312,8 +2342,8 @@
       "source": "release/ci-policy.json"
     },
     "release/github-readme.md.in": {
-      "sha256": "6a710602bb943b7d03e6e46baedf969deff653b890622f4d42ee021449dc4092",
-      "bytes": 4082,
+      "sha256": "e3228a88f4d3ec2e9a49b4fabefb5b229ed670db0b466d4401afd7c292c57f4e",
+      "bytes": 4144,
       "source": "release/github-readme.md.in"
     },
     "release/qualification.json": {
@@ -2406,6 +2436,11 @@
       "bytes": 2205,
       "source": "scripts/build_android_phase67_peer.py"
     },
+    "scripts/build_android_storage.py": {
+      "sha256": "9a2e972f912948265bcd8fba5e4a631ecbbb588711a0c8b234239c4ca734506e",
+      "bytes": 3939,
+      "source": "scripts/build_android_storage.py"
+    },
     "scripts/check-command-surface.mjs": {
       "sha256": "9c5c4ffb2ac2b648a1f5666d1aa7f7451fa2d7d84fd99f32a78b3678a78e811c",
       "bytes": 3510,
@@ -2417,8 +2452,8 @@
       "source": "scripts/check_default_boundary.py"
     },
     "scripts/ci/artifacts.py": {
-      "sha256": "dc6c1027bfb7696c049d127ac6b9597d936d6db276d142f58d819e83d7e3104c",
-      "bytes": 24397,
+      "sha256": "43f438820739c8a7fd0ea4684bb3c22a637c2a860cf9d683196c2d42e26f1cc4",
+      "bytes": 24497,
       "source": "scripts/ci/artifacts.py"
     },
     "scripts/ci/diagnostics.py": {
@@ -2427,7 +2462,7 @@
       "source": "scripts/ci/diagnostics.py"
     },
     "scripts/ci/emulator.py": {
-      "sha256": "35a48b81ed05b626a7d9eb45e9305d0b819924a0417e08a3e324aebe7b48c7c4",
+      "sha256": "5ed5fccca75f3cd72287a1828e6114e4018a137ece94a07d88da3c70f123c77d",
       "bytes": 3980,
       "source": "scripts/ci/emulator.py"
     },
@@ -2447,7 +2482,7 @@
       "source": "scripts/ci/playwright.config.mjs"
     },
     "scripts/ci/publish.py": {
-      "sha256": "7cb7e03f22c3dfc4d061f2233e32e1a18165741f0626b9d16dd52ddef1d43601",
+      "sha256": "8b136cc43ad0308cc91b3ceea0721435cb355c0d35f016a67b1aefe5345d95fa",
       "bytes": 16324,
       "source": "scripts/ci/publish.py"
     },
@@ -2527,8 +2562,8 @@
       "source": "scripts/prepare-sidecar.mjs"
     },
     "scripts/prepare_github.py": {
-      "sha256": "4b3cea65def4dabac09722d011867a6d4c95475eee6a9d79e72ef3eba5ca1073",
-      "bytes": 5518,
+      "sha256": "f1f84cbe6df4abed5e63120f2117126271422ad53d2d0540be71218efe435faa",
+      "bytes": 5529,
       "source": "scripts/prepare_github.py"
     },
     "scripts/provision_android_phase4.py": {
@@ -2632,8 +2667,8 @@
       "source": "scripts/validate_phase4.py"
     },
     "tests/ci/test_ci_tools.py": {
-      "sha256": "b026fe1235484a229907c481f1ad6554a29ed8a668555be8befdccc6568522c4",
-      "bytes": 14486,
+      "sha256": "d5f967c961a63dd5d766768dcc0f88239283ff82433b32ef9ce4b974498c3957",
+      "bytes": 15516,
       "source": "tests/ci/test_ci_tools.py"
     },
     "tests/ci/test_content_contract_fixture.py": {

@@ -55,6 +55,7 @@ fun interface ImportProviderFactory { fun create(uri: String, flags: Int): Impor
         },
         // Same Android-private-volume probe as ordinary transfers; no NIO mount-table query.
         freeBytes = { StatFs(context.noBackupFilesDir.absolutePath).availableBytes },
+        atomicMoveNoReplace = { pending, installed -> NativeStorageBridge.publish(pending, installed) },
         syncDirectory = { path -> val fd = Os.open(path.toString(), OsConstants.O_RDONLY or OsConstants.O_NOFOLLOW, 0); try { Os.fsync(fd) } finally { Os.close(fd) } },
     )
     @Provides @Singleton fun imports(@ApplicationContext context: Context): ImportProviderFactory = ImportProviderFactory { uri, flags -> DocumentsImportProvider(context, uri, flags) }
