@@ -192,10 +192,20 @@ def webview_mode(config):
     return mode
 
 
+
+def verify_windows_bundle_preparation(record, expected_context):
+    require(record.get("schema") == 1 and record.get("context") == expected_context, "Windows bundle preparation belongs to another source/run")
+    require(record.get("source_directory") == "target/release/bundle/nsis" and record.get("fresh_output_empty") is True and record.get("prior_bytes_preserved") is True, "Windows output was not freshly isolated before the build")
+
+
 def windows():
     require(os.name == "nt", "Windows candidates must be built on Windows")
+    proof = output() / "windows-bundle-preparation.json"
+    require(proof.is_file(), "Missing fresh Windows bundle preparation proof")
+    preparation = json.loads(proof.read_text(encoding="utf-8"))
+    verify_windows_bundle_preparation(preparation, context())
     installers = sorted((ROOT / "target/release/bundle/nsis").glob("*.exe"))
-    require(len(installers) == 1, "Expected exactly one newly built NSIS installer")
+    require(len(installers) == 1, f"Expected exactly one newly built NSIS installer; observed {len(installers)}: {[p.name for p in installers[:8]]}")
     exe = ROOT / "target/release/narada-desktop.exe"
     agent = ROOT / "target/release/narada-agent.exe"
     require(pe_machine(exe) == pe_machine(agent) == 0x8664, "Expected x64 native Windows binaries")
@@ -222,7 +232,7 @@ def windows():
               "frontend": frontend(),
               "webview": "system Evergreen WebView2; small bootstrapper, not bundled browser/runtime",
               "webview_install_mode": mode,
-              "application_version": config["version"], "unqualified": POLICY["not_qualified"]}
+              "application_version": config["version"], "bundle_preparation": preparation, "unqualified": POLICY["not_qualified"]}
     write_json(dest / "windows-build-report.json", report)
     write_json(output() / "windows-build-report.json", report)
     shutil.copy2(ROOT / "docs/github/manual-testing.md", dest / "WINDOWS-MANUAL-TEST.md")

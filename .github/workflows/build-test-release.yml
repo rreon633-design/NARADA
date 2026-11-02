@@ -150,6 +150,7 @@ jobs:
       - run: python scripts/ci/evidence.py run native-clippy -- cargo clippy --locked --workspace --exclude narada-desktop --all-targets -- -D warnings
       - run: python scripts/ci/node_tests.py
       - run: python scripts/ci/evidence.py run command-surface -- node scripts/check-command-surface.mjs
+      - run: python scripts/ci/evidence.py run isolate-windows-bundles -- python scripts/ci/windows_bundle.py
       - run: python scripts/ci/evidence.py run native-build -- node scripts/native-build.mjs
       - run: python scripts/ci/evidence.py run collect-windows -- python scripts/ci/artifacts.py windows
       - run: python scripts/ci/evidence.py run native-install-launch -- pwsh -NoProfile -File scripts/ci/windows-smoke.ps1

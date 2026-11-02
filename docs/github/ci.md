@@ -104,3 +104,9 @@ The ninth campaign passed tooling, Linux, Windows installation/bootstrap and And
 ## Android atomic publication boundary
 
 The tenth campaign again passed the four build/desktop gates, but each native suite was 12/13: reservation now succeeded and the write hit an Android-prohibited hard-link primitive. The new [filesystem-only atomic no-replace adapter](android-atomic-publication.md) keeps encryption, no-follow, fsync, immutable collision handling and uncertainty protections. New host cases raise the connection minimum to **430**; the exact-APK suite now requires **14** cases on each emulator. Native storage binary provenance and APK export/hardening/notice audits are mandatory, with no overwrite fallback or production-signing claim.
+
+## Fresh Windows bundles across application version changes
+
+The first v0.0.2 campaign (`4bceb62`, run `41476106312`) passed the Windows native build but failed collection's **exactly one installer** check. Its annotation did not report the observed count; do not relabel that run as successful or claim an installed-app result. The Rust cache includes `target`, so restoring it across an application version change can retain older named NSIS installers.
+
+Before the next native build, CI now inventories and moves only the restored `target/release/bundle/nsis` directory to a fresh, non-published cache quarantine, verifies its bytes, and records an empty output directory. Symlinks/junctions, over-budget inventories and pre-existing receipts/quarantines fail closed. Collection requires the preparation proof from the exact source/run/attempt and still requires **exactly one** newly built installer, unchanged size/provenance checks and the native installation/bootstrap gate. It does not pick the newest file, match only a versioned filename, overwrite an old release or relax a failure. The preparation inventory is included in the Windows build report; actual restored-file counts are observable there.

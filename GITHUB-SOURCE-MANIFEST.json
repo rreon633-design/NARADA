@@ -3,8 +3,8 @@
   "intended_release_tag": "v0.0.2",
   "prior_release_tag": "v0.0.1",
   "prior_release_commit": "7f85f262a5c225c98dbfad49cef66e4949a16dc5",
-  "files": 566,
-  "bytes": 9793141,
+  "files": 568,
+  "bytes": 9804822,
   "role": "Pre-commit source inventory, not a CI/publication or automatic two-way sync claim.",
   "history": "Original releases, source handoffs and failed campaigns are retained, never relabelled.",
   "inputs": {
@@ -19,8 +19,8 @@
       "source": ".gitattributes"
     },
     ".github/workflows/build-test-release.yml": {
-      "sha256": "369a78fd5611929db346c7d9ff4dd5a5a8d2ff0c1d0906fc0563fbe68551c1fa",
-      "bytes": 18363,
+      "sha256": "5596a2ab22c3d4f7f0a76dc94e698127a69f27f2d7a44c265b7840de478f732a",
+      "bytes": 18473,
       "source": ".github/workflows/build-test-release.yml"
     },
     ".github/workflows/ci-diagnostics.yml": {
@@ -2214,8 +2214,8 @@
       "source": "docs/github/apk-audit.md"
     },
     "docs/github/ci.md": {
-      "sha256": "6947a1a497c421bb93b29fca83f0deb0234699eeaae96fd24eef253a315ea794",
-      "bytes": 15226,
+      "sha256": "f069bd1e6a3f11ae4105c8aa73d9195bc11d90d600f0c370d3720356d2cd47ae",
+      "bytes": 16438,
       "source": "docs/github/ci.md"
     },
     "docs/github/history.md": {
@@ -2509,8 +2509,8 @@
       "source": "scripts/check_default_boundary.py"
     },
     "scripts/ci/artifacts.py": {
-      "sha256": "43f438820739c8a7fd0ea4684bb3c22a637c2a860cf9d683196c2d42e26f1cc4",
-      "bytes": 24497,
+      "sha256": "8158ced248291b94ebe9f3cbe6c392efb407beecc654d98fb27851fe560368c2",
+      "bytes": 25301,
       "source": "scripts/ci/artifacts.py"
     },
     "scripts/ci/diagnostics.py": {
@@ -2547,6 +2547,11 @@
       "sha256": "978c9d616acc74f14f34dfe89abb3ef3b2316157475e0acec9cddeb7c7ed1c7f",
       "bytes": 7606,
       "source": "scripts/ci/windows-smoke.ps1"
+    },
+    "scripts/ci/windows_bundle.py": {
+      "sha256": "f76c431b04c3bc3250d6d4ebda3c3daf84ca0038fa1581f80545e3537a090514",
+      "bytes": 4169,
+      "source": "scripts/ci/windows_bundle.py"
     },
     "scripts/dev.mjs": {
       "sha256": "d1fa2d3392586480f9fc585bca08692cdb25c92fd7564e1af354d11a6ec571ae",
@@ -2742,6 +2747,11 @@
       "sha256": "8e217c33f6a8a1e82086e08a0a926d940987d01444e170110f68546b327b6ebf",
       "bytes": 12124,
       "source": "tests/ci/test_release_gates.py"
+    },
+    "tests/ci/test_windows_bundle.py": {
+      "sha256": "42ee0e04a12ef4060071aaa64e84355d6e9d5a69ddd19f65cb738dc27513bf5b",
+      "bytes": 5386,
+      "source": "tests/ci/test_windows_bundle.py"
     },
     "tests/corpus/owner/oversized-cipher-manifest.json": {
       "sha256": "f61dbfb70277ef8660505b3ce86e458fb1b1308e894d2ee033a54174a46daeeb",
