@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.core.net.toUri
+import android.os.StatFs
 import android.os.CancellationSignal
 import android.os.ParcelFileDescriptor
 import android.provider.DocumentsContract
@@ -54,6 +55,9 @@ object TransferModule {
             override fun seal(context: ChunkContext, clear: ByteArray) = TransferCipher.seal(context, keys.transferKey(context.storeId), clear)
             override fun unseal(context: ChunkContext, sealed: ByteArray) = TransferCipher.unseal(context, keys.transferKey(context.storeId), sealed)
         },
+        // Android's NIO getFileStore is deliberately denied. Query only our
+        // existing app-private volume; errors still fail closed in the engine.
+        freeBytes = { StatFs(context.noBackupFilesDir.absolutePath).availableBytes },
         syncDirectory = { path -> val fd = Os.open(path.toString(), OsConstants.O_RDONLY or OsConstants.O_NOFOLLOW, 0)
             try { Os.fsync(fd) } finally { Os.close(fd) } },
     )

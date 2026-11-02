@@ -96,3 +96,7 @@ The seventh campaign built minified app/instrumentation APKs but failed the old 
 ## Exact packaged images and instrumentation ABI
 
 The eighth campaign passed Android collection and Windows native Rust/Clippy, but stopped at a Windows payload-reference mismatch and two instrumentation startup crashes. See [Windows package-byte provenance](windows-packaging.md) and [the inferred instrumentation boundary](android-instrumentation.md). Subsequent repairs still require a complete new same-source campaign.
+
+## Native Android storage result
+
+The ninth campaign passed tooling, Linux, Windows installation/bootstrap and Android build/audit. Each API 29/35 emulator executed all 13 exact-APK tests, with 12 passing and one storage failure; publication was skipped. Both Android chunk factories now supply a current app-private `StatFs.availableBytes` probe instead of inheriting the JVM mount-table query. See [the failure, narrow platform correction and regression scope](android-private-storage.md). The host-suite minimum rises from 259 to 263 for four adapter regressions, and the native fragment case covers both private stores. Neither test failure, skipped case nor unknown capacity is accepted. Failure annotations now retain the bounded JUnit cause without changing pass/fail parsing.

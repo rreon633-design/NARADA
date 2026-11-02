@@ -1,5 +1,9 @@
 # Windows packaging: exact payload provenance
 
+## Ninth-campaign native validation
+
+Run [41312970060](https://github.com/rreon633-design/NARADA/actions/runs/41312970060), source `18ff2ce6962ae600d050512249ae3448a04eb2b0`, passed the complete Windows gate. Its **7,270,718-byte (6.93 MiB)** installer exited zero; both installed payload hashes exactly matched their independently reproduced expected images, and the installed app/agent stayed alive for the required 15 seconds. The frontend was 382,485 bytes. This proves that campaign's installer/bootstrap check, not whole-app RAM/performance or the separate GUI/LAN/security gates. Android native storage failures prevented publication. Any subsequent source revision still needs its own same-run Windows pass.
+
 ## What the eighth campaign established
 
 Run [41288851145](https://github.com/rreon633-design/NARADA/actions/runs/41288851145), source `ed98c9f43bece4c1493e2827f7ded0a61fd791ba`, passed native Rust tests (138 executed, including 52 filesystem cases and the 24-cycle native watcher regression), strict Clippy and the desktop build. Its NSIS installer measured **7,268,270 bytes (6.93 MiB)**, below the 30 MiB limit. The frontend measured 382,485 bytes.
@@ -19,7 +23,7 @@ Source: https://github.com/tauri-apps/tauri/blob/tauri-cli-v2.12.4/crates/tauri-
 
 Comparing the restored compiler file directly with the installed NSIS payload therefore uses the wrong reference image. Equal lengths or an installer exit code alone must never be accepted as a substitute for full-byte verification.
 
-## Corrected audit, still requiring a fresh native pass
+## Corrected audit, first natively validated in the ninth campaign
 
 The collector independently reproduces only the reviewed marker transformation into a separate audit file. It requires the pinned CLI version, exactly one original marker, unchanged executable length and an x64 PE image. It records both compiler-input and expected packaged SHA-256 values, the marker offset and the three changed bytes. The compiler output itself is not modified.
 

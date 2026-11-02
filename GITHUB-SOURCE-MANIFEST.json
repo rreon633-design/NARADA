@@ -1,8 +1,8 @@
 {
   "repository": "https://github.com/rreon633-design/NARADA",
   "intended_initial_tag": "v0.0.1",
-  "files": 545,
-  "bytes": 9601982,
+  "files": 547,
+  "bytes": 9613747,
   "history": "Historical source/evidence remains preserved separately; these are new CI revisions.",
   "export_push_performed": false,
   "inputs": {
@@ -17,7 +17,7 @@
       "source": ".gitattributes"
     },
     ".github/workflows/build-test-release.yml": {
-      "sha256": "1236238942073410132a3649c685951ab21ea5dbd73f503a46c1521ebdb67cbb",
+      "sha256": "359ce0e7975be753352e171809f4073be6d1321ebec477397eda13b9317dc987",
       "bytes": 18234,
       "source": ".github/workflows/build-test-release.yml"
     },
@@ -162,8 +162,8 @@
       "source": "apps/android/app/src/androidTest/java/com/narada/android/NativeFoundationSmokeTest.kt"
     },
     "apps/android/app/src/androidTest/java/com/narada/android/NativeTransferBoundaryTest.kt": {
-      "sha256": "c5e47d79fdf1543e61a5fbf060b214d397aabff3a9f7d002bbdd14ea345c4217",
-      "bytes": 4567,
+      "sha256": "534cf600f7f69f994f457eb4356f9bae72ed6c0f01906196ec50c9825c84c96f",
+      "bytes": 5408,
       "source": "apps/android/app/src/androidTest/java/com/narada/android/NativeTransferBoundaryTest.kt"
     },
     "apps/android/app/src/androidTest/java/com/narada/android/OlmNativeInstrumentedTest.kt": {
@@ -207,8 +207,8 @@
       "source": "apps/android/app/src/main/java/com/narada/android/attachments/AttachmentPickerBinding.kt"
     },
     "apps/android/app/src/main/java/com/narada/android/attachments/AttachmentPlatform.kt": {
-      "sha256": "d0318c95f6fca5f8e0e389664d070eaf48928bae7f8c7341165d2e827139d6a5",
-      "bytes": 7447,
+      "sha256": "292983ca05fe8217afae30122f7c20ef7c91c97123563296926f57178a7a621b",
+      "bytes": 7660,
       "source": "apps/android/app/src/main/java/com/narada/android/attachments/AttachmentPlatform.kt"
     },
     "apps/android/app/src/main/java/com/narada/android/attachments/AttachmentsCoordinator.kt": {
@@ -332,8 +332,8 @@
       "source": "apps/android/app/src/main/java/com/narada/android/transfers/TransferMessages.kt"
     },
     "apps/android/app/src/main/java/com/narada/android/transfers/TransferPlatform.kt": {
-      "sha256": "482b3812c133e4242efba63c6ce17c447714204f46a76e9cc8d183466d30bab3",
-      "bytes": 12628,
+      "sha256": "6caec209745559468d20d44fac7b7a2ee81c224076d1ab7632c0433e65639434",
+      "bytes": 12896,
       "source": "apps/android/app/src/main/java/com/narada/android/transfers/TransferPlatform.kt"
     },
     "apps/android/app/src/main/java/com/narada/android/transfers/TransfersCoordinator.kt": {
@@ -735,6 +735,11 @@
       "sha256": "f628c385933eb8190bc6515e865d123a313915dd1c67e37b09dca2ace6d57a81",
       "bytes": 2450,
       "source": "apps/android/app/src/test/java/com/narada/android/TestFixture.kt"
+    },
+    "apps/android/app/src/test/java/com/narada/android/TransferStorageSpaceTest.kt": {
+      "sha256": "fa09aafe9061c7c48bfea67c964ce7a564ff936ffcb5eabda896441861b072c8",
+      "bytes": 4738,
+      "source": "apps/android/app/src/test/java/com/narada/android/TransferStorageSpaceTest.kt"
     },
     "apps/android/app/src/test/java/com/narada/android/TransferTestData.kt": {
       "sha256": "9efab2ba1075ba3d035001ab6bed9a1490f62c427ffb7eb38084ea1c6ee88d3e",
@@ -2117,9 +2122,14 @@
       "source": "docs/files-and-recovery.md"
     },
     "docs/github/android-instrumentation.md": {
-      "sha256": "551a3f711b8bedef6c5e9f8b5cb3adead6ba05ddf4292eaf7124b58d6692f664",
-      "bytes": 4646,
+      "sha256": "95780c9cda519ab5a2907ad4d403b0f5f40df1ff23fc2070ca2495331fccef24",
+      "bytes": 5307,
       "source": "docs/github/android-instrumentation.md"
+    },
+    "docs/github/android-private-storage.md": {
+      "sha256": "485a01db7c5ef9bcd0ab4e2b8d19c8a82943cb05d9fee85ed03a62b5b43873ca",
+      "bytes": 3041,
+      "source": "docs/github/android-private-storage.md"
     },
     "docs/github/apk-audit.md": {
       "sha256": "8b723acf1b0093181288e90cad5c87c4fac8994dd3f93903cf88583426610608",
@@ -2127,8 +2137,8 @@
       "source": "docs/github/apk-audit.md"
     },
     "docs/github/ci.md": {
-      "sha256": "80f56e413fb54fa63ce771b8b70ab217cdbb275c6c8734d247863c98c1224eb8",
-      "bytes": 12904,
+      "sha256": "c0fb5f8ba717364ff575054a9bf3db99266c422fa3fb81d9bec444686d96b568",
+      "bytes": 13689,
       "source": "docs/github/ci.md"
     },
     "docs/github/history.md": {
@@ -2152,8 +2162,8 @@
       "source": "docs/github/windows-filesystem.md"
     },
     "docs/github/windows-packaging.md": {
-      "sha256": "7e7499ff98ddab0c4a345e0284e6f75a5aaa652510f2eb2483155cf7e46ff037",
-      "bytes": 3063,
+      "sha256": "0e21ef621ec861d729a34384487561347915758599078b888fb30a0d5a082456",
+      "bytes": 3791,
       "source": "docs/github/windows-packaging.md"
     },
     "docs/pairing-and-recovery.md": {
@@ -2417,8 +2427,8 @@
       "source": "scripts/ci/diagnostics.py"
     },
     "scripts/ci/emulator.py": {
-      "sha256": "9c4841a7ce771e3713aaa5c75a53c5466f05d5b3576b85380e934225cb5f0fd9",
-      "bytes": 3868,
+      "sha256": "35a48b81ed05b626a7d9eb45e9305d0b819924a0417e08a3e324aebe7b48c7c4",
+      "bytes": 3980,
       "source": "scripts/ci/emulator.py"
     },
     "scripts/ci/evidence.py": {
@@ -2622,8 +2632,8 @@
       "source": "scripts/validate_phase4.py"
     },
     "tests/ci/test_ci_tools.py": {
-      "sha256": "c81650acda9a90f717430fdd16a60144c15726e727b214b941438f7d05674940",
-      "bytes": 14108,
+      "sha256": "b026fe1235484a229907c481f1ad6554a29ed8a668555be8befdccc6568522c4",
+      "bytes": 14486,
       "source": "tests/ci/test_ci_tools.py"
     },
     "tests/ci/test_content_contract_fixture.py": {

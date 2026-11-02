@@ -126,6 +126,11 @@ class EvidenceTests(unittest.TestCase):
         self.assertEqual(13, emulator.parse_result(progress + 'OK (13 tests)\n\nINSTRUMENTATION_CODE: -1\n'))
         with self.assertRaises(RuntimeError): emulator.parse_result(progress.replace('CODE: 0', 'CODE: -3', 1) + 'OK (13 tests)\nINSTRUMENTATION_CODE: -1\n')
 
+    def test_native_failure_keeps_the_junit_cause_visible(self):
+        text = "INSTRUMENTATION_RESULT: stream=\nThere was 1 failure: fixture\nConnectionFailure(LOCAL_STORAGE_UNAVAILABLE)\nFAILURES!!!\nTests run: 13, Failures: 1\nINSTRUMENTATION_CODE: -1"
+        with self.assertRaisesRegex(RuntimeError, "LOCAL_STORAGE_UNAVAILABLE"):
+            emulator.parse_result(text)
+
     def test_size_notice_contains_only_public_file_measurements(self):
         report = {"private": "DO-NOT-PRINT", "files": [{"name": "candidate.apk", "bytes": 1234, "sha256": "a" * 64, "extra": "DO-NOT-PRINT"}]}
         out = io.StringIO()

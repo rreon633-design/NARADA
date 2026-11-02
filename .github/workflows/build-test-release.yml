@@ -236,7 +236,7 @@ jobs:
       - run: python scripts/ci/evidence.py junit --minimum 22 domain 'apps/android/core/domain/build/test-results/test/TEST-*.xml'
       - run: python scripts/ci/evidence.py junit --minimum 418 connection 'apps/android/core/connection/build/test-results/test/TEST-*.xml'
       - run: python scripts/ci/evidence.py junit --minimum 65 real-peer-interop 'apps/android/core/connection/build/test-results/interopTest/TEST-*.xml'
-      - run: python scripts/ci/evidence.py junit --minimum 259 android-host 'apps/android/app/build/test-results/testDebugUnitTest/TEST-*.xml'
+      - run: python scripts/ci/evidence.py junit --minimum 263 android-host 'apps/android/app/build/test-results/testDebugUnitTest/TEST-*.xml'
       - name: Build the minified, signed manual-test APKs and matching instrumentation APK
         run: |
           python scripts/ci/evidence.py run --cwd apps/android manual-test-build -- bash gradlew --no-daemon --no-build-cache --max-workers=2 --dependency-verification=strict --stacktrace '-Dorg.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=1g -XX:ActiveProcessorCount=2 -Dfile.encoding=UTF-8' -PnaradaAbiSplits=true -PnaradaTestBuildType=manualTest :app:assembleManualTest :app:assembleManualTestAndroidTest :app:lintManualTest

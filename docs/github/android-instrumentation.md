@@ -1,5 +1,9 @@
 # Instrumentation against the exact minified APK
 
+## Ninth-campaign outcome
+
+Run [41312970060](https://github.com/rreon633-design/NARADA/actions/runs/41312970060) passed all minified APK boundary/definition audits. The runner then executed **13 cases on each API 29/35 emulator: 12 passed, 1 failed, 0 skipped**. JNI age/Olm, AndroidKeyStore and activity recreation cases ran; the earlier runner-linkage blocker was resolved. The remaining failure was a separate app-private storage capacity probe, not a reason to weaken shrinking or skip tests. See [the platform-specific storage correction](android-private-storage.md). Publication was skipped, and the revised source still needs a complete fresh campaign.
+
 ## Eighth-campaign result
 
 Run [41288851145](https://github.com/rreon633-design/NARADA/actions/runs/41288851145) built, signed and statically audited all four per-ABI APKs. They measured 6,497,156–7,382,196 bytes (6.20–7.04 MiB), below the 20 MiB limit. Both API 29 and 35 emulators installed the exact x86_64 APK and reported a successful MainActivity launch command. Their instrumentation processes then crashed in `AndroidJUnitRunner.onCreate` because `androidx.tracing.Trace` was absent. **No test case ran successfully.** Neither attempt is a passing native test result.

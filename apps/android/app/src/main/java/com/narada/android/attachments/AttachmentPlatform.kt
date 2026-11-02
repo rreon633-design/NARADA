@@ -3,6 +3,7 @@ package com.narada.android.attachments
 import android.content.Context
 import android.content.Intent
 import androidx.core.net.toUri
+import android.os.StatFs
 import android.os.CancellationSignal
 import android.os.ParcelFileDescriptor
 import android.provider.DocumentsContract
@@ -51,7 +52,10 @@ fun interface ImportProviderFactory { fun create(uri: String, flags: Int): Impor
         object : ChunkCryptography {
             override fun seal(context: ChunkContext, clear: ByteArray) = TransferCipher.seal(context, keys.transferKey(context.storeId), clear)
             override fun unseal(context: ChunkContext, sealed: ByteArray) = TransferCipher.unseal(context, keys.transferKey(context.storeId), sealed)
-        }, syncDirectory = { path -> val fd = Os.open(path.toString(), OsConstants.O_RDONLY or OsConstants.O_NOFOLLOW, 0); try { Os.fsync(fd) } finally { Os.close(fd) } },
+        },
+        // Same Android-private-volume probe as ordinary transfers; no NIO mount-table query.
+        freeBytes = { StatFs(context.noBackupFilesDir.absolutePath).availableBytes },
+        syncDirectory = { path -> val fd = Os.open(path.toString(), OsConstants.O_RDONLY or OsConstants.O_NOFOLLOW, 0); try { Os.fsync(fd) } finally { Os.close(fd) } },
     )
     @Provides @Singleton fun imports(@ApplicationContext context: Context): ImportProviderFactory = ImportProviderFactory { uri, flags -> DocumentsImportProvider(context, uri, flags) }
 }
